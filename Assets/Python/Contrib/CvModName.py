@@ -1,11 +1,12 @@
 #CvModName.py
 
-modName = "BUG Mod"
-displayName = "BUG Mod"
-modVersion = "4.5 [Build 2245]"
-
+# <trs>
+modName = "Taurus"
+displayName = "Taurus"
+modVersion = "1.00"
+civVersion = "3.19"
+# </trs>
 civName = "BtS"
-civVersion = "3.13-3.19"
 
 def getName():
 	return modName

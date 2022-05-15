@@ -3887,13 +3887,14 @@ void CvDLLWidgetData::parseFlagHelp(CvWidgetDataStruct &widgetDataStruct, CvWStr
 	szBuffer.append(szTempBuffer);
 #else
 	// BUG Mod version
-	if (isBug())
+	// trs.build: No distinction between base mod and DLL mod
+	/*if (isBug())
 	{
 		CvWString szBugNameAndVersion;
 		gDLL->getPythonIFace()->callFunction(PYBugModule, "getModNameAndVersion", NULL, &szBugNameAndVersion);
 		szTempBuffer.Format(NEWLINE SETCOLR L"%s" ENDCOLR, TEXT_COLOR("COLOR_POSITIVE_TEXT"), szBugNameAndVersion.c_str());
 		szBuffer.append(szTempBuffer);
-	}
+	}*/
 	// BUG DLL version
 	szTempBuffer.Format(NEWLINE SETCOLR L"%s %s [Build %s]" ENDCOLR, TEXT_COLOR("COLOR_POSITIVE_TEXT"), 
 			BUG_DLL_NAME, BUG_DLL_VERSION, BUG_DLL_BUILD);

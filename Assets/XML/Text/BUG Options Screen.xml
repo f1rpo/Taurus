@@ -11,11 +11,12 @@
 
 <!-- Title and Buttons -->
 
+	<!-- trs: Was "BUG Mod options" -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TITLE</Tag>
-		<English>BUG Mod Options</English>
+		<English>Mod Options</English>
 		<French>Options du BUG Mod</French>
-		<German>Optionen der BUG Mod</German>
+		<German>Mod-Optionen</German>
 		<Italian>Opzioni BUG Mod</Italian>
 		<Spanish>BUG Mod Options</Spanish>
 	</TEXT>
@@ -35,19 +36,21 @@
 		<Italian>Apre il file della Guida del BUG Mod. Puoi utilizzare la scorciatoia [ALT + CTRL + F1] dall'interfaccia principale.</Italian>
 		<Spanish>Opens the BUG Mod help file. You can hit [ALT + CTRL + F1] from the main interface.</Spanish>
 	</TEXT>
+	<!-- trs: was "BUG Options screen" -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTBUTTON_EXIT_HOVER</Tag>
-		<English>Exits the BUG Options screen.</English>
+		<English>Exits the Options screen</English>
 		<French>Sortir de l'écran d'options du BUG.</French>
-		<German>Den Optionensbildschirm der BUG Mod verlassen</German>
+		<German>Optionsmenü schließen</German>
 		<Italian>Esci dalla schermata delle Opzioni del BUG Mod.</Italian>
 		<Spanish>Exits the BUG Options screen.</Spanish>
 	</TEXT>
+	<!-- trs: Was "BUG Options Screen"  -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTIONS_SCREEN_HOVER</Tag>
-		<English>Shows the BUG Option Screen.</English>
+		<English>Shows the Mod Options screen</English>
 		<French>Shows the BUG Option Screen.</French>
-		<German>Ruft den Optionsbildschirm der BUG Mod auf</German>
+		<German>Ruft die Mod-Optionen auf</German>
 		<Italian>Shows the BUG Option Screen.</Italian>
 		<Spanish>Shows the BUG Option Screen.</Spanish>
 	</TEXT>
