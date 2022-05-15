@@ -45,8 +45,9 @@ ________________________________________________________________________________
 The following are all of the compile-time options for BULL. Each one has a unique preprocessor flag that you must define to enable the component. You do this with the /D option in your makefile.
 
 [0] BUFFY
-(trs.doc: Will throw out some BUFFY-related files. There aren't going to be
-multiple HOF-compatible mods.)
+(trs.doc: There aren't going to be multiple HOF-compatible mods, so this option
+is no longer fully supported. Well, so far only GameSetUpCheck.txt has been
+removed.)
 	Flag: _BUFFY
 	by BUG/HOF Team
 		
