@@ -9372,7 +9372,7 @@ bool CvGame::pythonIsBonusIgnoreLatitudes() const
 }
 
 // BUG - MapFinder - start
-#include "ximage.h"
+#include "CxImage/include/ximage.h" // trs.build: Moved this header
 
 // from HOF Mod - Dianthus
 bool CvGame::takeJPEGScreenShot(std::string fileName) const
