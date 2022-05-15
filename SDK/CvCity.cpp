@@ -5651,7 +5651,7 @@ int CvCity::getSavedMaintenanceTimes100ByBuilding(BuildingTypes eBuilding) const
 	if (iModifier != 0 && !isDisorder() && !isWeLoveTheKingDay() && (getPopulation() > 0))
 	{
 		int iNewMaintenance = calculateBaseMaintenanceTimes100() * std::max(0, getMaintenanceModifier() + iModifier + 100) / 100;
-		return std::max(0, getMaintenanceTimes100() - iNewMaintenance);
+		return getMaintenanceTimes100() - iNewMaintenance;
 	}
 
 	return 0;
@@ -6063,38 +6063,23 @@ int CvCity::getFeatureBadHealth() const
 }
 
 
+// BUG - Feature Health - start
+/*
+ * Recalculates the total percentage health effects from existing features
+ * and updates the values if they have changed.
+ *
+ * Bad health is stored as a negative value.
+ */
 void CvCity::updateFeatureHealth()
 {
-	CvPlot* pLoopPlot;
-	FeatureTypes eFeature;
 	int iNewGoodHealth;
 	int iNewBadHealth;
-	int iI;
 
 	iNewGoodHealth = 0;
 	iNewBadHealth = 0;
 
-	for (iI = 0; iI < NUM_CITY_PLOTS; iI++)
-	{
-		pLoopPlot = getCityIndexPlot(iI);
-
-		if (pLoopPlot != NULL)
-		{
-			eFeature = pLoopPlot->getFeatureType();
-
-			if (eFeature != NO_FEATURE)
-			{
-				if (GC.getFeatureInfo(eFeature).getHealthPercent() > 0)
-				{
-					iNewGoodHealth += GC.getFeatureInfo(eFeature).getHealthPercent();
-				}
-				else
-				{
-					iNewBadHealth += GC.getFeatureInfo(eFeature).getHealthPercent();
-				}
-			}
-		}
-	}
+	calculateFeatureHealthPercent(iNewGoodHealth, iNewBadHealth);
+	iNewBadHealth = -iNewBadHealth;  // convert to "negative is bad"
 
 	iNewGoodHealth /= 100;
 	iNewBadHealth /= 100;
@@ -6114,6 +6099,220 @@ void CvCity::updateFeatureHealth()
 		}
 	}
 }
+
+/*
+ * Adds the total percentage health effects from existing features to iGood and iBad.
+ *
+ * Positive values for iBad mean an increase in unhealthiness.
+ */
+void CvCity::calculateFeatureHealthPercent(int& iGood, int& iBad) const
+{
+	CvPlot* pLoopPlot;
+	FeatureTypes eFeature;
+	int iI;
+
+	for (iI = 0; iI < NUM_CITY_PLOTS; iI++)
+	{
+		pLoopPlot = getCityIndexPlot(iI);
+
+		if (pLoopPlot != NULL)
+		{
+			eFeature = pLoopPlot->getFeatureType();
+
+			if (eFeature != NO_FEATURE)
+			{
+				int iHealth = GC.getFeatureInfo(eFeature).getHealthPercent();
+
+				if (iHealth > 0)
+				{
+					iGood += iHealth;
+				}
+				else
+				{
+					iBad -= iHealth;
+				}
+			}
+		}
+	}
+}
+
+/*
+ * Subtracts the total percentage health effects of features currently being removed to iGood and iBad.
+ * If pIgnorePlot is not NULL, it is not checked for feature removal.
+ * Checks only plots visible to this city's owner.
+ *
+ * Positive values for iBad mean an increase in unhealthiness.
+ */
+void CvCity::calculateFeatureHealthPercentChange(int& iGood, int& iBad, CvPlot* pIgnorePlot) const
+{
+	CvPlot* pLoopPlot;
+	FeatureTypes eFeature;
+	int iI;
+
+	for (iI = 0; iI < NUM_CITY_PLOTS; iI++)
+	{
+		pLoopPlot = getCityIndexPlot(iI);
+
+		if (pLoopPlot != NULL && pLoopPlot != pIgnorePlot && pLoopPlot->isVisible(getTeam(), true))
+		{
+			eFeature = pLoopPlot->getFeatureType();
+
+			if (eFeature != NO_FEATURE)
+			{
+				int iHealth = GC.getFeatureInfo(eFeature).getHealthPercent();
+
+				if (iHealth != 0)
+				{
+					int iNumUnits = pLoopPlot->getNumUnits();
+
+					if (iNumUnits > 0)
+					{
+						CLLNode<IDInfo>* pUnitNode = pLoopPlot->headUnitNode();
+						while (pUnitNode != NULL)
+						{
+							CvUnit* pUnit = ::getUnit(pUnitNode->m_data);
+							pUnitNode = pLoopPlot->nextUnitNode(pUnitNode);
+							BuildTypes eBuild = pUnit->getBuildType();
+
+							if (eBuild != NO_BUILD)
+							{
+								CvBuildInfo& kBuild = GC.getBuildInfo(eBuild);
+
+								if (kBuild.isFeatureRemove(eFeature))
+								{
+									if (iHealth > 0)
+									{
+										iGood += iHealth;
+									}
+									else
+									{
+										iBad -= iHealth;
+									}
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+/*
+ * Returns the total additional health that adding or removing iChange eFeatures will provide.
+ */
+int CvCity::getAdditionalHealthByFeature(FeatureTypes eFeature, int iChange) const
+{
+	int iGood = 0, iBad = 0;
+	return getAdditionalHealthByFeature(eFeature, iChange, iGood, iBad);
+}
+
+/*
+ * Returns the total additional health that adding or removing iChange eFeatures will provide
+ * and sets the good and bad levels individually.
+ *
+ * Doesn't reset iGood or iBad to zero.
+ * Positive values for iBad mean an increase in unhealthiness.
+ */
+int CvCity::getAdditionalHealthByFeature(FeatureTypes eFeature, int iChange, int& iGood, int& iBad) const
+{
+	FAssertMsg(eFeature >= 0, "eFeature expected to be >= 0");
+	FAssertMsg(eFeature < GC.getNumFeatureInfos(), "eFeature expected to be < GC.getNumFeatureInfos()");
+
+	CvFeatureInfo& kFeature = GC.getFeatureInfo(eFeature);
+	int iHealth = GC.getFeatureInfo(eFeature).getHealthPercent();
+
+	if (iHealth > 0)
+	{
+		return getAdditionalHealth(iChange * iHealth, 0, iGood, iBad);
+	}
+	else
+	{
+		return getAdditionalHealth(0, - iChange * iHealth, iGood, iBad);
+	}
+}
+
+/*
+ * Returns the total additional health that adding or removing a good or bad health percent will provide
+ * and sets the good and bad levels individually.
+ *
+ * Doesn't reset iGood or iBad to zero.
+ * Positive values for iBad and iBadPercent mean an increase in unhealthiness.
+ */
+int CvCity::getAdditionalHealth(int iGoodPercent, int iBadPercent, int& iGood, int& iBad) const
+{
+	int iStarting = iGood - iBad;
+
+	// Add current
+	calculateFeatureHealthPercent(iGoodPercent, iBadPercent);
+
+	// Delta
+	iGood += (iGoodPercent / 100) - getFeatureGoodHealth();
+	iBad += (iBadPercent / 100) + getFeatureBadHealth();		// bad health is stored as negative
+
+	return iGood - iBad - iStarting;
+}
+// BUG - Feature Health - end
+
+// BUG - Actual Effects - start
+/*
+ * Returns the additional angry population caused by the given happiness changes.
+ *
+ * Positive values for iBad mean an increase in unhappiness.
+ */
+int CvCity::getAdditionalAngryPopuplation(int iGood, int iBad) const
+{
+	int iHappy = happyLevel();
+	int iUnhappy = unhappyLevel();
+	int iPop = getPopulation();
+
+	return range((iUnhappy + iBad) - (iHappy + iGood), 0, iPop) - range(iUnhappy - iHappy, 0, iPop);
+}
+
+/*
+ * Returns the additional spoiled food caused by the given health changes.
+ *
+ * Positive values for iBad mean an increase in unhealthiness.
+ */
+int CvCity::getAdditionalSpoiledFood(int iGood, int iBad) const
+{
+	int iHealthy = goodHealth();
+	int iUnhealthy = badHealth();
+	int iRate = iHealthy - iUnhealthy;
+
+	return std::min(0, iRate) - std::min(0, iRate + iGood - iBad);
+}
+
+/*
+ * Returns the additional starvation caused by the given spoiled food.
+ */
+int CvCity::getAdditionalStarvation(int iSpoiledFood) const
+{
+	int iFood = getYieldRate(YIELD_FOOD) - foodConsumption();
+
+	if (iSpoiledFood > 0)
+	{
+		if (iFood <= 0)
+		{
+			return iSpoiledFood;
+		}
+		else if (iSpoiledFood > iFood)
+		{
+			return iSpoiledFood - iFood;
+		}
+	}
+	else if (iSpoiledFood < 0)
+	{
+		if (iFood < 0)
+		{
+			return std::max(iFood, iSpoiledFood);
+		}
+	}
+
+	return 0;
+}
+// BUG - Actual Effects - start
 
 
 int CvCity::getBuildingGoodHealth() const
@@ -6459,8 +6658,8 @@ void CvCity::updateExtraBuildingHappiness()
  */
 int CvCity::getAdditionalHappinessByBuilding(BuildingTypes eBuilding) const
 {
-	int iGood = 0, iBad = 0, iAngryPop = 0;
-	return getAdditionalHappinessByBuilding(eBuilding, iGood, iBad, iAngryPop);
+	int iGood = 0, iBad = 0;
+	return getAdditionalHappinessByBuilding(eBuilding, iGood, iBad);
 }
 
 /*
@@ -6470,7 +6669,7 @@ int CvCity::getAdditionalHappinessByBuilding(BuildingTypes eBuilding) const
  * Doesn't reset iGood or iBad to zero.
  * Doesn't check if the building can be constructed in this city.
  */
-int CvCity::getAdditionalHappinessByBuilding(BuildingTypes eBuilding, int& iGood, int& iBad, int& iAngryPop) const
+int CvCity::getAdditionalHappinessByBuilding(BuildingTypes eBuilding, int& iGood, int& iBad) const
 {
 	FAssertMsg(eBuilding >= 0, "eBuilding expected to be >= 0");
 	FAssertMsg(eBuilding < GC.getNumBuildingInfos(), "eBuilding expected to be < GC.getNumBuildingInfos()");
@@ -6568,12 +6767,6 @@ int CvCity::getAdditionalHappinessByBuilding(BuildingTypes eBuilding, int& iGood
 		iBad = iStartingBad - unhappyLevel();
 	}
 
-	// Effect on Angry Population
-	int iHappy = happyLevel();
-	int iUnhappy = unhappyLevel();
-	int iPop = getPopulation();
-	iAngryPop += range((iUnhappy + iBad) - (iHappy + iGood), 0, iPop) - range(iUnhappy - iHappy, 0, iPop);
-
 	return iGood - iBad - iStarting;
 }
 
@@ -6585,18 +6778,18 @@ int CvCity::getAdditionalHappinessByBuilding(BuildingTypes eBuilding, int& iGood
  */
 int CvCity::getAdditionalHealthByBuilding(BuildingTypes eBuilding) const
 {
-	int iGood = 0, iBad = 0, iSpoiledFood = 0;
-	return getAdditionalHealthByBuilding(eBuilding, iGood, iBad, iSpoiledFood);
+	int iGood = 0, iBad = 0;
+	return getAdditionalHealthByBuilding(eBuilding, iGood, iBad);
 }
 
 /*
  * Returns the total additional health that adding one of the given buildings will provide
- * and sets the good and bad levels individually and any resulting additional spoiled food.
+ * and sets the good and bad levels individually and any resulting additional spoiled food and starvation.
  *
- * Doesn't reset iGood or iBad to zero.
+ * Doesn't reset iGood, iBad, iSpoiledFood, iStarvation to zero.
  * Doesn't check if the building can be constructed in this city.
  */
-int CvCity::getAdditionalHealthByBuilding(BuildingTypes eBuilding, int& iGood, int& iBad, int& iSpoiledFood) const
+int CvCity::getAdditionalHealthByBuilding(BuildingTypes eBuilding, int& iGood, int& iBad) const
 {
 	FAssertMsg(eBuilding >= 0, "eBuilding expected to be >= 0");
 	FAssertMsg(eBuilding < GC.getNumBuildingInfos(), "eBuilding expected to be < GC.getNumBuildingInfos()");
@@ -6671,11 +6864,6 @@ int CvCity::getAdditionalHealthByBuilding(BuildingTypes eBuilding, int& iGood, i
 	{
 		iBad -= getPopulation();
 	}
-
-	// Effect on Spoiled Food
-	int iHealthy = goodHealth();
-	int iUnhealthy = badHealth();
-	iSpoiledFood -= std::min(0, (iHealthy + iGood) - (iUnhealthy + iBad)) - std::min(0, iHealthy - iUnhealthy);
 
 	return iGood - iBad - iStarting;
 }
@@ -8118,6 +8306,16 @@ void CvCity::setCultureLevel(CultureLevelTypes eNewValue, bool bUpdatePlotGroups
 /************************************************************************************************/
 			}
 		}
+
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                       08/08/10                              EmperorFool     */
+/*                                                                                              */
+/* Bugfix, already called by AI_doTurn()                                                        */
+/************************************************************************************************/
+		AI_updateBestBuild();
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                        END                                                  */
+/************************************************************************************************/
 	}
 }
 
@@ -8326,7 +8524,11 @@ int CvCity::getAdditionalYieldRateModifierByBuilding(YieldTypes eIndex, Building
 	if (!bObsolete)
 	{
 		iExtraModifier += kBuilding.getYieldModifier(eIndex);
-		if (!isPower())
+		if (isPower())
+		{
+			iExtraModifier += kBuilding.getPowerYieldModifier(eIndex);
+		}
+		else
 		{
 			if (kBuilding.isPower() || kBuilding.isAreaCleanPower() || (kBuilding.getPowerBonus() != NO_BONUS && hasBonus((BonusTypes)kBuilding.getPowerBonus())))
 			{
@@ -12036,6 +12238,9 @@ void CvCity::popOrder(int iNum, bool bFinish, bool bChoose)
 				changeOverflowProduction(iOverflow, getProductionModifier(eTrainUnit));
 			}
 			setUnitProduction(eTrainUnit, 0);
+// BUG - Unofficial Patch - start
+			setUnitProductionTime(eTrainUnit, 0);
+// BUG - Unofficial Patch - end
 
 // BUG - Overflow Gold Fix - start
 			iLostProduction *= getBaseYieldRateModifier(YIELD_PRODUCTION);
@@ -12125,6 +12330,9 @@ void CvCity::popOrder(int iNum, bool bFinish, bool bChoose)
 				changeOverflowProduction(iOverflow, getProductionModifier(eConstructBuilding));
 			}
 			setBuildingProduction(eConstructBuilding, 0);
+// BUG - Unofficial Patch - start
+			setBuildingProductionTime(eConstructBuilding, 0);
+// BUG - Unofficial Patch - end
 
 // BUG - Overflow Gold Fix - start
 			iLostProduction *= getBaseYieldRateModifier(YIELD_PRODUCTION);

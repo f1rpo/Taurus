@@ -296,7 +296,10 @@ public:
 	bool canBuildRoute() const;																						// Exposed to Python
 	DllExport BuildTypes getBuildType() const;														// Exposed to Python
 	int workRate(bool bMax) const;															// Exposed to Python
-
+	
+// BUG - Female Great People - start
+	bool isFemale() const;																	// Exposed to Python
+// BUG - Female Great People - end
 	bool isAnimal() const;																								// Exposed to Python
 	bool isNoBadGoodies() const;																					// Exposed to Python
 	bool isOnlyDefensive() const;																					// Exposed to Python

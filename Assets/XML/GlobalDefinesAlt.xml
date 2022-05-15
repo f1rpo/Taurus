@@ -93,6 +93,122 @@
 		<DefineName>BUG_CITYBAR_HIDE_INSTRUCTIONS</DefineName>
 		<iDefineIntVal>1</iDefineIntVal>
 	</Define>
+
+<!-- City Plot Status -->
+
+	<Define>
+		<DefineName>BUG_CITY_CONTROLLED_PLOTS</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_CONTROLLED_PLOTS_COLOR</DefineName>
+		<DefineTextVal>COLOR_HIGHLIGHT_TEXT</DefineTextVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_CONTROLLED_PLOTS_ALPHA</DefineName>
+		<fDefineFloatVal>1.0</fDefineFloatVal>
+	</Define>
+	
+	<Define>
+		<DefineName>BUG_CITY_PLOT_STATUS</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_WORKING_IMPROVED_PLOT</DefineName>
+		<iDefineIntVal>0</iDefineIntVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_WORKING_IMPROVED_PLOT_COLOR</DefineName>
+		<DefineTextVal>COLOR_RED</DefineTextVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_WORKING_IMPROVED_PLOT_ALPHA</DefineName>
+		<fDefineFloatVal>1.0</fDefineFloatVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_WORKING_IMPROVABLE_PLOT</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_WORKING_IMPROVABLE_PLOT_COLOR</DefineName>
+		<DefineTextVal>COLOR_RED</DefineTextVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_WORKING_IMPROVABLE_PLOT_ALPHA</DefineName>
+		<fDefineFloatVal>1.0</fDefineFloatVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_WORKING_IMPROVABLE_BONUS_PLOT</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_WORKING_IMPROVABLE_BONUS_PLOT_COLOR</DefineName>
+		<DefineTextVal>COLOR_RED</DefineTextVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_WORKING_IMPROVABLE_BONUS_PLOT_ALPHA</DefineName>
+		<fDefineFloatVal>1.0</fDefineFloatVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_WORKING_UNIMPROVABLE_PLOT</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_WORKING_UNIMPROVABLE_PLOT_COLOR</DefineName>
+		<DefineTextVal>COLOR_YELLOW</DefineTextVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_WORKING_UNIMPROVABLE_PLOT_ALPHA</DefineName>
+		<fDefineFloatVal>1.0</fDefineFloatVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_NOT_WORKING_IMPROVED_PLOT</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_NOT_WORKING_IMPROVED_PLOT_COLOR</DefineName>
+		<DefineTextVal>COLOR_GREEN</DefineTextVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_NOT_WORKING_IMPROVED_PLOT_ALPHA</DefineName>
+		<fDefineFloatVal>1.0</fDefineFloatVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_NOT_WORKING_IMPROVABLE_PLOT</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_NOT_WORKING_IMPROVABLE_PLOT_COLOR</DefineName>
+		<DefineTextVal>COLOR_PLAYER_DARK_CYAN</DefineTextVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_NOT_WORKING_IMPROVABLE_PLOT_ALPHA</DefineName>
+		<fDefineFloatVal>1.0</fDefineFloatVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_NOT_WORKING_IMPROVABLE_BONUS_PLOT</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_NOT_WORKING_IMPROVABLE_BONUS_PLOT_COLOR</DefineName>
+		<DefineTextVal>COLOR_CYAN</DefineTextVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_NOT_WORKING_IMPROVABLE_BONUS_PLOT_ALPHA</DefineName>
+		<fDefineFloatVal>1.0</fDefineFloatVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_NOT_WORKING_UNIMPROVABLE_PLOT</DefineName>
+		<iDefineIntVal>0</iDefineIntVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_NOT_WORKING_UNIMPROVABLE_PLOT_COLOR</DefineName>
+		<DefineTextVal>COLOR_BLACK</DefineTextVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_CITY_NOT_WORKING_UNIMPROVABLE_PLOT_ALPHA</DefineName>
+		<fDefineFloatVal>1.0</fDefineFloatVal>
+	</Define>
 	
 <!-- Miscellaneous Hovers -->
 	
@@ -129,6 +245,14 @@
 		<DefineName>BUG_PLOT_HOVER_LAT_LONG</DefineName>
 		<iDefineIntVal>1</iDefineIntVal>
 	</Define>
+  <Define>
+    <DefineName>BUG_PLOT_HOVER_WORKING_CITY</DefineName>
+    <iDefineIntVal>1</iDefineIntVal>
+  </Define>
+  <Define>
+    <DefineName>BUG_PLOT_HOVER_RECOMMENDED_BUILD</DefineName>
+    <iDefineIntVal>1</iDefineIntVal>
+  </Define>
 	<Define>
 		<DefineName>BUG_PLOT_HOVER_PARTIAL_BUILDS</DefineName>
 		<iDefineIntVal>1</iDefineIntVal>
@@ -137,6 +261,10 @@
 	<!-- Building -->
 	<Define>
 		<DefineName>BUG_BUILDING_HOVER_ACTUAL_EFFECTS</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_BUILDING_DOUBLE_COMMERCE</DefineName>
 		<iDefineIntVal>1</iDefineIntVal>
 	</Define>
 	
@@ -205,6 +333,15 @@
 		<iDefineIntVal>1</iDefineIntVal>
 	</Define>
 	
+	<Define>
+		<DefineName>BUG_REMOVE_FEATURE_HEALTH_EFFECTS</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
+	<Define>
+		<DefineName>BUG_REMOVE_FEATURE_HEALTH_EFFECTS_COUNT_OTHER_TILES</DefineName>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
+	
 	<!-- City Screen -->
 	<Define>
 		<DefineName>BUG_CITY_SCREEN_BASE_COMMERCE_HOVER</DefineName>
@@ -256,7 +393,7 @@
 	</Define>
 	<Define>
 		<DefineName>BUG_PRODUCTION_POPUP_TRAIN_MILITARY_UNITS_FOREVER</DefineName>
-		<iDefineIntVal>1</iDefineIntVal>
+		<iDefineIntVal>0</iDefineIntVal>
 	</Define>
 
 	<!-- Actions -->

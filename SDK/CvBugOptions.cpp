@@ -64,6 +64,32 @@ int getDefineINT(const char* xmlKey, int iDefault)
 	}
 }
 
+float getDefineFLOAT(const char* xmlKey, float fDefault)
+{
+	float fResult = 0.0;
+	if (GC.getDefinesVarSystem()->GetValue(xmlKey, fResult))
+	{
+		return fResult;
+	}
+	else
+	{
+		return fDefault;
+	}
+}
+
+const char * getDefineSTRING(const char* xmlKey, const char * szDefault)
+{
+	const char * szResult = NULL;
+	if (GC.getDefinesVarSystem()->GetValue(xmlKey, szResult))
+	{
+		return szResult;
+	}
+	else
+	{
+		return szDefault;
+	}
+}
+
 
 bool getBugOptionBOOL(const char* id, bool bDefault, const char* xmlKey)
 {

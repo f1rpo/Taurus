@@ -7554,6 +7554,12 @@ int CvPlayer::unitsGoldenAgeCapable() const
 }
 
 
+// BUG - Female Great People - start
+
+/*
+ * Units are grouped by unit class instead of type so you cannot start your second Golden Age
+ * with two Great Prophets: one male and one female.
+ */
 int CvPlayer::unitsGoldenAgeReady() const
 {
 	PROFILE_FUNC();
@@ -7564,9 +7570,9 @@ int CvPlayer::unitsGoldenAgeReady() const
 	int iLoop;
 	int iI;
 
-	pabUnitUsed = new bool[GC.getNumUnitInfos()];
+    pabUnitUsed = new bool[GC.getNumUnitClassInfos()];
 
-	for (iI = 0; iI < GC.getNumUnitInfos(); iI++)
+    for (iI = 0; iI < GC.getNumUnitClassInfos(); iI++)
 	{
 		pabUnitUsed[iI] = false;
 	}
@@ -7575,11 +7581,11 @@ int CvPlayer::unitsGoldenAgeReady() const
 
 	for(pLoopUnit = firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = nextUnit(&iLoop))
 	{
-		if (!(pabUnitUsed[pLoopUnit->getUnitType()]))
+        if (!(pabUnitUsed[pLoopUnit->getUnitClassType()]))
 		{
 		if (pLoopUnit->isGoldenAge())
 		{
-				pabUnitUsed[pLoopUnit->getUnitType()] = true;
+                pabUnitUsed[pLoopUnit->getUnitClassType()] = true;
 				iCount++;
 			}
 		}
@@ -7602,9 +7608,9 @@ void CvPlayer::killGoldenAgeUnits(CvUnit* pUnitAlive)
 	int iLoop;
 	int iI;
 
-	pabUnitUsed = new bool[GC.getNumUnitInfos()];
+    pabUnitUsed = new bool[GC.getNumUnitClassInfos()];
 
-	for (iI = 0; iI < GC.getNumUnitInfos(); iI++)
+    for (iI = 0; iI < GC.getNumUnitClassInfos(); iI++)
 	{
 		pabUnitUsed[iI] = false;
 	}
@@ -7613,7 +7619,7 @@ void CvPlayer::killGoldenAgeUnits(CvUnit* pUnitAlive)
 
 	if (pUnitAlive != NULL)
 	{
-		pabUnitUsed[pUnitAlive->getUnitType()] = true;
+        pabUnitUsed[pUnitAlive->getUnitClassType()] = true;
 		iUnitsRequired--;
 	}
 
@@ -7626,7 +7632,7 @@ void CvPlayer::killGoldenAgeUnits(CvUnit* pUnitAlive)
 		{
 			if (pLoopUnit->isGoldenAge())
 			{
-				if (!(pabUnitUsed[pLoopUnit->getUnitType()]))
+                if (!(pabUnitUsed[pLoopUnit->getUnitClassType()]))
 				{
 					iValue = 10000;
 
@@ -7644,7 +7650,7 @@ void CvPlayer::killGoldenAgeUnits(CvUnit* pUnitAlive)
 		FAssert(pBestUnit != NULL);
 		if (pBestUnit != NULL)
 		{
-			pabUnitUsed[pBestUnit->getUnitType()] = true;
+            pabUnitUsed[pBestUnit->getUnitClassType()] = true;
 
 			pBestUnit->kill(true);
 
@@ -7659,6 +7665,7 @@ void CvPlayer::killGoldenAgeUnits(CvUnit* pUnitAlive)
 
 	SAFE_DELETE_ARRAY(pabUnitUsed);
 }
+// BUG - Female Great People - end
 
 
 int CvPlayer::greatPeopleThreshold(bool bMilitary) const
@@ -16704,6 +16711,25 @@ void CvPlayer::write(FDataStreamBase* pStream)
 
 void CvPlayer::createGreatPeople(UnitTypes eGreatPersonUnit, bool bIncrementThreshold, bool bIncrementExperience, int iX, int iY)
 {
+// BUG - Female Great People - start
+	CvUnitInfo& kUnit = GC.getUnitInfo(eGreatPersonUnit);
+
+	if (!kUnit.isFemale())
+	{
+		UnitTypes eFemaleGreatPersonUnit = (UnitTypes) kUnit.getFemaleUnitType();
+
+		if (eFemaleGreatPersonUnit != NO_UNIT)
+		{
+			int iFemalePercent = isCivic((CivicTypes)GC.getInfoTypeForString("CIVIC_EMANCIPATION")) ? 50 : 20;
+		
+			if (GC.getGameINLINE().getSorenRandNum(100, "Female great person") < iFemalePercent)
+			{
+				eGreatPersonUnit = eFemaleGreatPersonUnit;
+			}
+		}
+	}
+// BUG - Female Great People - end
+
 	CvUnit* pGreatPeopleUnit = initUnit(eGreatPersonUnit, iX, iY);
 	if (NULL == pGreatPeopleUnit)
 	{

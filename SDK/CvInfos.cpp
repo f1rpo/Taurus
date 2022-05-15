@@ -3046,6 +3046,9 @@ m_iUnitMeleeWaveSize(0),
 m_iUnitRangedWaveSize(0),
 m_iNumUnitNames(0),
 m_iCommandType(NO_COMMAND),
+// BUG - Female Great People - start
+m_bFemale(false),
+// BUG - Female Great People - end
 m_bAnimal(false),
 m_bFoodProduction(false),
 m_bNoBadGoodies(false),
@@ -3546,6 +3549,25 @@ int CvUnitInfo::getNumUnitNames() const
 {
 	return m_iNumUnitNames;
 }
+
+// BUG - Female Great People - start
+bool CvUnitInfo::isFemale() const
+{
+	return m_bFemale;
+}
+
+/*
+ * Find the equivalent female unit type by appending "_FEMALE" to this unit's type.
+ * Returns -1 if there is no such unit.
+ *
+ * Ideally this would be done in a second pass while reading the XML and saved.
+ */
+int CvUnitInfo::getFemaleUnitType() const
+{
+	CvString szFemaleUnitType = m_szType + "_FEMALE";
+	return GC.getInfoTypeForString(szFemaleUnitType.GetCString());
+}
+// BUG - Female Great People - end
 
 bool CvUnitInfo::isAnimal() const				
 {
@@ -4260,7 +4282,10 @@ void CvUnitInfo::read(FDataStreamBase* stream)
 	stream->Read(&m_iUnitRangedWaveSize);
 	stream->Read(&m_iNumUnitNames);
 	stream->Read(&m_iCommandType);
-
+	
+// BUG - Female Great People - start
+	stream->Read(&m_bFemale);
+// BUG - Female Great People - end
 	stream->Read(&m_bAnimal);
 	stream->Read(&m_bFoodProduction);
 	stream->Read(&m_bNoBadGoodies);
@@ -4556,7 +4581,10 @@ void CvUnitInfo::write(FDataStreamBase* stream)
 	stream->Write(m_iUnitRangedWaveSize);
 	stream->Write(m_iNumUnitNames);
 	stream->Write(m_iCommandType);
-
+	
+// BUG - Female Great People - start
+	stream->Write(m_bFemale);
+// BUG - Female Great People - end
 	stream->Write(m_bAnimal);
 	stream->Write(m_bFoodProduction);
 	stream->Write(m_bNoBadGoodies);
@@ -4698,7 +4726,10 @@ bool CvUnitInfo::read(CvXMLLoadUtility* pXML)
 
 	pXML->GetChildXmlValByName(szTextVal, "Advisor");
 	m_iAdvisorType = pXML->FindInInfoClass(szTextVal);
-
+	
+// BUG - Female Great People - start
+	pXML->GetChildXmlValByName(&m_bFemale, "bFemale");
+// BUG - Female Great People - end
 	pXML->GetChildXmlValByName(&m_bAnimal, "bAnimal");
 	pXML->GetChildXmlValByName(&m_bFoodProduction, "bFood");
 	pXML->GetChildXmlValByName(&m_bNoBadGoodies, "bNoBadGoodies");
@@ -12838,6 +12869,25 @@ bool CvFeatureInfo::isNukeImmune() const
 	return m_bNukeImmune; 
 }
 
+// BUG - City Plot Status - start
+bool CvFeatureInfo::isOnlyBad() const
+{
+	if (getHealthPercent() > 0 || isAddsFreshWater())
+	{
+		return false;
+	}
+	for (int iI = 0; iI < NUM_YIELD_TYPES; iI++)
+	{
+		if (getYieldChange(iI) > 0)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+// BUG - City Plot Status - end
+
 const TCHAR* CvFeatureInfo::getOnUnitChangeTo() const
 {
 	return m_szOnUnitChangeTo;
@@ -20113,6 +20163,18 @@ int CvEventTriggerInfo::getNumCorporationsRequired() const
 	return (int)m_aiCorporationsRequired.size();
 }
 
+// BUG - Events with Images - start
+const TCHAR* CvEventTriggerInfo::getEventArt() const
+{
+	if (m_szEventArt.empty())
+	{
+		return NULL;
+	}
+	
+	return m_szEventArt;
+}
+// BUG - Events with Images - end
+
 bool CvEventTriggerInfo::isSinglePlayer() const
 {
 	return m_bSinglePlayer;
@@ -20426,6 +20488,9 @@ void CvEventTriggerInfo::read(FDataStreamBase* stream)
 		m_aiCorporationsRequired.push_back(iElement);
 	}
 
+// BUG - Events with Images - start
+	stream->ReadString(m_szEventArt);
+// BUG - Events with Images - end
 	stream->Read(&m_bSinglePlayer);
 	stream->Read(&m_bTeam);
 	stream->Read(&m_bRecurring);
@@ -20583,6 +20648,9 @@ void CvEventTriggerInfo::write(FDataStreamBase* stream)
 		stream->Write(*it);
 	}
 
+// BUG - Events with Images - start
+	stream->WriteString(m_szEventArt);
+// BUG - Events with Images - end
 	stream->Write(m_bSinglePlayer);
 	stream->Write(m_bTeam);
 	stream->Write(m_bRecurring);
@@ -21134,6 +21202,9 @@ bool CvEventTriggerInfo::read(CvXMLLoadUtility* pXML)
 		gDLL->getXMLIFace()->SetToParent(pXML->GetXML());
 	}
 
+// BUG - Events with Images - start
+	pXML->GetChildXmlValByName(m_szEventArt, "EventArt");
+// BUG - Events with Images - end
 	pXML->GetChildXmlValByName(&m_bSinglePlayer, "bSinglePlayer");
 	pXML->GetChildXmlValByName(&m_bTeam, "bTeam");
 	pXML->GetChildXmlValByName(&m_bRecurring, "bRecurring");

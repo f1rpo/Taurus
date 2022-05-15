@@ -142,6 +142,33 @@
 		<Spanish>[NEWLINE]------------------------[NEWLINE]ESPECIALISTAS TOTAL: %d1 [ICON_GOLD]</Spanish>
 	</TEXT>
 
+<!-- Building Double Commerce Year -->
+
+	<TEXT>
+		<Tag>TXT_KEY_BUG_YEAR_BUILT</Tag>
+		<English>Built in %s1_year</English>
+		<French>Built in %s1_year</French>
+		<German>Errichtet im Jahr %s1_year</German>
+		<Italian>Built in %s1_year</Italian>
+		<Spanish>Built in %s1_year</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_DOUBLE_COMMERCE_NEXT_YEAR</Tag>
+		<English>[ICON_BULLET]Double %s1_commerce_type next year</English>
+		<French>[ICON_BULLET]Double %s1_commerce_type next year</French>
+		<German>[ICON_BULLET]Doppelte %s1_commerce_type im nächsten Jahr</German>
+		<Italian>[ICON_BULLET]Double %s1_commerce_type next year</Italian>
+		<Spanish>[ICON_BULLET]Double %s1_commerce_type next year</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_DOUBLE_COMMERCE_YEARS</Tag>
+		<English>[ICON_BULLET]Double %s1_commerce_type in %d2 years</English>
+		<French>[ICON_BULLET]Double %s1_commerce_type in %d2 years</French>
+		<German>[ICON_BULLET]Doppelte %s1_commerce_type für %d2 Jahre</German>
+		<Italian>[ICON_BULLET]Double %s1_commerce_type in %d2 years</Italian>
+		<Spanish>[ICON_BULLET]Double %s1_commerce_type in %d2 years</Spanish>
+	</TEXT>
+
 <!-- Production Decay -->
 
 	<TEXT>
@@ -755,6 +782,17 @@
 		<German>Bei Entfernung der Geländeart %s1_FeatName wird die Stadt %s3_CityName %d2_Num [ICON_PRODUCTION] erhalten.</German>
 		<Italian>Sgombrando una casella di %s1_FeatName si &#232; creerà %d2_Num [ICON_PRODUCTION] per %s3_CityName.</Italian>
 		<Spanish>Despejar [NUM1:el:la:los:las] %s1_FeatName generará %d2_Num [ICON_PRODUCTION] para %s3_CityName.</Spanish>
+	</TEXT>
+
+<!-- Feature Health -->
+
+	<TEXT>
+		<Tag>TXT_KEY_ACTION_CHANGE_IN_CITY</Tag>
+		<English>[ICON_BULLET]%s1 in %s2_CityName</English>
+		<French>[ICON_BULLET]%s1 &#224; %s2_CityName</French>
+		<German>[ICON_BULLET]%s1 in %s2_CityName</German>
+		<Italian>[ICON_BULLET]%s1 a %s2_CityName</Italian>
+		<Spanish>[ICON_BULLET]%s1 en %s2_CityName</Spanish>
 	</TEXT>
 
 <!-- Delete/Fortify/Sleep All Units Actions -->

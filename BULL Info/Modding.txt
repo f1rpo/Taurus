@@ -191,6 +191,14 @@ CyCity
 	
 [1]	int calculateTradeProfitTimes100(CyCity pCity)
 
+CyUnit
+
+	bool isFemale()
+
+CvUnitInfo
+
+	bool isFemale()
+
 CyDeal
 
 	bool isCancelable(PlayerTypes eByPlayer, bool bIgnoreWaitingPeriod=false)

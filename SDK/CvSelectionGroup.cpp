@@ -3543,6 +3543,7 @@ bool CvSelectionGroup::groupBuild(BuildTypes eBuild)
 	
 // BUG - Pre-Chop - start
 	bool bCheckChop = false;
+	bool bStopOtherWorkers = false;
 
 	FeatureTypes eFeature = pPlot->getFeatureType();
 	CvBuildInfo& kBuildInfo = GC.getBuildInfo(eBuild);
@@ -3598,11 +3599,33 @@ bool CvSelectionGroup::groupBuild(BuildTypes eBuild)
 					gDLL->getInterfaceIFace()->addMessage(getOwnerINLINE(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer,  ARTFILEMGR.getInterfaceArtInfo("WORLDBUILDER_CITY_EDIT")->getPath(), MESSAGE_TYPE_INFO, GC.getFeatureInfo(eFeature).getButton(), (ColorTypes)GC.getInfoTypeForString("COLOR_WHITE"), getX(), getY(), true, true);
 				}
 				bContinue = false;
+				bStopOtherWorkers = true;
 				break;
 			}
 // BUG - Pre-Chop - end
 		}
 	}
+
+// BUG - Pre-Chop - start
+	if (bStopOtherWorkers)
+	{
+		pUnitNode = pPlot->headUnitNode();
+
+		while (pUnitNode != NULL)
+		{
+			pLoopUnit = ::getUnit(pUnitNode->m_data);
+			pUnitNode = pPlot->nextUnitNode(pUnitNode);
+			CvSelectionGroup* pSelectionGroup = pLoopUnit->getGroup();
+
+			if (pSelectionGroup != NULL && pSelectionGroup != this && pSelectionGroup->getOwnerINLINE() == getOwnerINLINE()
+					&& pSelectionGroup->getActivityType() == ACTIVITY_MISSION && pSelectionGroup->getLengthMissionQueue() > 0 
+					&& pSelectionGroup->getMissionType(0) == kBuildInfo.getMissionType() && pSelectionGroup->getMissionData1(0) == eBuild)
+			{
+				pSelectionGroup->deleteMissionQueueNode(pSelectionGroup->headMissionQueueNode());
+			}
+		}
+	}
+// BUG - Pre-Chop - end
 
 	return bContinue;
 }

@@ -233,12 +233,18 @@ public:
 	int getBuildingBadHealth();
 	int getFeatureGoodHealth();
 	int getFeatureBadHealth();
+// BUG - Feature Health - start
+	int getAdditionalHealthByFeature(int /*FeatureTypes*/ eFeature, int iChange);
+	int getAdditionalGoodHealthByFeature(int /*FeatureTypes*/ eFeature, int iChange);
+	int getAdditionalBadHealthByFeature(int /*FeatureTypes*/ eFeature, int iChange);
+// BUG - Feature Health - end
 	int getBuildingHealth(int iBuilding);
 // BUG - Building Additional Health - start
 	int getAdditionalHealthByBuilding(int /*BuildingTypes*/ eBuilding);
 	int getAdditionalGoodHealthByBuilding(int /*BuildingTypes*/ eBuilding);
 	int getAdditionalBadHealthByBuilding(int /*BuildingTypes*/ eBuilding);
 	int getAdditionalSpoiledFoodByBuilding(int /*BuildingTypes*/ eBuilding);
+	int getAdditionalStarvationByBuilding(int /*BuildingTypes*/ eBuilding);
 // BUG - Building Additional Health - end
 	int getPowerGoodHealth();
 	int getPowerBadHealth();

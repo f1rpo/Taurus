@@ -121,6 +121,254 @@ void CvGame::updateColoredPlots()
 		}
 		else
 		{
+// BUG - City Controlled Plots - start
+			if (getBugOptionBOOL("CityBar__CityControlledPlots", true, "BUG_CITY_CONTROLLED_PLOTS"))
+			{
+				NiColorA color(GC.getColorInfo((ColorTypes)GC.getInfoTypeForString(getDefineSTRING("BUG_CITY_CONTROLLED_PLOTS_COLOR", "COLOR_HIGHLIGHT_TEXT"))).getColor());
+				color.a = getDefineFLOAT("BUG_CITY_CONTROLLED_PLOTS_ALPHA", 1.0);
+
+				for (iI = 0; iI < NUM_CITY_PLOTS; iI++)
+				{
+					pLoopPlot = pHeadSelectedCity->getCityIndexPlot(iI);
+
+					if (pLoopPlot != NULL && pLoopPlot->getWorkingCity() == pHeadSelectedCity)
+					{
+						gDLL->getEngineIFace()->fillAreaBorderPlot(pLoopPlot->getX_INLINE(), pLoopPlot->getY_INLINE(), color, AREA_BORDER_LAYER_CITY_RADIUS);
+					}
+				}
+			}
+// BUG - City Controlled Plots - end
+
+// BUG - City Plot Status - start
+			if (getBugOptionBOOL("CityBar__CityPlotStatus", true, "BUG_CITY_PLOT_STATUS"))
+			{
+				float fAlpha = 0.0;
+				bool bShowWorkingImprovedTile = getBugOptionBOOL("CityBar__WorkingImprovedPlot", false, "BUG_CITY_WORKING_IMPROVED_PLOT");
+				NiColorA workingImprovedTile(GC.getColorInfo((ColorTypes)GC.getInfoTypeForString(getDefineSTRING("BUG_CITY_WORKING_IMPROVED_PLOT_COLOR", "COLOR_WHITE"))).getColor());
+				fAlpha = getDefineFLOAT("BUG_CITY_WORKING_IMPROVED_PLOT_ALPHA", 0.0);
+				if (fAlpha != 0) workingImprovedTile.a = fAlpha;
+				
+				bool bShowWorkingImprovableTile = getBugOptionBOOL("CityBar__WorkingImprovablePlot", true, "BUG_CITY_WORKING_IMPROVABLE_PLOT");
+				NiColorA workingImprovableTile(GC.getColorInfo((ColorTypes)GC.getInfoTypeForString(getDefineSTRING("BUG_CITY_WORKING_IMPROVABLE_PLOT_COLOR", "COLOR_RED"))).getColor());
+				fAlpha = getDefineFLOAT("BUG_CITY_WORKING_IMPROVABLE_PLOT_ALPHA", 0.0);
+				if (fAlpha != 0) workingImprovableTile.a = fAlpha;
+				
+				bool bShowWorkingImprovableBonusTile = getBugOptionBOOL("CityBar__WorkingImprovableBonusPlot", true, "BUG_CITY_WORKING_IMPROVABLE_BONUS_PLOT");
+				NiColorA workingImprovableBonusTile(GC.getColorInfo((ColorTypes)GC.getInfoTypeForString(getDefineSTRING("BUG_CITY_WORKING_IMPROVABLE_BONUS_PLOT_COLOR", "COLOR_RED"))).getColor());
+				fAlpha = getDefineFLOAT("BUG_CITY_WORKING_IMPROVABLE_BONUS_BONUS_PLOT_ALPHA", 0.0);
+				if (fAlpha != 0) workingImprovableBonusTile.a = fAlpha;
+				
+				bool bShowWorkingUnimprovableTile = getBugOptionBOOL("CityBar__WorkingUnimprovablePlot", true, "BUG_CITY_WORKING_UNIMPROVABLE_PLOT");
+				NiColorA workingUnimprovableTile(GC.getColorInfo((ColorTypes)GC.getInfoTypeForString(getDefineSTRING("BUG_CITY_WORKING_UNIMPROVABLE_PLOT_COLOR", "COLOR_YELLOW"))).getColor());
+				fAlpha = getDefineFLOAT("BUG_CITY_WORKING_UNIMPROVABLE_PLOT_ALPHA", 0.0);
+				if (fAlpha != 0) workingUnimprovableTile.a = fAlpha;
+				
+				bool bShowNotWorkingImprovedTile = getBugOptionBOOL("CityBar__NotWorkingImprovedPlot", true, "BUG_CITY_NOT_WORKING_IMPROVED_PLOT");
+				NiColorA notWorkingImprovedTile(GC.getColorInfo((ColorTypes)GC.getInfoTypeForString(getDefineSTRING("BUG_CITY_NOT_WORKING_IMPROVED_PLOT_COLOR", "COLOR_GREEN"))).getColor());
+				fAlpha = getDefineFLOAT("BUG_CITY_NOT_WORKING_IMPROVED_PLOT_ALPHA", 0.0);
+				if (fAlpha != 0) notWorkingImprovedTile.a = fAlpha;
+				
+				bool bShowNotWorkingImprovableTile = getBugOptionBOOL("CityBar__NotWorkingImprovablePlot", true, "BUG_CITY_NOT_WORKING_IMPROVABLE_PLOT");
+				NiColorA notWorkingImprovableTile(GC.getColorInfo((ColorTypes)GC.getInfoTypeForString(getDefineSTRING("BUG_CITY_NOT_WORKING_IMPROVABLE_PLOT_COLOR", "COLOR_PLAYER_DARK_CYAN"))).getColor());
+				fAlpha = getDefineFLOAT("BUG_CITY_NOT_WORKING_IMPROVABLE_PLOT_ALPHA", 0.0);
+				if (fAlpha != 0) notWorkingImprovableTile.a = fAlpha;
+				
+				bool bShowNotWorkingImprovableBonusTile = getBugOptionBOOL("CityBar__NotWorkingImprovableBonusPlot", true, "BUG_CITY_NOT_WORKING_IMPROVABLE_BONUS_PLOT");
+				NiColorA notWorkingImprovableBonusTile(GC.getColorInfo((ColorTypes)GC.getInfoTypeForString(getDefineSTRING("BUG_CITY_NOT_WORKING_IMPROVABLE_BONUS_PLOT_COLOR", "COLOR_CYAN"))).getColor());
+				fAlpha = getDefineFLOAT("BUG_CITY_NOT_WORKING_IMPROVABLE_BONUS_PLOT_ALPHA", 0.0);
+				if (fAlpha != 0) notWorkingImprovableBonusTile.a = fAlpha;
+				
+				bool bShowNotWorkingUnimprovableTile = getBugOptionBOOL("CityBar__NotWorkingUnimprovablePlot", false, "BUG_CITY_NOT_WORKING_UNIMPROVABLE_PLOT");
+				NiColorA notWorkingUnimprovableTile(GC.getColorInfo((ColorTypes)GC.getInfoTypeForString(getDefineSTRING("BUG_CITY_NOT_WORKING_UNIMPROVABLE_PLOT_COLOR", "COLOR_BLACK"))).getColor());
+				fAlpha = getDefineFLOAT("BUG_CITY_NOT_WORKING_UNIMPROVABLE_PLOT_ALPHA", 0.0);
+				if (fAlpha != 0) notWorkingUnimprovableTile.a = fAlpha;
+
+				pSelectedCityNode = gDLL->getInterfaceIFace()->headSelectedCitiesNode();
+
+				while (pSelectedCityNode != NULL)
+				{
+					pSelectedCity = ::getCity(pSelectedCityNode->m_data);
+					pSelectedCityNode = gDLL->getInterfaceIFace()->nextSelectedCitiesNode(pSelectedCityNode);
+
+					if (pSelectedCity != NULL)
+					{
+						TeamTypes eOwnerTeam = pSelectedCity->getTeam();
+
+						for (iI = 0; iI < NUM_CITY_PLOTS; iI++)
+						{
+							pLoopPlot = pSelectedCity->getCityIndexPlot(iI);
+
+							if (pLoopPlot != NULL && pLoopPlot->getWorkingCity() == pSelectedCity)
+							{
+								bool bImproved = false;
+								bool bCanBeImproved = false;
+								bool bCanNeverBeImproved = false;
+								bool bCanProvideBonus = false;
+
+								if (pLoopPlot == pSelectedCity->plot())
+								{
+									// never highlight city itself as it cannot be improved
+									// can it have fallout? if so, it can be scrubbed (improved)
+									continue;
+								}
+								else
+								{
+									BonusTypes ePlotBonus = pLoopPlot->getBonusType(eOwnerTeam);
+									FeatureTypes ePlotFeature = pLoopPlot->getFeatureType();
+									ImprovementTypes ePlotImprovement = pLoopPlot->getImprovementType();
+
+									if (ePlotImprovement == GC.getDefineINT("RUINS_IMPROVEMENT"))
+									{
+										ePlotImprovement = NO_IMPROVEMENT;
+									}
+									
+									BuildTypes eBestBuild = pSelectedCity->AI_getBestBuild(iI);
+									ImprovementTypes eBestImprovement = NO_IMPROVEMENT;
+									RouteTypes eBestRoute = NO_ROUTE;
+									bool bBestBuildRemovesFeature = false;
+
+									if (eBestBuild != NO_BUILD)
+									{
+										CvBuildInfo& kBestBuild = GC.getBuildInfo(eBestBuild);
+										eBestImprovement = (ImprovementTypes)kBestBuild.getImprovement();
+										eBestRoute = (RouteTypes)kBestBuild.getRoute();
+
+										if (ePlotFeature != NO_FEATURE && kBestBuild.isFeatureRemove(ePlotFeature))
+										{
+											bBestBuildRemovesFeature = true;
+										}
+
+										// will the best build provide a bonus?
+										if (ePlotBonus != NO_BONUS)
+										{
+											if (eBestImprovement != NO_IMPROVEMENT && GC.getImprovementInfo(eBestImprovement).isImprovementBonusTrade(ePlotBonus))
+											{
+												bCanBeImproved = true;
+												bCanProvideBonus = true;
+											}
+											else if (eBestRoute != NO_ROUTE && !pLoopPlot->isWater() && ePlotImprovement != NO_IMPROVEMENT 
+													&& GC.getImprovementInfo(ePlotImprovement).isImprovementBonusTrade(ePlotBonus))
+											{
+												bCanProvideBonus = true;
+											}
+										}
+									}
+
+									if (!bCanProvideBonus)
+									{
+										if (ePlotImprovement != NO_IMPROVEMENT)
+										{
+											if (eBestBuild != NO_BUILD)
+											{
+												CvImprovementInfo& kPlotImprovement = GC.getImprovementInfo(ePlotImprovement);
+
+												if (eBestRoute != NO_ROUTE)
+												{
+													// will the route increase yields?
+													for (int iJ = 0; iJ < NUM_YIELD_TYPES; iJ++)
+													{
+														if (kPlotImprovement.getRouteYieldChanges(eBestRoute, iJ) > 0)
+														{
+															bCanBeImproved = true;
+															break;
+														}
+													}
+												}
+												else
+												{
+													// does the best build clear a bad feature?
+													if (bBestBuildRemovesFeature && !kPlotImprovement.isRequiresFeature() 
+															&& GC.getFeatureInfo(ePlotFeature).isOnlyBad())
+													{
+														bCanBeImproved = true;
+													}
+												}
+											}
+											
+											bImproved = !bCanBeImproved;
+										}
+										else // no improvement
+										{
+											if (eBestBuild != NO_BUILD)
+											{
+												if (bBestBuildRemovesFeature)
+												{
+													if (GC.getFeatureInfo(ePlotFeature).isOnlyBad())
+													{
+														// does the best build clear a bad feature?
+														bCanBeImproved = true;
+													}
+													else if (ePlotBonus != NO_BONUS && eBestImprovement != NO_IMPROVEMENT 
+															&& GC.getImprovementInfo(eBestImprovement).isImprovementBonusTrade(ePlotBonus))
+													{
+														// does the best build provide a bonus
+														bCanBeImproved = true;
+														bCanProvideBonus = true;
+													}
+												}
+												else if (eBestRoute == NO_ROUTE)
+												{
+													// any other non-feature-clearing, non-route build is okay
+													bCanBeImproved = true;
+												}
+											}
+											else
+											{
+												if (ePlotFeature != NO_FEATURE && GC.getFeatureInfo(ePlotFeature).isNoImprovement())
+												{
+													bCanNeverBeImproved = true;
+												}
+											}
+										}
+									}
+								}
+
+								// bImproved is false if bCanBeImproved is true, even if the plot has an improvement
+								if (pSelectedCity->isWorkingPlot(pLoopPlot))
+								{
+									if (bImproved)
+									{
+										if (bShowWorkingImprovedTile) gDLL->getEngineIFace()->addColoredPlot(pLoopPlot->getX_INLINE(), pLoopPlot->getY_INLINE(), workingImprovedTile, PLOT_STYLE_CIRCLE, PLOT_LANDSCAPE_LAYER_RECOMMENDED_PLOTS);
+									}
+									else if (bCanProvideBonus)
+									{
+										if (bShowWorkingImprovableBonusTile) gDLL->getEngineIFace()->addColoredPlot(pLoopPlot->getX_INLINE(), pLoopPlot->getY_INLINE(), workingImprovableBonusTile, PLOT_STYLE_CIRCLE, PLOT_LANDSCAPE_LAYER_RECOMMENDED_PLOTS);
+									}
+									else if (bCanBeImproved)
+									{
+										if (bShowWorkingImprovableTile) gDLL->getEngineIFace()->addColoredPlot(pLoopPlot->getX_INLINE(), pLoopPlot->getY_INLINE(), workingImprovableTile, PLOT_STYLE_CIRCLE, PLOT_LANDSCAPE_LAYER_RECOMMENDED_PLOTS);
+									}
+									else if (!bCanNeverBeImproved)
+									{
+										if (bShowWorkingUnimprovableTile) gDLL->getEngineIFace()->addColoredPlot(pLoopPlot->getX_INLINE(), pLoopPlot->getY_INLINE(), workingUnimprovableTile, PLOT_STYLE_CIRCLE, PLOT_LANDSCAPE_LAYER_RECOMMENDED_PLOTS);
+									}
+								}
+								else if (pSelectedCity->canWork(pLoopPlot))
+								{
+									if (bImproved)
+									{
+										if (bShowNotWorkingImprovedTile) gDLL->getEngineIFace()->addColoredPlot(pLoopPlot->getX_INLINE(), pLoopPlot->getY_INLINE(), notWorkingImprovedTile, PLOT_STYLE_CIRCLE, PLOT_LANDSCAPE_LAYER_RECOMMENDED_PLOTS);
+									}
+									else if (bCanProvideBonus)
+									{
+										if (bShowNotWorkingImprovableBonusTile) gDLL->getEngineIFace()->addColoredPlot(pLoopPlot->getX_INLINE(), pLoopPlot->getY_INLINE(), notWorkingImprovableBonusTile, PLOT_STYLE_CIRCLE, PLOT_LANDSCAPE_LAYER_RECOMMENDED_PLOTS);
+									}
+									else if (bCanBeImproved)
+									{
+										if (bShowNotWorkingImprovableTile) gDLL->getEngineIFace()->addColoredPlot(pLoopPlot->getX_INLINE(), pLoopPlot->getY_INLINE(), notWorkingImprovableTile, PLOT_STYLE_CIRCLE, PLOT_LANDSCAPE_LAYER_RECOMMENDED_PLOTS);
+									}
+									else if (!bCanNeverBeImproved)
+									{
+										if (bShowNotWorkingUnimprovableTile) gDLL->getEngineIFace()->addColoredPlot(pLoopPlot->getX_INLINE(), pLoopPlot->getY_INLINE(), notWorkingUnimprovableTile, PLOT_STYLE_CIRCLE, PLOT_LANDSCAPE_LAYER_RECOMMENDED_PLOTS);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+// BUG - City Plot Status - end
+
 			pSelectedCityNode = gDLL->getInterfaceIFace()->headSelectedCitiesNode();
 
 			while (pSelectedCityNode != NULL)
