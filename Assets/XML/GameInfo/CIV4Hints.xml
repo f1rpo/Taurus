@@ -453,6 +453,8 @@
 		</HintInfo>
 
 		<!-- BUG Hints -->
+		<!-- trs.hints: Disabled some bad ones;
+			 see comments in the game text file. -->
 		
 		<HintInfo>
 			<Description>TXT_KEY_BUG_HINT_1</Description>
@@ -475,37 +477,37 @@
 		<HintInfo>
 			<Description>TXT_KEY_BUG_HINT_7</Description>
 		</HintInfo>
-		<HintInfo>
+		<!--HintInfo>
 			<Description>TXT_KEY_BUG_HINT_8</Description>
-		</HintInfo>
+		</HintInfo-->
 		<HintInfo>
 			<Description>TXT_KEY_BUG_HINT_9</Description>
 		</HintInfo>
-		<HintInfo>
+		<!--HintInfo>
 			<Description>TXT_KEY_BUG_HINT_10</Description>
-		</HintInfo>
+		</HintInfo-->
 		<HintInfo>
 			<Description>TXT_KEY_BUG_HINT_11</Description>
 		</HintInfo>
-		<HintInfo>
+		<!--HintInfo>
 			<Description>TXT_KEY_BUG_HINT_12</Description>
-		</HintInfo>
+		</HintInfo-->
 		<HintInfo>
 			<Description>TXT_KEY_BUG_HINT_13</Description>
 		</HintInfo>
-		<HintInfo>
+		<!--HintInfo>
 			<Description>TXT_KEY_BUG_HINT_14</Description>
-		</HintInfo>	
+		</HintInfo-->	
 		<HintInfo>
 			<Description>TXT_KEY_BUG_HINT_15</Description>
 		</HintInfo>
-		<HintInfo>
+		<!--HintInfo>
 			<Description>TXT_KEY_BUG_HINT_16</Description>
-		</HintInfo>
+		</HintInfo-->
 		<HintInfo>
 			<Description>TXT_KEY_BUG_HINT_17</Description>
 		</HintInfo>
-		<HintInfo>
+		<!--HintInfo>
 			<Description>TXT_KEY_BUG_HINT_18</Description>
 		</HintInfo>
 		<HintInfo>
@@ -519,6 +521,6 @@
 		</HintInfo>
 		<HintInfo>
 			<Description>TXT_KEY_BUG_HINT_22</Description>
-		</HintInfo>
+		</HintInfo-->
 	</HintInfos>
 </Civ4Hints>
