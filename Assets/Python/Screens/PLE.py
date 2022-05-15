@@ -247,6 +247,13 @@ class PLE:
 		for i in range(gc.getNumPromotionInfos()):
 			szName = "PromotionButton" + str(i)
 			screen.moveToFront( szName )
+# BUG - Stack Promotions - start
+		for i in range(gc.getNumPromotionInfos()):
+			szName = "PromotionButtonCircle" + str(i)
+			screen.moveToFront( szName )
+			szName = "PromotionButtonCount" + str(i)
+			screen.moveToFront( szName )
+# BUG - Stack Promotions - end
 
 		# hide all buttons
 		self.hidePlotListButtonPLEObjects(screen)

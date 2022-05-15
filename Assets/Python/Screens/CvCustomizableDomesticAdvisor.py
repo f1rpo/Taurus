@@ -74,6 +74,7 @@ import BugPath
 import BugUtil
 import FontUtil
 import GameUtil
+import TradeUtil
 
 # BUG - Mac Support - start
 BugUtil.fixSets(globals())
@@ -1296,19 +1297,23 @@ class CvCustomizableDomesticAdvisor:
 		for nTradeRoute in range (gc.getDefineINT("MAX_TRADE_ROUTES")):
 			# Get the next trade city
 			pTradeCity = city.getTradeCity(nTradeRoute)
+				
 			# Not quite sure what this does but it's in the MainInterface
 			# and I pretty much C&Ped :p
 			if (pTradeCity and pTradeCity.getOwner() >= 0):
 				bForeign = city.getOwner() != pTradeCity.getOwner()
 				if (not arg or ((arg == "F" and bForeign) or (arg == "D" and not bForeign))):
-					for j in range( YieldTypes.NUM_YIELD_TYPES ):
-						iTradeProfit = city.calculateTradeYield(j, city.calculateTradeProfit(pTradeCity))
-	
-						# If the TradeProfit is greater than 0, add it to the total
-						if ( iTradeProfit > 0 ):
-							nTotalTradeProfit += iTradeProfit
-
-		return unicode(nTotalTradeProfit)
+# BUG - Fractional Trade - start
+					iTradeProfit = TradeUtil.calculateTradeRouteYield(city, nTradeRoute, YieldTypes.YIELD_COMMERCE)
+					nTotalTradeProfit += iTradeProfit
+		
+		if TradeUtil.isFractionalTrade():
+			nTotalTradeProfit //= 100
+		if ( nTotalTradeProfit < 0 ):
+			return u"-%d" % nTotalTradeProfit
+		else:
+			return u"%d" % nTotalTradeProfit
+# BUG - Fractional Trade - end
 
 	def countTradeRoutes (self, city, szKey, arg):
 		"""arg: None to count all, 'D' to count domestic, 'F' to count foreign."""

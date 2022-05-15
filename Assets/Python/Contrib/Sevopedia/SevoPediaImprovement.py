@@ -115,7 +115,6 @@ class SevoPediaImprovement:
 				screen.appendListBoxString( listName, szYield, WidgetTypes.WIDGET_GENERAL, -1, -1, CvUtil.FONT_LEFT_JUSTIFY )
 
 		for k in range(YieldTypes.NUM_YIELD_TYPES):
-			szYield = u""
 			iYieldChange = gc.getImprovementInfo(self.iImprovement).getRiverSideYieldChange(k)
 			if (iYieldChange != 0):
 				szYield = localText.getText("TXT_KEY_PEDIA_RIVER_YIELD", (gc.getYieldInfo(k).getTextKey(), iYieldChange, gc.getYieldInfo(k).getChar()))
@@ -123,7 +122,6 @@ class SevoPediaImprovement:
 
 		for iTech in range(gc.getNumTechInfos()):
 			for k in range(YieldTypes.NUM_YIELD_TYPES):
-				szYield = u""
 				iYieldChange = gc.getImprovementInfo(self.iImprovement).getTechYieldChanges(iTech, k)
 				if (iYieldChange != 0):
 					szYield = localText.getText("TXT_KEY_PEDIA_TECH_YIELD", (gc.getYieldInfo(k).getTextKey(), iYieldChange, gc.getYieldInfo(k).getChar(), gc.getTechInfo(iTech).getDescription()))
@@ -131,7 +129,6 @@ class SevoPediaImprovement:
 
 		for iCivic in range(gc.getNumCivicInfos()):
 			for k in range(YieldTypes.NUM_YIELD_TYPES):
-				szYield = u""
 				iYieldChange = gc.getCivicInfo(iCivic).getImprovementYieldChanges(self.iImprovement, k)
 				if (iYieldChange != 0):
 					szYield = localText.getText("TXT_KEY_PEDIA_TECH_YIELD", (gc.getYieldInfo(k).getTextKey(), iYieldChange, gc.getYieldInfo(k).getChar(), gc.getCivicInfo(iCivic).getDescription()))
@@ -141,7 +138,7 @@ class SevoPediaImprovement:
 			for k in range(YieldTypes.NUM_YIELD_TYPES):
 				iYieldChange = gc.getImprovementInfo(self.iImprovement).getRouteYieldChanges(iRoute, k)
 				if (iYieldChange != 0):										
-					szYield += localText.getText("TXT_KEY_PEDIA_ROUTE_YIELD", (gc.getYieldInfo(k).getTextKey(), iYieldChange, gc.getYieldInfo(k).getChar(), gc.getRouteInfo(iRoute).getTextKey())) + u"\n"
+					szYield = localText.getText("TXT_KEY_PEDIA_ROUTE_YIELD", (gc.getYieldInfo(k).getTextKey(), iYieldChange, gc.getYieldInfo(k).getChar(), gc.getRouteInfo(iRoute).getTextKey())) + u"\n"
 					screen.appendListBoxString( listName, szYield, WidgetTypes.WIDGET_GENERAL, -1, -1, CvUtil.FONT_LEFT_JUSTIFY )
 
 

@@ -134,6 +134,7 @@
 ## Author: EmperorFool
 
 from CvPythonExtensions import *
+from BugPath import isMac
 import ColorUtil
 import CvEventInterface
 import sys
@@ -696,7 +697,8 @@ def extend(function, toModule, asName=None, how=EXTEND_INSTEAD, log=True):
 	else:
 		raise ConfigError("Invalid how '%s' in extend()" % how)
 	newFunc.__module__ = function.__module__
-	newFunc.__name__ = function.__name__
+	if not isMac():
+		newFunc.__name__ = asName
 	if log:
 		if asName != function.__name__:
 			debug("BugUtil - extending %s.%s %s %s.%s", function.__module__, function.__name__, how, toModule, asName)

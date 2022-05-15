@@ -3,6 +3,7 @@ CHANGELOG for BUG
 
 * Introduction
 
+* BUG 4.5
 * BUG 4.4
 * BUG 4.3
 * BUG 4.2
@@ -26,6 +27,43 @@ The MODDING sections are mostly of interest to modders merging BUG into their ow
 
 Note: Changes marked [BULL] only take effect when the optional BUG DLL is installed.
       BULL features that don't require BUG are not listed here.
+
+
+____________________________________________________________________________________________________
+BUG 4.5 released September 21st, 2010
+
+CHANGES
+
+New Features:
+
+- Stack Promotions
+	Added promotions possessed by at least one unit in a stack and how many have it when more than one
+
+Bug Fixes:
+
+- Strategy Layer
+	Redrawn when loading a saved game while playing an active game
+- City Screen
+	Excess unhealthiness (eaten food) and unhappiness (angry population) are shown as red positive numbers
+- Customizable Domestic Advisor
+	Trade columns show correct rounded value when Fractional Trade Routes is enabled in BULL
+- Mac
+	Fixed "readonly attribute" error in BugUtil.extend()
+- BTS Fixes
+	Added link to building in "Requires <building> (X Total)" in the Pedia
+
+
+MODDING
+
+New Features:
+
+- Trigger Event
+	Hit CTRL + SHIFT + E to trigger a random event (requires cheat mode)
+
+Bug Fixes:
+
+- Miscellaneous
+	BugUtil.extend() sets the name of the new function to asName instead of its original name
 
 
 ____________________________________________________________________________________________________

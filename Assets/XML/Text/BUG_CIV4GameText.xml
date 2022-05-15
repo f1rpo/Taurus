@@ -404,6 +404,25 @@
 		<Spanish>%d1[ICON_FOOD] = %d2[ICON_EATENFOOD]</Spanish>
 	</TEXT>
 	
+	<!-- Negative Health/Happy Rate -->
+	
+	<TEXT>
+		<Tag>INTERFACE_CITY_HEALTH_BAD</Tag>
+		<English>%d1[ICON_HEALTHY] &lt; %d2[ICON_UNHEALTHY] = [COLOR_WARNING_TEXT]%d3[COLOR_REVERT][ICON_EATENFOOD]</English>
+		<French>%d1[ICON_HEALTHY] &lt; %d2[ICON_UNHEALTHY] = [COLOR_WARNING_TEXT]%d3[COLOR_REVERT][ICON_EATENFOOD]</French>
+		<German>%d1[ICON_HEALTHY] &lt; %d2[ICON_UNHEALTHY] = [COLOR_WARNING_TEXT]%d3[COLOR_REVERT][ICON_EATENFOOD]</German>
+		<Italian>%d1[ICON_HEALTHY] &lt; %d2[ICON_UNHEALTHY] = [COLOR_WARNING_TEXT]%d3[COLOR_REVERT][ICON_EATENFOOD]</Italian>
+		<Spanish>%d1 [ICON_HEALTHY] &lt; %d2 [ICON_UNHEALTHY] = [COLOR_WARNING_TEXT]%d3[COLOR_REVERT] [ICON_EATENFOOD]</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>INTERFACE_CITY_UNHAPPY</Tag>
+		<English>%d1[ICON_HAPPY] &lt; %d2[ICON_UNHAPPY] = [COLOR_WARNING_TEXT]%d3[COLOR_REVERT][ICON_ANGRYPOP]</English>
+		<French>%d1[ICON_HAPPY] &lt; %d2[ICON_UNHAPPY] = [COLOR_WARNING_TEXT]%d3[COLOR_REVERT][ICON_ANGRYPOP]</French>
+		<German>%d1[ICON_HAPPY] &lt; %d2[ICON_UNHAPPY] = [COLOR_WARNING_TEXT]%d3[COLOR_REVERT][ICON_ANGRYPOP]</German>
+		<Italian>%d1[ICON_HAPPY] &lt; %d2[ICON_UNHAPPY] = [COLOR_WARNING_TEXT]%d3[COLOR_REVERT][ICON_ANGRYPOP]</Italian>
+		<Spanish>%d1 [ICON_HAPPY] &lt; %d2 [ICON_UNHAPPY] = [COLOR_WARNING_TEXT]%d3[COLOR_REVERT] [ICON_ANGRYPOP]</Spanish>
+	</TEXT>
+	
 	<!-- Whip Assist -->
 	
 	<TEXT>
@@ -1460,6 +1479,37 @@
 			<Gender>Male</Gender>
 			<Plural>1</Plural>
 		</Spanish>
+	</TEXT>
+	
+	<!-- Trigger Event -->
+	<TEXT>
+		<Tag>TXT_KEY_POPUP_SELECT_EVENT</Tag>
+		<English>Choose an event which should be triggered.</English>
+		<French>Choose an event which should be triggered.</French>
+		<German>Event aussuchen, das gestartet werden soll.</German>
+		<Italian>Choose an event which should be triggered.</Italian>
+		<Spanish>Choose an event which should be triggered.</Spanish>
+	</TEXT>
+	
+	<!-- General BTS Fixes -->
+	
+	<TEXT>
+		<Tag>TXT_KEY_BUILDING_REQUIRES_NUM_SPECIAL_BUILDINGS</Tag>
+		<!-- %s1_Name = Can be Buildings, Units, etc -->
+		<English>[COLOR_WARNING_TEXT]Requires [LINK=literal]%s1_Name[\LINK] (%d2_NumCurr/%d3_NumTotal Total)[COLOR_REVERT]</English>
+		<French>[COLOR_WARNING_TEXT]Requiert : [LINK=literal]%s1_Name[\LINK] (%d2_NumCurr/%d3_NumTotal au total)[COLOR_REVERT]</French>
+		<German>[COLOR_WARNING_TEXT]Erfordert: [LINK=literal]%s1_Name[\LINK] (%d2_NumCurr/%d3_NumTotal insgesamt)[COLOR_REVERT]</German>
+		<Italian>[COLOR_WARNING_TEXT]Richiede [LINK=literal]%s1_Name[\LINK] (%d2_NumCurr/%d3_NumTotal totali)[COLOR_REVERT]</Italian>
+		<Spanish>[COLOR_WARNING_TEXT]Requiere [LINK=literal]%s1_Name[\LINK] (%d2_NumCurr de un total de %d3_NumTotal)[COLOR_REVERT]</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUILDING_REQUIRES_NUM_SPECIAL_BUILDINGS_NO_CITY</Tag>
+		<!-- %s1_Name = Can be Buildings, Units, etc -->
+		<English>[COLOR_WARNING_TEXT]Requires [LINK=literal]%s1_Name[\LINK] (%d2_NumTotal Total)[COLOR_REVERT]</English>
+		<French>[COLOR_WARNING_TEXT]Requiert : [LINK=literal]%s1_Name[\LINK] (%d2_NumTotal au total)[COLOR_REVERT]</French>
+		<German>[COLOR_WARNING_TEXT]Erfordert: [LINK=literal]%s1_Name[\LINK] (%d2_NumTotal insgesamt)[COLOR_REVERT]</German>
+		<Italian>[COLOR_WARNING_TEXT]Richiede [LINK=literal]%s1_Name[\LINK] (%d2_NumTotal totali)[COLOR_REVERT]</Italian>
+		<Spanish>[COLOR_WARNING_TEXT]Requiere [LINK=literal]%s1_Name[\LINK] (%d2_NumTotal en total)[COLOR_REVERT]</Spanish>
 	</TEXT>
 	
 	<!-- BULL -->

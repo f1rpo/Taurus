@@ -42,7 +42,7 @@ class BugPleOptionsTab(BugOptionsTab.BugOptionsTab):
 		#self.addTextEdit(screen, left, left, "PLE__Horizontal_Spacing")
 		#self.addTextEdit(screen, left, left, "PLE__Vertical_Spacing")
 		
-		
+		self.addSpacer(screen, center, "PLE_Tab")
 		self.addCheckbox(screen, center, "PLE__Health_Bar")
 		centerL, centerR = self.addTwoColumnLayout(screen, center, "Health_Bar_Column")
 		self.addColorDropdown(screen, centerL, centerR, "PLE__Healthy_Color")
@@ -56,7 +56,7 @@ class BugPleOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addColorDropdown(screen, centerL, centerR, "PLE__Has_Moved_Color")
 		self.addColorDropdown(screen, centerL, centerR, "PLE__No_Movement_Color")
 		
-		
+		self.addSpacer(screen, right, "PLE_Tab")
 		self.addLabel(screen, right, "PLE_Unit_Info_Tooltip")
 		#self.addCheckbox(screen, right, "PLE__Info_Pane")  # EF: Can't get it to work
 		#self.addTextEdit(screen, right, right, "PLE__Info_Pane_X")

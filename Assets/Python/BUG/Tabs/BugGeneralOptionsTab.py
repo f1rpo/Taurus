@@ -32,10 +32,12 @@ class BugGeneralOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addSpacer(screen, center, "General3")
 		self.createActionsPanel(screen, center)
 		
-		if Buffy.isEnabled():
-			self.createBuffyPanel(screen, right)
-			self.addSpacer(screen, right, "General4")
+		self.createInfoPanePanel(screen, right)
+		self.addSpacer(screen, right, "General4")
 		self.createMiscellaneousPanel(screen, right)
+		if Buffy.isEnabled():
+			self.addSpacer(screen, right, "General5")
+			self.createBuffyPanel(screen, right)
 		
 	def createGreatPersonGeneralPanel(self, screen, panel):
 		self.addLabel(screen, panel, "ProgressBars", "Progress Bars:")
@@ -74,13 +76,21 @@ class BugGeneralOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addLabel(screen, panel, "BUFFY", "BUFFY:")
 		self.addCheckbox(screen, panel, "BUFFY__WarningsDawnOfMan")
 		self.addCheckbox(screen, panel, "BUFFY__WarningsSettings")
+	
+	def createInfoPanePanel(self, screen, panel):
+		self.addLabel(screen, panel, "InfoPane", "Unit/Stack Info:")
+		self.addCheckbox(screen, panel, "MainInterface__UnitMovementPointsFraction")
+		self.addCheckbox(screen, panel, "MainInterface__StackMovementPoints")
+		self.addCheckbox(screen, panel, "MainInterface__StackPromotions")
+		left, center, right = self.addThreeColumnLayout(screen, panel, "StackPromotionColors")
+		self.addCheckbox(screen, left, "MainInterface__StackPromotionCounts", True)
+		self.addColorDropdown(screen, center, right, "MainInterface__StackPromotionColor", False)
+		self.addColorDropdown(screen, center, right, "MainInterface__StackPromotionColorAll", False)
 		
 	def createMiscellaneousPanel(self, screen, panel):
 		self.addLabel(screen, panel, "Misc", "Misc:")
 		self.addCheckbox(screen, panel, "MainInterface__GoldRateWarning")
 		self.addCheckbox(screen, panel, "MainInterface__MinMax_Commerce")
 		self.addCheckbox(screen, panel, "MainInterface__ProgressBarsTickMarks")
-		self.addCheckbox(screen, panel, "MainInterface__UnitMovementPointsFraction")
-		self.addCheckbox(screen, panel, "MainInterface__StackMovementPoints")
 		self.addTextDropdown(screen, panel, panel, "MainInterface__BuildIconSize", True)
 		self.addCheckbox(screen, panel, "MainInterface__CityArrows")

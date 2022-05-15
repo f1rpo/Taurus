@@ -57,6 +57,7 @@ credits = [
 			"Requies - Exotic Foreign Advisor",
 			"ricardojahns - I Love Asphalt (wide screen EFA)",
 			"Roamty - (extended Tech Window)",
+			"Ronnar - Trigger Event",
 			"Ruff_Hi - BUG Plot List, Unit Naming, BUG MA Sit-Rep tab, Smilies in EFA Glance tab, BUG Graphs",
 			" -    City Specialists Chevons, BUG Religion Advisor, BUG Victory Screen Additions, Tick Marks",
 			" -    (extended AutoLog, Reminder, Promo/Actions in PLE, Better Espionage Screen)",

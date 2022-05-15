@@ -79,6 +79,38 @@
 		<Spanish>When checked, the longitude and latitude are shown when hovering over a plot once you have centered the map.</Spanish>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__PLOTWORKINGCITY_TEXT</Tag>
+		<English>Working City</English>
+		<French>Working City</French>
+		<German>Bearbeitende Stadt</German>
+		<Italian>Working City</Italian>
+		<Spanish>Working City</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__PLOTWORKINGCITY_HOVER</Tag>
+		<English>When checked, hovering over a tile your team owns shows which city controls it, in cyan if it is being worked.</English>
+		<French>When checked, hovering over a tile your team owns shows which city controls it, in cyan if it is being worked.</French>
+		<German>Zeigt, wenn der Mauszeiger über ein Geländefeld im Bereich mehrerer Städte bewegt wird, an, welche Stadt es kontrolliert (erscheint in Cyan, falls es auch bearbeitet wird)</German>
+		<Italian>When checked, hovering over a tile your team owns shows which city controls it, in cyan if it is being worked.</Italian>
+		<Spanish>When checked, hovering over a tile your team owns shows which city controls it, in cyan if it is being worked.</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__PLOTRECOMMENDEDBUILD_TEXT</Tag>
+		<English>Recommended Build</English>
+		<French>Recommended Build</French>
+		<German>Empfohlene Bauten</German>
+		<Italian>Recommended Build</Italian>
+		<Spanish>Recommended Build</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__PLOTRECOMMENDEDBUILD_HOVER</Tag>
+		<English>When checked, hovering over a tile you own shows the improvement or route an automated worker would build.</English>
+		<French>When checked, hovering over a tile you own shows the improvement or route an automated worker would build.</French>
+		<German>Zeigt, wenn der Mauszeiger über ein eigenes Geländefeld bewegt wird, die Modernisierungen oder Straßen an, die ein automatisierter Bautrupp errichten würde</German>
+		<Italian>When checked, hovering over a tile you own shows the improvement or route an automated worker would build.</Italian>
+		<Spanish>When checked, hovering over a tile you own shows the improvement or route an automated worker would build.</Spanish>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__PARTIALBUILDS_TEXT</Tag>
 		<English>Partial Builds</English>
 		<French>Partial Builds</French>
@@ -88,11 +120,11 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__PARTIALBUILDS_HOVER</Tag>
-		<English>When checked, hovering over a plot that has partially-completed builds (improvements, routes, and chops) will show how many worker turns are required to complete them as long as your workers can actually do so.</English>
-		<French>When checked, hovering over a plot that has partially-completed builds (improvements, routes, and chops) will show how many worker turns are required to complete them as long as your workers can actually do so.</French>
+		<English>When checked, hovering over a tile that has partially-completed builds (improvements, routes, and chops) will show how many worker turns are required to complete them as long as your workers can actually do so.</English>
+		<French>When checked, hovering over a tile that has partially-completed builds (improvements, routes, and chops) will show how many worker turns are required to complete them as long as your workers can actually do so.</French>
 		<German>Zeigt, wenn der Mauszeiger über ein Geländefeld mit teilweise fertig gestellten Bauten (Modernisierungen, Straßen und Waldrodungen) bewegt wird, an, wie viele Runden ein Bautrupp noch benötigt, um sie fertig zu stellen, wenn der Bautrupp diese Aktionen beherrscht</German>
 		<Italian>Quando è selezionato, posizionare il cursore su una casella che contiene costruzioni (miglioramenti, strade, eccetera) parzialmente completate mostrerà quanti turni di lavoro sono necessari per completare l'opera.</Italian>
-		<Spanish>When checked, hovering over a plot that has partially-completed builds (improvements, routes, and chops) will show how many worker turns are required to complete them as long as your workers can actually do so.</Spanish>
+		<Spanish>When checked, hovering over a tile that has partially-completed builds (improvements, routes, and chops) will show how many worker turns are required to complete them as long as your workers can actually do so.</Spanish>
 	</TEXT>
 
 <!-- Unit -->
@@ -118,7 +150,7 @@
 		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__UNITEXPERIENCE_TEXT</Tag>
 		<English>Starting Experience</English>
 		<French>Starting Experience</French>
-		<German>Anfängliche Erfahrung</German>
+		<German>Anfängliche Erfahrungspunkte</German>
 		<Italian>Starting Experience</Italian>
 		<Spanish>Starting Experience</Spanish>
 	</TEXT>
@@ -134,7 +166,7 @@
 		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__UNITEXPERIENCEMODIFIERS_TEXT</Tag>
 		<English>Starting Experience Modifiers</English>
 		<French>Starting Experience Modifiers</French>
-		<German>Anfängliche Erfahrung (Modifikatoren)</German>
+		<German>Anfängliche Erfahrungspunkte (Modifikatoren)</German>
 		<Italian>Starting Experience Modifiers</Italian>
 		<Spanish>Starting Experience Modifiers</Spanish>
 	</TEXT>
@@ -392,7 +424,7 @@
 		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__CONSCRIPTUNIT_TEXT</Tag>
 		<English>Draft Unit Details</English>
 		<French>Draft Unit Details</French>
-		<German>Zwangsrekrutierung (Info)</German>
+		<German>Zwangsrekrutierung (Informationen)</German>
 		<Italian>Draft Unit Details</Italian>
 		<Spanish>Draft Unit Details</Spanish>
 	</TEXT>
@@ -485,6 +517,39 @@
 		<German>Zeigt im Tooltip der Schaltfläche "Zur Stadt zoomen" dieselben ausführlichen Informationen an, wie wenn der Mauszeiger über einen Stadtbalken auf der Karte bewegt würde</German>
 		<Italian>Quando è selezionato, il testo a comparsa del Bottone di Zoom Cittadino nella schermata del 'Consigliere Interno' include informazioni dettagliate sulla Città, come quelle visualizzate quando si posiziona il cursore sulla Barra Cittadina sulla mappa.</Italian>
 		<Spanish>When checked, the Zoom to City button includes detailed information about the city as when hovering over a city bar on the map.</Spanish>
+	</TEXT>
+	
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__REMOVEFEATUREHEALTHEFFECTS_TEXT</Tag>
+		<English>Health Effects from Features</English>
+		<French>Health Effects from Features</French>
+		<German>Gesundheitseffekte von Gelände</German>
+		<Italian>Health Effects from Features</Italian>
+		<Spanish>Health Effects from Features</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__REMOVEFEATUREHEALTHEFFECTS_HOVER</Tag>
+		<English>When checked, the hover text for any Worker action that will remove a feature with health effects (e.g. Forest or Jungle) will list the effect on each nearby city.</English>
+		<French>When checked, the hover text for any Worker action that will remove a feature with health effects (e.g. Forest or Jungle) will list the effect on each nearby city.</French>
+		<German>Zeigt im Tooltip jeder Aktion eines Bautrupps, die eine Geländeeigenschaft mit Einfluss auf die Gesundheit von Städten entfernen würde (beispielsweise Wald oder Dschungel), die entsprechenden Auswirkungen auf nahegelegene Städte</German>
+		<Italian>When checked, the hover text for any Worker action that will remove a feature with health effects (e.g. Forest or Jungle) will list the effect on each nearby city.</Italian>
+		<Spanish>When checked, the hover text for any Worker action that will remove a feature with health effects (e.g. Forest or Jungle) will list the effect on each nearby city.</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__REMOVEFEATUREHEALTHEFFECTSCOUNTOTHERTILES_TEXT</Tag>
+		<English>Consider Other Workers</English>
+		<French>Consider Other Workers</French>
+		<German>Andere Bautrupps einbeziehen</German>
+		<Italian>Consider Other Workers</Italian>
+		<Spanish>Consider Other Workers</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_MISCHOVER__REMOVEFEATUREHEALTHEFFECTSCOUNTOTHERTILES_HOVER</Tag>
+		<English>When checked, the effect of removing a feature on each nearby city will take into account Workers performing actions that will remove a feature from other tiles.</English>
+		<French>When checked, the effect of removing a feature on each nearby city will take into account Workers performing actions that will remove a feature from other tiles.</French>
+		<German>Bezieht in die Anzeige der Gesundheitseffekte die Aktionen anderer Bautrupps ein, die ebenfalls Geländeeigenschaften entfernen</German>
+		<Italian>When checked, the effect of removing a feature on each nearby city will take into account Workers performing actions that will remove a feature from other tiles.</Italian>
+		<Spanish>When checked, the effect of removing a feature on each nearby city will take into account Workers performing actions that will remove a feature from other tiles.</Spanish>
 	</TEXT>
 
 </Civ4GameText>

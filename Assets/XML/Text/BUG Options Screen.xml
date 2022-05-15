@@ -97,6 +97,14 @@
 		<Spanish>Actions:</Spanish>
 	</TEXT>
 	<TEXT>
+		<Tag>TXT_KEY_BUG_OPTLABEL_INFOPANE</Tag>
+		<English>Unit/Stack Info:</English>
+		<French>Unit/Stack Info:</French>
+		<German>Einheit/Verband:</German>
+		<Italian>Unit/Stack Info:</Italian>
+		<Spanish>Unit/Stack Info:</Spanish>
+	</TEXT>
+	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTLABEL_TECHWINDOW</Tag>
 		<English>Tech Splash Screen:</English>
 		<French>Tech Splash Screen:</French>
@@ -162,6 +170,30 @@
 		<German>Geländefeld-Tooltip:</German>
 		<Italian>Tile Hover:</Italian>
 		<Spanish>Tile Hover:</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPTLABEL_CITYPLOTS</Tag>
+		<English>City Tiles:</English>
+		<French>City Tiles:</French>
+		<German>Stadt-Geländefelder:</German>
+		<Italian>City Tiles:</Italian>
+		<Spanish>City Tiles:</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPTLABEL_WORKINGPLOTS</Tag>
+		<English>Working:</English>
+		<French>Working:</French>
+		<German>Bearbeitet:</German>
+		<Italian>Working:</Italian>
+		<Spanish>Working:</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPTLABEL_NOTWORKINGPLOTS</Tag>
+		<English>Not Working:</English>
+		<French>Not Working:</French>
+		<German>Nicht bearbeitet:</German>
+		<Italian>Not Working:</Italian>
+		<Spanish>Not Working:</Spanish>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTLABEL_MAPFINDER</Tag>

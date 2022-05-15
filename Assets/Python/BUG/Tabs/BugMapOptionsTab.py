@@ -20,43 +20,75 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		column = self.addOneColumnLayout(screen, panel)
 		
 		left, center, right = self.addThreeColumnLayout(screen, column, "Top", True)
-		
-		self.addLabel(screen, left, "StrategyOverlay", "Strategy Layer:")
-		self.addCheckbox(screen, left, "StrategyOverlay__Enabled")
-		self.addCheckbox(screen, left, "StrategyOverlay__ShowDotMap")
-		self.addCheckbox(screen, left, "StrategyOverlay__DotMapDrawDots")
-		leftL, leftR = self.addTwoColumnLayout(screen, left, "DotMapBrightness")
-		#self.addTextEdit(screen, leftL, leftR, "StrategyOverlay__DotMapDotIcon")
-		self.addSlider(screen, leftL, leftR, "StrategyOverlay__DotMapBrightness", False, False, False, "up", 0, 100)
-		self.addSlider(screen, leftL, leftR, "StrategyOverlay__DotMapHighlightBrightness", False, False, False, "up", 0, 100)
-		
-		
-		self.addLabel(screen, center, "CityBar", "CityBar:")
-		self.addCheckbox(screen, center, "CityBar__AirportIcons")
-		self.addCheckbox(screen, center, "CityBar__StarvationTurns")
-		
-		self.addLabel(screen, center, "TileHover", "Tile Hover:")
-		self.addCheckbox(screen, center, "MiscHover__LatLongCoords")
-		self.addCheckbox(screen, center, "MiscHover__PartialBuilds")
-		
-		
-		self.addLabel(screen, right, "Misc", "Misc:")
-		self.addCheckbox(screen, right, "MainInterface__FieldOfView")
-		self.addCheckbox(screen, right, "MainInterface__FieldOfView_Remember", True)
-		self.addCheckbox(screen, right, "EventSigns__Enabled")
-		self.addCheckbox(screen, right, "Actions__IgnoreHarmlessBarbarians")
-		
+		self.createStrategyLayerPanel(screen, left)
+		self.createCityBarPanel(screen, center)
+		self.createTileHoverPanel(screen, center)
+		self.createMiscellaneousPanel(screen, right)
 		
 		screen.attachHSeparator(column, column + "Sep1")
+		self.createCityTileStatusPanel(screen, column)
 		
-		left, right = self.addTwoColumnLayout(screen, column, "MapFinderEnabled", True)
+		screen.attachHSeparator(column, column + "Sep2")
+		self.createMapFinderPanel(screen, column)
+		
+	def createStrategyLayerPanel(self, screen, panel):
+		self.addLabel(screen, panel, "StrategyOverlay", "Strategy Layer:")
+		self.addCheckbox(screen, panel, "StrategyOverlay__Enabled")
+		self.addCheckbox(screen, panel, "StrategyOverlay__ShowDotMap")
+		self.addCheckbox(screen, panel, "StrategyOverlay__DotMapDrawDots")
+		left, right = self.addTwoColumnLayout(screen, panel, "DotMapBrightness")
+		#self.addTextEdit(screen, left, right, "StrategyOverlay__DotMapDotIcon")
+		self.addSlider(screen, left, right, "StrategyOverlay__DotMapBrightness", False, False, False, "up", 0, 100)
+		self.addSlider(screen, left, right, "StrategyOverlay__DotMapHighlightBrightness", False, False, False, "up", 0, 100)
+		
+	def createCityBarPanel(self, screen, panel):
+		self.addLabel(screen, panel, "CityBar", "CityBar:")
+		self.addCheckbox(screen, panel, "CityBar__AirportIcons")
+		self.addCheckbox(screen, panel, "CityBar__StarvationTurns")
+		
+	def createTileHoverPanel(self, screen, panel):
+		self.addLabel(screen, panel, "TileHover", "Tile Hover:")
+		self.addCheckbox(screen, panel, "MiscHover__PlotWorkingCity")
+		self.addCheckbox(screen, panel, "MiscHover__PlotRecommendedBuild")
+		self.addCheckbox(screen, panel, "MiscHover__PartialBuilds")
+		self.addCheckbox(screen, panel, "MiscHover__LatLongCoords")
+		
+	def createMiscellaneousPanel(self, screen, panel):
+		self.addLabel(screen, panel, "Misc", "Misc:")
+		self.addCheckbox(screen, panel, "MainInterface__FieldOfView")
+		self.addCheckbox(screen, panel, "MainInterface__FieldOfView_Remember", True)
+		self.addCheckbox(screen, panel, "EventSigns__Enabled")
+		self.addCheckbox(screen, panel, "Actions__IgnoreHarmlessBarbarians")
+		self.addCheckbox(screen, panel, "MiscHover__RemoveFeatureHealthEffects")
+		self.addCheckbox(screen, panel, "MiscHover__RemoveFeatureHealthEffectsCountOtherTiles", True)
+		
+	def createCityTileStatusPanel(self, screen, panel):
+		left, center, right = self.addThreeColumnLayout(screen, panel, "CityPlotsEnabled", True)
+		self.addLabel(screen, left, "CityPlots", "City Tiles:")
+		self.addCheckbox(screen, center, "CityBar__CityControlledPlots")
+		self.addCheckbox(screen, right, "CityBar__CityPlotStatus")
+		
+		one, two, three, four, five = self.addMultiColumnLayout(screen, panel, 5, "CityPlotsOptions")
+		self.addLabel(screen, one, "WorkingPlots", "Working:")
+		self.addCheckbox(screen, two, "CityBar__WorkingImprovedPlot")
+		self.addCheckbox(screen, three, "CityBar__WorkingImprovablePlot")
+		self.addCheckbox(screen, four, "CityBar__WorkingImprovableBonusPlot")
+		self.addCheckbox(screen, five, "CityBar__WorkingUnimprovablePlot")
+		self.addLabel(screen, one, "NotWorkingPlots", "Not Working:")
+		self.addCheckbox(screen, two, "CityBar__NotWorkingImprovedPlot")
+		self.addCheckbox(screen, three, "CityBar__NotWorkingImprovablePlot")
+		self.addCheckbox(screen, four, "CityBar__NotWorkingImprovableBonusPlot")
+		self.addCheckbox(screen, five, "CityBar__NotWorkingUnimprovablePlot")
+		
+	def createMapFinderPanel(self, screen, panel):
+		left, right = self.addTwoColumnLayout(screen, panel, "MapFinderEnabled", True)
 		self.addLabel(screen, left, "MapFinder", "MapFinder:")
 		self.addCheckbox(screen, right, "MapFinder__Enabled")
 		
-		self.addTextEdit(screen, column, column, "MapFinder__Path")
-		self.addTextEdit(screen, column, column, "MapFinder__SavePath")
+		self.addTextEdit(screen, panel, panel, "MapFinder__Path")
+		self.addTextEdit(screen, panel, panel, "MapFinder__SavePath")
 		
-		left, right = self.addTwoColumnLayout(screen, column, "MapFinder", True)
+		left, right = self.addTwoColumnLayout(screen, panel, "MapFinderOptions", True)
 		leftL, leftR = self.addTwoColumnLayout(screen, left, "MapFinderDelays")
 		self.addFloatDropdown(screen, leftL, leftR, "MapFinder__RegenerationDelay")
 		self.addFloatDropdown(screen, leftL, leftR, "MapFinder__SkipDelay")

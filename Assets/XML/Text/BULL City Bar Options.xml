@@ -7,6 +7,8 @@
 -->
 <Civ4GameText xmlns="http://www.firaxis.com">
 	
+<!-- Bar -->
+	
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_CITYBAR__AIRPORTICONS_TEXT</Tag>
 		<English>Airport Icons</English>
@@ -39,6 +41,8 @@
 		<Italian>When checked, shows how many turns until a city will lose population if it is shrinking.</Italian>
 		<Spanish>When checked, shows how many turns until a city will lose population if it is shrinking.</Spanish>
 	</TEXT>
+	
+<!-- Hover -->
 	
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_CITYBAR__HEALTH_TEXT</Tag>
@@ -335,6 +339,171 @@
 		<German>Verbirgt die Hinweise zur Auswahl von Städten und zur Anzeige der Basiswerte, um Platz für die neuen Informationen zu schaffen</German>
 		<Italian>Quando è selezionato, nasconde le istruzioni per la selezione delle Città e mostra i valori base per fare posto alle nuove informazioni.</Italian>
 		<Spanish>When checked, hides the instructions for selecting cities and showing base values to make room for the new information.</Spanish>
+	</TEXT>
+	
+<!-- Plot Status -->
+	
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__CITYCONTROLLEDPLOTS_TEXT</Tag>
+		<English>Highlight Workable Area</English>
+		<French>Highlight Workable Area</French>
+		<German>Bearbeitbares Gebiet hervorheben</German>
+		<Italian>Highlight Workable Area</Italian>
+		<Spanish>Highlight Workable Area</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__CITYCONTROLLEDPLOTS_HOVER</Tag>
+		<English>When checked, highlights the area of tiles controlled by the selected city, similar to when you select a Settler.</English>
+		<French>When checked, highlights the area of tiles controlled by the selected city, similar to when you select a Settler.</French>
+		<German>Hebt die von der gewählten Stadt bearbeitbaren Geländefelder hervor (ähnlich wie bei Auswahl eines Siedlers)</German>
+		<Italian>When checked, highlights the area of tiles controlled by the selected city, similar to when you select a Settler.</Italian>
+		<Spanish>When checked, highlights the area of tiles controlled by the selected city, similar to when you select a Settler.</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__CITYPLOTSTATUS_TEXT</Tag>
+		<English>Highlight Tile Improvability</English>
+		<French>Highlight Tile Improvability</French>
+		<German>Modernisierbares Gebiet hervorheben</German>
+		<Italian>Highlight Tile Improvability</Italian>
+		<Spanish>Highlight Tile Improvability</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__CITYPLOTSTATUS_HOVER</Tag>
+		<English>When checked, highlights each tile controlled by the selected city using a color based on whether it's being worked and your ability to improve it.</English>
+		<French>When checked, highlights each tile controlled by the selected city using a color based on whether it's being worked and your ability to improve it.</French>
+		<German>Hebt die von der gewählten Stadt bearbeitbaren Geländefelder mit farbigen Markierungen hervor, abhängig von der tatsächlichen Bewirtschaftung und den Möglichkeiten zur Modernisierung</German>
+		<Italian>When checked, highlights each tile controlled by the selected city using a color based on whether it's being worked and your ability to improve it.</Italian>
+		<Spanish>When checked, highlights each tile controlled by the selected city using a color based on whether it's being worked and your ability to improve it.</Spanish>
+	</TEXT>
+	
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__WORKINGIMPROVEDPLOT_TEXT</Tag>
+		<English>Improved</English>
+		<French>Improved</French>
+		<German>Modernisiert</German>
+		<Italian>Improved</Italian>
+		<Spanish>Improved</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__WORKINGIMPROVEDPLOT_HOVER</Tag>
+		<English>When checked, highlights tiles being worked that have already been improved.</English>
+		<French>When checked, highlights tiles being worked that have already been improved.</French>
+		<German>Hebt Geländefelder hervor, die bearbeitet werden und schon modernisiert wurden</German>
+		<Italian>When checked, highlights tiles being worked that have already been improved</Italian>
+		<Spanish>When checked, highlights tiles being worked that have already been improved</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__WORKINGIMPROVABLEPLOT_TEXT</Tag>
+		<English>Improvable</English>
+		<French>Improvable</French>
+		<German>Modernisierbar</German>
+		<Italian>Improvable</Italian>
+		<Spanish>Improvable</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__WORKINGIMPROVABLEPLOT_HOVER</Tag>
+		<English>When checked, highlights tiles being worked that can be improved.</English>
+		<French>When checked, highlights tiles being worked that can be improved.</French>
+		<German>Hebt Geländefelder hervor, die bearbeitet werden und noch modernisiert werden können</German>
+		<Italian>When checked, highlights tiles being worked that can be improved.</Italian>
+		<Spanish>When checked, highlights tiles being worked that can be improved.</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__WORKINGIMPROVABLEBONUSPLOT_TEXT</Tag>
+		<English>Improvable w. Bonus</English>
+		<French>Improvable w. Bonus</French>
+		<German>Modernisierbar mit Bonus</German>
+		<Italian>Improvable w. Bonus</Italian>
+		<Spanish>Improvable w. Bonus</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__WORKINGIMPROVABLEBONUSPLOT_HOVER</Tag>
+		<English>When checked, highlights tiles being worked that can be improved to provide a bonus.</English>
+		<French>When checked, highlights tiles being worked that can be improved to provide a bonus.</French>
+		<German>Hebt Geländefelder hervor, die bearbeitet werden und modernisiert werden können, um einen Bonus zu erhalten</German>
+		<Italian>When checked, highlights tiles being worked that can be improved to provide a bonus.</Italian>
+		<Spanish>When checked, highlights tiles being worked that can be improved to provide a bonus.</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__WORKINGUNIMPROVABLEPLOT_TEXT</Tag>
+		<English>Unimprovable</English>
+		<French>Unimprovable</French>
+		<German>Nicht modernisierbar</German>
+		<Italian>Unimprovable</Italian>
+		<Spanish>Unimprovable</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__WORKINGUNIMPROVABLEPLOT_HOVER</Tag>
+		<English>When checked, highlights tiles being worked that cannot be improved.</English>
+		<French>When checked, highlights tiles being worked that cannot be improved.</French>
+		<German>Hebt Geländefelder hervor, die bearbeitet werden und nicht modernisiert werden können</German>
+		<Italian>When checked, highlights tiles being worked that cannot be improved.</Italian>
+		<Spanish>When checked, highlights tiles being worked that cannot be improved.</Spanish>
+	</TEXT>
+	
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__NOTWORKINGIMPROVEDPLOT_TEXT</Tag>
+		<English>Improved</English>
+		<French>Improved</French>
+		<German>Modernisiert</German>
+		<Italian>Improved</Italian>
+		<Spanish>Improved</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__NOTWORKINGIMPROVEDPLOT_HOVER</Tag>
+		<English>When checked, highlights tiles not being worked that have already been improved.</English>
+		<French>When checked, highlights tiles not being worked that have already been improved.</French>
+		<German>Hebt Geländefelder hervor, die nicht bearbeitet werden und schon modernisiert wurden</German>
+		<Italian>When checked, highlights tiles not being worked that have already been improved</Italian>
+		<Spanish>When checked, highlights tiles not being worked that have already been improved</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__NOTWORKINGIMPROVABLEPLOT_TEXT</Tag>
+		<English>Improvable</English>
+		<French>Improvable</French>
+		<German>Modernisierbar</German>
+		<Italian>Improvable</Italian>
+		<Spanish>Improvable</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__NOTWORKINGIMPROVABLEPLOT_HOVER</Tag>
+		<English>When checked, highlights tiles not being worked that can be improved.</English>
+		<French>When checked, highlights tiles not being worked that can be improved.</French>
+		<German>Hebt Geländefelder hervor, die nicht bearbeitet werden und noch modernisiert werden können</German>
+		<Italian>When checked, highlights tiles not being worked that can be improved.</Italian>
+		<Spanish>When checked, highlights tiles not being worked that can be improved.</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__NOTWORKINGIMPROVABLEBONUSPLOT_TEXT</Tag>
+		<English>Improvable w. Bonus</English>
+		<French>Improvable w. Bonus</French>
+		<German>Modernisierbar mit Bonus</German>
+		<Italian>Improvable w. Bonus</Italian>
+		<Spanish>Improvable w. Bonus</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__NOTWORKINGIMPROVABLEBONUSPLOT_HOVER</Tag>
+		<English>When checked, highlights tiles not being worked that can be improved to provide a bonus.</English>
+		<French>When checked, highlights tiles not being worked that can be improved to provide a bonus.</French>
+		<German>Hebt Geländefelder hervor, die nicht bearbeitet werden und modernisiert werden können, um einen Bonus zu erhalten</German>
+		<Italian>When checked, highlights tiles not being worked that can be improved to provide a bonus.</Italian>
+		<Spanish>When checked, highlights tiles not being worked that can be improved to provide a bonus.</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__NOTWORKINGUNIMPROVABLEPLOT_TEXT</Tag>
+		<English>Unimprovable</English>
+		<French>Unimprovable</French>
+		<German>Nicht modernisierbar</German>
+		<Italian>Unimprovable</Italian>
+		<Spanish>Unimprovable</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYBAR__NOTWORKINGUNIMPROVABLEPLOT_HOVER</Tag>
+		<English>When checked, highlights tiles not being worked that cannot be improved.</English>
+		<French>When checked, highlights tiles not being worked that cannot be improved.</French>
+		<German>Hebt Geländefelder hervor, die nicht bearbeitet werden und nicht modernisiert werden können</German>
+		<Italian>When checked, highlights tiles not being worked that cannot be improved.</Italian>
+		<Spanish>When checked, highlights tiles not being worked that cannot be improved.</Spanish>
 	</TEXT>
 
 </Civ4GameText>

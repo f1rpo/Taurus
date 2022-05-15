@@ -147,6 +147,7 @@
 	<load mod="EventSigns"/>
 	<load mod="Strategy Overlay"/>
 	<load mod="StatusDump"/>
+	<load mod="Trigger Event"/>
 	
 	<!-- BULL -->
 	

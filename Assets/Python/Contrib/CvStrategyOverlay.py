@@ -72,7 +72,9 @@ def onLoad(argsList):
 		layer.read()
 	callEachLayer(callRead)
 	if StratLayerOpt.isShowDotMap():
-		getDotMap().redrawCities()
+		def redraw():
+			getDotMap().redrawCities()
+		BugUtil.deferCall(redraw)
 
 def onPreSave(argsList):
 	def callWrite(layer):
