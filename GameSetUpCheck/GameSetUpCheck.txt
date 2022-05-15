@@ -1,0 +1,115 @@
+minHOFOpponents,Duel,1
+minHOFOpponents,Tiny,2
+minHOFOpponents,Small,4
+minHOFOpponents,Standard,6
+minHOFOpponents,Large,8
+minHOFOpponents,Huge,10
+maxHOFOpponents,Duel,2
+maxHOFOpponents,Tiny,4
+maxHOFOpponents,Small,7
+maxHOFOpponents,Standard,10
+maxHOFOpponents,Large,14
+maxHOFOpponents,Huge,17
+reqHOFGameOptions,Advanced Start,-1
+reqHOFGameOptions,No City Razing,0
+reqHOFGameOptions,No City Flipping From Culture,-1
+reqHOFGameOptions,City Flipping after Conquest,0
+reqHOFGameOptions,No Barbarians,0
+reqHOFGameOptions,Raging Barbarians,0
+reqHOFGameOptions,Aggressive AI,0
+reqHOFGameOptions,Unrestricted Leaders,-1
+reqHOFGameOptions,Random Personalities,0
+reqHOFGameOptions,Choose Religions,0
+reqHOFGameOptions,No Technology Trading,-1
+reqHOFGameOptions,No Technology Brokering,-1
+reqHOFGameOptions,Permanent Alliances,0
+reqHOFGameOptions,Always War,0
+reqHOFGameOptions,Always Peace,-1
+reqHOFGameOptions,One City Challenge,0
+reqHOFGameOptions,Permanent War or Peace,-1
+reqHOFGameOptions,New Random Seed on Reload,-1
+reqHOFGameOptions,Locked Modified Assets,1
+reqHOFGameOptions,Require complete kills,0
+reqHOFGameOptions,No Vassal States,0
+reqHOFGameOptions,No Tribal Villages,0
+reqHOFGameOptions,No Random Events,0
+reqHOFGameOptions,No Espionage,-1
+reqHOFGameOptions,Raising Seas,-1
+hofAllowedMapScripts,Inland_Sea,1
+hofAllowedMapScripts,Highlands,1
+hofAllowedMapScripts,Pangaea,1
+hofAllowedMapScripts,Continents,1
+hofAllowedMapScripts,Lakes,1
+hofAllowedMapScripts,Terra,1
+hofAllowedMapScripts,Archipelago,1
+hofAllowedMapScripts,Oasis,1
+hofAllowedMapScripts,Ice_Age,1
+hofAllowedMapScripts,Great_Plains,1
+hofAllowedMapScripts,Fractal,1
+hofAllowedMapScripts,Shuffle,1
+hofAllowedMapScripts,Big_and_Small,1
+hofAllowedMapScripts,Boreal,1
+hofAllowedMapScripts,Global_Highlands,1
+hofAllowedMapScripts,Hemispheres,1
+hofAllowedMapScripts,Medium_and_Small,1
+hofAllowedMapScripts,Rainforest,1
+hofAllowedCylindrical,Inland_Sea,0
+hofAllowedCylindrical,Highlands,1
+hofAllowedCylindrical,Pangaea,1
+hofAllowedCylindrical,Continents,1
+hofAllowedCylindrical,Lakes,1
+hofAllowedCylindrical,Terra,1
+hofAllowedCylindrical,Archipelago,1
+hofAllowedCylindrical,Oasis,0
+hofAllowedCylindrical,Ice_Age,1
+hofAllowedCylindrical,Great_Plains,0
+hofAllowedCylindrical,Fractal,1
+hofAllowedCylindrical,Shuffle,1
+hofAllowedCylindrical,Big_and_Small,1
+hofAllowedCylindrical,Boreal,0
+hofAllowedCylindrical,Global_Highlands,1
+hofAllowedCylindrical,Hemispheres,1
+hofAllowedCylindrical,Medium_and_Small,1
+hofAllowedCylindrical,Rainforest,0
+hofAllowedToroidal,Inland_Sea,0
+hofAllowedToroidal,Highlands,0
+hofAllowedToroidal,Pangaea,1
+hofAllowedToroidal,Continents,1
+hofAllowedToroidal,Lakes,0
+hofAllowedToroidal,Terra,1
+hofAllowedToroidal,Archipelago,1
+hofAllowedToroidal,Oasis,0
+hofAllowedToroidal,Ice_Age,1
+hofAllowedToroidal,Great_Plains,0
+hofAllowedToroidal,Fractal,1
+hofAllowedToroidal,Shuffle,1
+hofAllowedToroidal,Big_and_Small,1
+hofAllowedToroidal,Boreal,0
+hofAllowedToroidal,Global_Highlands,1
+hofAllowedToroidal,Hemispheres,1
+hofAllowedToroidal,Medium_and_Small,1
+hofAllowedToroidal,Rainforest,0
+balancedOptionIndex,Archipelago,2
+balancedOptionIndex,Continents,1
+balancedOptionIndex,Custom_Continents,2
+balancedOptionIndex,Fractal,1
+balancedOptionIndex,Highlands,4
+balancedOptionIndex,Hub,5
+balancedOptionIndex,Inland_Sea,1
+balancedOptionIndex,Islands,3
+balancedOptionIndex,Lakes,1
+balancedOptionIndex,Maze,2
+balancedOptionIndex,Mirror,4
+balancedOptionIndex,Oasis,1
+balancedOptionIndex,Pangaea,2
+balancedOptionIndex,Ring,5
+balancedOptionIndex,Shuffle,1
+balancedOptionIndex,Terra,1
+balancedOptionIndex,Tilted_Axis,1
+balancedOptionIndex,Wheel,5
+balancedOptionIndex,Global_Highlands,4
+modCRC,7ce10a10e72ba10bd2cc0bce82400adb,
+dllCRC,3cdd245e1aaeaee7b5bc97e9d45fbf1b,
+shaderCRC,a90a0d57089c87775439221f996bd37f,
+pythonCRC,4a797321af6d48bcf37abf4bf29dc76d,
+xmlCRC,0fcfbba4388ae02b731457278ceb6ca1,
