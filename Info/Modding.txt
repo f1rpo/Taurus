@@ -1,3 +1,9 @@
+trs.doc: Will try to keep this file up to date. Taurus additions here and
+in program code are tagged with "trs.CAT" comments, where CAT describes the
+category of the change. There is also a Git repository:
+https://github.com/f1rpo/Taurus
+
+
 MODDING with BULL
 =================
 
@@ -20,6 +26,18 @@ The SDK folder includes all of the source files included with BTS along with the
 
 Or you can use a tool like WinMerge to find all the differences by comparing the entire source tree to the original BTS files.
 
+trs.doc: About installing the compiler, see Leoreth's guide:
+https://forums.civfanatics.com/threads/the-easiest-way-to-compile-a-new-dll.608137/
+When using a more recent version of the Visual Studio IDE than VS2010,
+also consider this CFC post:
+https://forums.civfanatics.com/threads/modmodding-q-a-thread.516755/page-111#post-16257258
+The build system has moved into a subfolder "project" inside SDK.
+All local paths should be defined in project/Makefile.settings. Attempting to compile
+without setting any paths should cause that file to be generated.
+For documentation about the Makefile, see this thread:
+https://forums.civfanatics.com/threads/new-makefile-faster-compilation-profiling-and-more.499166/
+
+
 
 ____________________________________________________________________________________________________
 2. OPTIONAL COMPONENTS
@@ -27,7 +45,8 @@ ________________________________________________________________________________
 The following are all of the compile-time options for BULL. Each one has a unique preprocessor flag that you must define to enable the component. You do this with the /D option in your makefile.
 
 [0] BUFFY
-
+(trs.doc: Will throw out some BUFFY-related files. There aren't going to be
+multiple HOF-compatible mods.)
 	Flag: _BUFFY
 	by BUG/HOF Team
 		
@@ -55,7 +74,7 @@ The following are all of the compile-time options for BULL. Each one has a uniqu
 	by Pep
 	http://forums.civfanatics.com/showthread.php?t=298512
 	
-		Options to keep City Governor from building WOrkers and Workboats
+		Options to keep City Governor from building Workers and Workboats
 
 [4] AI AutoPlay
 
@@ -85,7 +104,7 @@ The following are all of the compile-time options for BULL. Each one has a uniqu
 ____________________________________________________________________________________________________
 3. EVENTS
 
-These new events have already been added to BUG, but if you want to use them in a non-BUG-based mod you must add them yourself to the top of CvEventManager.
+These new events have already been added to BUG, but if you want to use them in a non-BUG-based mod you must add them yourself to the top of CvEventManager. (trs.doc: Never mind this. There is no non-BUG-based version of Taurus.)
 
 Player
 
