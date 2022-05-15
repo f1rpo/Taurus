@@ -34,7 +34,8 @@ def launch(argsList=None):
 			showErrorAlert(BugUtil.getPlainText("TXT_KEY_BUG_HELP_CANNOT_OPEN_BROWSER_TITLE"), 
 					BugUtil.getText("TXT_KEY_BUG_HELP_CANNOT_OPEN_BROWSER_BODY", (url,)))		
 	else:
-		sLang = ["ENG", "FRA", "DEU", "ITA", "ESP"]
+		# trs.doc: Same as for Mac.  There is no French or Spanish translation.
+		sLang = ["ENG", "ENG", "DEU", "ITA", "ENG"]
 		name = "BUG Mod Help-%s.chm" % (sLang[CyGame().getCurrentLanguage()])
 		file = BugPath.findInfoFile(name)
 		if file:

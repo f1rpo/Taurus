@@ -52,14 +52,16 @@
 		<Italian>Apertura della Guida del BUG Mod in corso...</Italian>
 		<Spanish>Opening the BUG Mod help file...</Spanish>
 	</TEXT>
-	<TEXT>
+	<!-- trs: Unused, and let's keep it that way.
+		 (Because the separate files for FRA and ESP are gone.) -->
+	<!--TEXT>
 		<Tag>TXT_KEY_BUG_HELP_LANGUAGE</Tag>
 		<English>BUG Mod Help - ENG.chm</English>
 		<French>BUG Mod Help - FRA.chm</French>
 		<German>BUG Mod Help - DEU.chm</German>
 		<Italian>BUG Mod Help - ITA.chm</Italian>
 		<Spanish>BUG Mod Help - ESP.chm</Spanish>
-	</TEXT>
+	</TEXT-->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_HELP_MISSING_TITLE</Tag>
 		<English>Help File Not Found</English>
