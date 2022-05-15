@@ -77,6 +77,12 @@ credits = [
 			"Nercury - Planet Generator",
 			"Ruff_Hi - Ring World",
 			"Sto - Full of Resources",
+		# <trs.doc>
+		"-",
+		"TAURUS_CREDITS|Taurus Mod",
+			"Nightinggale - GameCoreDLL Makefile",
+			"f1rpo - the rest"
+		# </trs.doc>
 ]
 
 class BugCreditsOptionsTab(BugOptionsTab.BugOptionsTab):
