@@ -389,8 +389,17 @@ class DotMapLayer(StrategyLayer):
 		"""
 		Sends a message to add a city for the active player at the given point.
 		"""
-		CyMessageControl().sendModNetMessage(MSG_ADD_CITY, PlayerUtil.getActivePlayerID(), point[X] * 1000 + point[Y], color, layer)
-	
+		
+		# check if the plot has been revealed
+		pPlayer = gc.getPlayer(PlayerUtil.getActivePlayerID())
+		if not pPlayer or pPlayer.isNone():
+			BugUtil.warn("CvStrategyOverlay.addCityAt() was passed an invalid player id: %s" % (str(ePlayer)))
+			return False
+		eTeam = pPlayer.getTeam()
+		pPlot = gc.getMap().plot(point[X], point[Y])
+		if pPlot.isRevealed(eTeam, False):
+			CyMessageControl().sendModNetMessage(MSG_ADD_CITY, PlayerUtil.getActivePlayerID(), point[X] * 1000 + point[Y], color, layer)
+
 	def addCityMessage(self, ePlayer, xy, color, layer):
 		"""
 		Processes a message to add a city.

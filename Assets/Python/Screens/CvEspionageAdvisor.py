@@ -27,6 +27,7 @@ CITYMISSION_MISSION = 1
 
 class CvEspionageAdvisor:
 
+
 	def __init__(self):
 		self.SCREEN_NAME = "EspionageAdvisor"
 		self.DEBUG_DROPDOWN_ID =  "EspionageAdvisorDropdownWidget"

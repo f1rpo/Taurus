@@ -11,6 +11,7 @@ from CvPythonExtensions import *
 import BugUtil
 import CvStrategyOverlay
 import CvUtil
+import PlayerUtil
 import sys
 
 X, Y = 0, 1    # used in point tuples instead of creating a new class
@@ -220,12 +221,27 @@ class CvDotMapOverlayScreen:
 		Called from CvOverlayScreenUtils when mousing over a plot when the screen is active.
 		Updates the current plot and its x/y location.
 		"""
+
+		# remove the current city
+		g_DotMap.unhighlightCity()
+
+		# get the current plot
 		plot = CyInterface().getMouseOverPlot()
 		x = plot.getX()
 		y = plot.getY()
-		self.currentPoint = (x, y)
-		g_DotMap.highlightCity(self.currentPoint, self.currentColor)
-		self.resetInterfaceMode()
+
+		# get the current player
+		pPlayer = gc.getPlayer(PlayerUtil.getActivePlayerID())
+		if not pPlayer or pPlayer.isNone():
+			BugUtil.warn("CvDotMapOverlayScreen.onMouseOverPlot() was passed an invalid player id: %s" % (str(ePlayer)))
+			return False
+		eTeam = pPlayer.getTeam()
+
+		# update city location if plot is visible
+		if plot.isRevealed(eTeam, False):
+			self.currentPoint = (x, y)
+			g_DotMap.highlightCity(self.currentPoint, self.currentColor)
+			self.resetInterfaceMode()
 	
 	def resetInterfaceMode(self):
 		if CyInterface().getInterfaceMode() != InterfaceModeTypes.INTERFACEMODE_PYTHON_PICK_PLOT:
