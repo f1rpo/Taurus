@@ -119,7 +119,7 @@
 	</Define>
 	<Define>
 		<DefineName>BUG_CITY_WORKING_IMPROVED_PLOT_COLOR</DefineName>
-		<DefineTextVal>COLOR_RED</DefineTextVal>
+		<DefineTextVal>COLOR_WHITE</DefineTextVal>
 	</Define>
 	<Define>
 		<DefineName>BUG_CITY_WORKING_IMPROVED_PLOT_ALPHA</DefineName>

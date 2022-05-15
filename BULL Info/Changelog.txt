@@ -81,6 +81,11 @@ Bug Fixes:
 	Fixed missing normal prereq building in Building hover when a building requires a minimum number of other buildings
 	Added "Will remove the <improvement>" to Clear Feature Action hover when the feature is required by the improvement
 
+Merged Mods:
+
+- Unofficial Patch
+	Updated to release version 1.60
+
 
 MODDING
 

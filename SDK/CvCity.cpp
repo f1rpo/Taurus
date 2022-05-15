@@ -5014,10 +5014,11 @@ bool CvCity::hasActiveWorldWonder() const
 }
 
 /************************************************************************************************/
-/* UNOFFICIAL_PATCH                       03/04/10                                jdog5000      */
+/* UNOFFICIAL_PATCH                       03/04/10                     Mongoose & jdog5000      */
 /*                                                                                              */
 /* Bugfix                                                                                       */
 /************************************************************************************************/
+// From Mongoose SDK
 int CvCity::getNumActiveWorldWonders() const
 {
 	int iI;

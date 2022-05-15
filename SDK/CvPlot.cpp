@@ -5943,7 +5943,21 @@ int CvPlot::calculateImprovementYieldChange(ImprovementTypes eImprovement, Yield
 		}
 	}
 
+/*************************************************************************************************/
+/* UNOFFICIAL_PATCH                       06/02/10                     Afforess & jdog5000       */
+/*                                                                                               */
+/* Bugfix                                                                                        */
+/*************************************************************************************************/
+/* original bts code
 	return iYield;
+*/
+	// Improvement cannot actually produce negative yield
+	int iCurrYield = calculateNatureYield(eYield, (ePlayer == NO_PLAYER) ? NO_TEAM : GET_PLAYER(ePlayer).getTeam(), bOptimal);
+
+	return std::max( -iCurrYield, iYield );
+/*************************************************************************************************/
+/* UNOFFICIAL_PATCH                         END                                                  */
+/*************************************************************************************************/
 }
 
 

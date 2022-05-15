@@ -888,19 +888,7 @@ void CvTeam::doTurn()
 
 				for (iJ = 0; iJ < MAX_CIV_TEAMS; iJ++)
 				{
-/************************************************************************************************/
-/* UNOFFICIAL_PATCH                       03/01/10                     Mongoose & jdog5000      */
-/*                                                                                              */
-/* Bugfix                                                                                       */
-/************************************************************************************************/
-/* original bts code
 					if (GET_TEAM((TeamTypes)iJ).isAlive())
-*/
-					// From Mongoose SDK, BarbarianPassiveTechFix
-					if (GET_TEAM((TeamTypes)iJ).isAlive() && !GET_TEAM((TeamTypes)iJ).isBarbarian())
-/************************************************************************************************/
-/* UNOFFICIAL_PATCH                        END                                                  */
-/************************************************************************************************/
 					{
 						if (GET_TEAM((TeamTypes)iJ).isHasTech((TechTypes)iI))
 						{

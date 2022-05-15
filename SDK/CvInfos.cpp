@@ -3565,7 +3565,7 @@ bool CvUnitInfo::isFemale() const
 int CvUnitInfo::getFemaleUnitType() const
 {
 	CvString szFemaleUnitType = m_szType + "_FEMALE";
-	return GC.getInfoTypeForString(szFemaleUnitType.GetCString());
+	return GC.getInfoTypeForString(szFemaleUnitType.GetCString(), true);
 }
 // BUG - Female Great People - end
 
@@ -6563,7 +6563,20 @@ m_pbCommerceFlexible(NULL),
 m_pbCommerceChangeOriginalOwner(NULL),
 m_pbBuildingClassNeededInCity(NULL),
 m_ppaiSpecialistYieldChange(NULL),
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                       06/27/10                    Afforess & jdog5000       */
+/*                                                                                              */
+/* Efficiency                                                                                   */
+/************************************************************************************************/
+/* original bts code
 m_ppaiBonusYieldModifier(NULL)
+*/
+m_ppaiBonusYieldModifier(NULL),
+m_bAnySpecialistYieldChange(false),
+m_bAnyBonusYieldModifier(false)
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                        END                                                  */
+/************************************************************************************************/
 {
 }
 
@@ -7562,6 +7575,24 @@ int* CvBuildingInfo::getSpecialistYieldChangeArray(int i) const
 	return m_ppaiSpecialistYieldChange[i];
 }
 
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                       06/27/10                    Afforess & jdog5000       */
+/*                                                                                              */
+/* Efficiency                                                                                   */
+/************************************************************************************************/
+bool CvBuildingInfo::isAnySpecialistYieldChange() const
+{
+	return m_bAnySpecialistYieldChange;
+}
+
+bool CvBuildingInfo::isAnyBonusYieldModifier() const
+{
+	return m_bAnyBonusYieldModifier;
+}
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                        END                                                  */
+/************************************************************************************************/
+
 int CvBuildingInfo::getBonusYieldModifier(int i, int j) const
 {
 	FAssertMsg(i < GC.getNumBonusInfos(), "Index out of bounds");
@@ -7913,6 +7944,27 @@ void CvBuildingInfo::read(FDataStreamBase* stream)
 		stream->Read(NUM_YIELD_TYPES, m_ppaiSpecialistYieldChange[i]);
 	}
 
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                       06/27/10                    Afforess & jdog5000       */
+/*                                                                                              */
+/* Efficiency                                                                                   */
+/************************************************************************************************/
+	m_bAnySpecialistYieldChange = false;
+	for(i=0;(!m_bAnySpecialistYieldChange) && i<GC.getNumSpecialistInfos();i++)
+	{
+		for(int j=0; j < NUM_YIELD_TYPES; j++ )
+		{
+			if( m_ppaiSpecialistYieldChange[i][j] != 0 )
+			{
+				m_bAnySpecialistYieldChange = true;
+				break;
+			}
+		}
+	}
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                        END                                                  */
+/************************************************************************************************/
+
 	if (m_ppaiBonusYieldModifier != NULL)
 	{
 		for(i=0;i<GC.getNumBonusInfos();i++)
@@ -7928,6 +7980,27 @@ void CvBuildingInfo::read(FDataStreamBase* stream)
 		m_ppaiBonusYieldModifier[i]  = new int[NUM_YIELD_TYPES];
 		stream->Read(NUM_YIELD_TYPES, m_ppaiBonusYieldModifier[i]);
 	}
+
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                       06/27/10                    Afforess & jdog5000       */
+/*                                                                                              */
+/* Efficiency                                                                                   */
+/************************************************************************************************/
+	m_bAnyBonusYieldModifier = false;
+	for(i=0;(!m_bAnyBonusYieldModifier) && i<GC.getNumBonusInfos();i++)
+	{
+		for(int j=0; j < NUM_YIELD_TYPES; j++ )
+		{
+			if( m_ppaiBonusYieldModifier[i][j] != 0 )
+			{
+				m_bAnyBonusYieldModifier = true;
+				break;
+			}
+		}
+	}
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                        END                                                  */
+/************************************************************************************************/
 }
 
 //
@@ -8582,6 +8655,12 @@ bool CvBuildingInfo::read(CvXMLLoadUtility* pXML)
 	pXML->SetVariableListTagPair(&m_piPrereqNumOfBuildingClass, "PrereqBuildingClasses", sizeof(GC.getBuildingClassInfo((BuildingClassTypes)0)), GC.getNumBuildingClassInfos());
 	pXML->SetVariableListTagPair(&m_pbBuildingClassNeededInCity, "BuildingClassNeededs", sizeof(GC.getBuildingClassInfo((BuildingClassTypes)0)), GC.getNumBuildingClassInfos());
 
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                       06/27/10                    Afforess & jdog5000       */
+/*                                                                                              */
+/* Efficiency                                                                                   */
+/************************************************************************************************/
+	m_bAnySpecialistYieldChange = false;
 	pXML->Init2DIntList(&m_ppaiSpecialistYieldChange, GC.getNumSpecialistInfos(), NUM_YIELD_TYPES);
 	if (gDLL->getXMLIFace()->SetToChildByTagName(pXML->GetXML(),"SpecialistYieldChanges"))
 	{
@@ -8615,6 +8694,18 @@ bool CvBuildingInfo::read(CvXMLLoadUtility* pXML)
 				}
 			}
 
+			for(int ii=0;(!m_bAnySpecialistYieldChange) && ii<GC.getNumSpecialistInfos();ii++)
+			{
+				for(int ij=0; ij < NUM_YIELD_TYPES; ij++ )
+				{
+					if( m_ppaiSpecialistYieldChange[ii][ij] != 0 )
+					{
+						m_bAnySpecialistYieldChange = true;
+						break;
+					}
+				}
+			}
+
 			// set the current xml node to it's parent node
 			gDLL->getXMLIFace()->SetToParent(pXML->GetXML());
 		}
@@ -8622,7 +8713,16 @@ bool CvBuildingInfo::read(CvXMLLoadUtility* pXML)
 		// set the current xml node to it's parent node
 		gDLL->getXMLIFace()->SetToParent(pXML->GetXML());
 	}
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                        END                                                  */
+/************************************************************************************************/
 
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                       06/27/10                    Afforess & jdog5000       */
+/*                                                                                              */
+/* Efficiency                                                                                   */
+/************************************************************************************************/
+	m_bAnyBonusYieldModifier = false;
 	pXML->Init2DIntList(&m_ppaiBonusYieldModifier, GC.getNumBonusInfos(), NUM_YIELD_TYPES);
 	if (gDLL->getXMLIFace()->SetToChildByTagName(pXML->GetXML(),"BonusYieldModifiers"))
 	{
@@ -8657,6 +8757,18 @@ bool CvBuildingInfo::read(CvXMLLoadUtility* pXML)
 				}
 			}
 
+			for(int ii=0;(!m_bAnyBonusYieldModifier) && ii<GC.getNumBonusInfos(); ii++)
+			{
+				for(int ij=0; ij < NUM_YIELD_TYPES; ij++ )
+				{
+					if( m_ppaiBonusYieldModifier[ii][ij] != 0 )
+					{
+						m_bAnyBonusYieldModifier = true;
+						break;
+					}
+				}
+			}
+
 			// set the current xml node to it's parent node
 			gDLL->getXMLIFace()->SetToParent(pXML->GetXML());
 		}
@@ -8664,6 +8776,9 @@ bool CvBuildingInfo::read(CvXMLLoadUtility* pXML)
 		// set the current xml node to it's parent node
 		gDLL->getXMLIFace()->SetToParent(pXML->GetXML());
 	}
+/************************************************************************************************/
+/* UNOFFICIAL_PATCH                        END                                                  */
+/************************************************************************************************/
 
 	pXML->SetVariableListTagPair(&m_piFlavorValue, "Flavors", GC.getFlavorTypes(), GC.getNumFlavorTypes());
 	pXML->SetVariableListTagPair(&m_piImprovementFreeSpecialist, "ImprovementFreeSpecialists", sizeof(GC.getImprovementInfo((ImprovementTypes)0)), GC.getNumImprovementInfos());
