@@ -38,8 +38,10 @@
 				<change module="BugUtil" function="readLoggingOptions"/>
 			</option>
 		</section>
-		
-		<section id="Subversion">
+		<!-- trs: Commented out. Was already disabled through
+			 BugSystemOptionsTab.py - but I want to double down on that.
+			 No updates for this mod are going to come from that place. -->
+		<!--section id="Subversion">
 			<option id="CheckForUpdates" key="Check For Updates" 
 					type="boolean" default="False" 
 					title="Check for Updates">
@@ -65,7 +67,7 @@
 					title="Repository Revision"/>
 		</section>
 		
-		<option id="LastSvnCheck" type="float" default="0"/>
+		<option id="LastSvnCheck" type="float" default="0"/-->
 	</options>
 	
 	<init module="BugUtil" function="readLoggingOptions" immediate="true"/>
