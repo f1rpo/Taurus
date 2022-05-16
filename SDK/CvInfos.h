@@ -5435,7 +5435,9 @@ public:
 	DllExport int getNumLanguages() const; // not static for Python access
 	DllExport void setNumLanguages(int iNum); // not static for Python access
 
-	bool read(CvXMLLoadUtility* pXML);
+	bool read(CvXMLLoadUtility* pXML,
+			// <trs.lang> (K-Mod): Choose which language to load. NULL means default.
+			std::string const* pLanguageName = NULL);
 
 protected:
 

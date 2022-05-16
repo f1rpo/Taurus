@@ -535,6 +535,69 @@ bool CvXMLLoadUtility::LoadGlobalText()
 		std::vector<CvString> aszModfiles;
 
 		gDLL->enumerateFiles(aszFiles, "xml\\text\\*.xml");
+		// <trs.lang> (from K-Mod, incl. all comments)
+		/*	Text files from mods may not have the same set of languages as the
+			base game. When such a mismatch occurs, we cannot simply rely on
+			"getCurrentLanguage()" to give us the correct text from the mod file.
+			We should instead check the xml tags. So, before we start loading text,
+			we need to extract the current name of our language tag.
+			This isn't as easy as I'd like. Here's what I'm going to do:
+			CIV4GameText_Misc1.xml contains the text for the language options
+			dropdown menu in the settings screen; so I'm going to assume
+			that particular text file is well formed, and I'm going to use it
+			to determine the current language name.
+			(Note: I'd like to use the names from TXT_KEY_LANGUAGE_#,
+			but that text isn't easy to access.) */
+		/*	label text for the currently selected language --
+			that should correspond to the xml label used for that language. */
+		std::string sLanguageName;
+		if (LoadCivXml(m_pFXml, "xml\\text\\CIV4GameText_Misc1.xml"))
+		{
+			if (gDLL->getXMLIFace()->LocateNode(m_pFXml, "Civ4GameText/TEXT") &&
+				gDLL->getXMLIFace()->SetToChild(m_pFXml))
+			{
+				int const& iLanguage = GAMETEXT.getCurrentLanguage();
+				int const iMax = GC.getDefineINT("MAX_NUM_LANGUAGES");
+				int i;
+				for (i = 0; i < iMax; i++)
+				{
+					SkipToNextVal();
+					if (!gDLL->getXMLIFace()->NextSibling(m_pFXml))
+						break;
+					if (i == iLanguage)
+					{	/*	no way to determine max tag name size.
+							This is really bad; but what can I do about it? */
+						char acBuffer[1024];
+						if (gDLL->getXMLIFace()->GetLastLocatedNodeTagName(m_pFXml, acBuffer))
+						{
+							acBuffer[1023] = 0; // just in case the buffer isn't even terminated!
+							sLanguageName.assign(acBuffer);
+						}
+					}
+				}
+				/*	this is stupid... the number of languages is a static private variable
+					which can only be set by a non-static function. */
+				CvGameText dummy;
+				dummy.setNumLanguages(i);
+			}
+		}
+
+		/*	Remove duplicate files. (Both will be loaded from the mod folder anyway,
+			so this will save us some time.)
+			However, we must not disturb the order of the list, because it is
+			important that the modded files overrule the unmodded files. */
+		for (std::vector<CvString>::iterator it = aszFiles.begin();
+			it != aszFiles.end(); ++it)
+		{
+			std::vector<CvString>::iterator jt = it+1;
+			while (jt != aszFiles.end())
+			{
+				if (it->CompareNoCase(*jt) == 0)
+					jt = aszFiles.erase(jt);
+				else ++jt;
+			}
+		}
+		// </trs.lang>
 
 		if (gDLL->isModularXMLLoading())
 		{
@@ -542,7 +605,8 @@ bool CvXMLLoadUtility::LoadGlobalText()
 			aszFiles.insert(aszFiles.end(), aszModfiles.begin(), aszModfiles.end());
 		}
 
-		for(std::vector<CvString>::iterator it = aszFiles.begin(); it != aszFiles.end(); ++it)
+		for (std::vector<CvString>::iterator it = aszFiles.begin();
+			it != aszFiles.end(); ++it)
 		{
 			bLoaded = LoadCivXml(m_pFXml, *it); // Load the XML
 			if (!bLoaded)
@@ -554,7 +618,8 @@ bool CvXMLLoadUtility::LoadGlobalText()
 			if (bLoaded)
 			{
 				// if the xml is successfully validated
-				SetGameText("Civ4GameText", "Civ4GameText/TEXT");
+				SetGameText("Civ4GameText", "Civ4GameText/TEXT",
+						sLanguageName); // trs.lang (K-Mod)
 			}
 		}
 
@@ -1262,7 +1327,8 @@ void CvXMLLoadUtility::SetGlobalUnitScales(float* pfLargeScale, float* pfSmallSc
 //  PURPOSE :   Reads game text info from XML and adds it to the translation manager
 //
 //------------------------------------------------------------------------------------------------------
-void CvXMLLoadUtility::SetGameText(const char* szTextGroup, const char* szTagName)
+void CvXMLLoadUtility::SetGameText(const char* szTextGroup, const char* szTagName,
+	std::string const& kLanguageName) // trs.lang (K-Mod)
 {
 	PROFILE_FUNC();
 	logMsg("SetGameText %s\n", szTagName);
@@ -1279,7 +1345,8 @@ void CvXMLLoadUtility::SetGameText(const char* szTextGroup, const char* szTagNam
 		for (i=0; i < iNumVals; i++)
 		{
 			CvGameText textInfo;
-			textInfo.read(this);
+			textInfo.read(this,
+					&kLanguageName); // trs.lang (K-Mod)
 
 			gDLL->addText(textInfo.getType() /*id*/, textInfo.getText(), textInfo.getGender(), textInfo.getPlural());
 			if (!gDLL->getXMLIFace()->NextSibling(m_pFXml) && i!=iNumVals-1)

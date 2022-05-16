@@ -19057,69 +19057,85 @@ void CvGameText::setText(const wchar* szText)
 	m_szText = szText; 
 }
 
-bool CvGameText::read(CvXMLLoadUtility* pXML)
+/*	trs.lang (K-Mod): I've rewritten most of this function
+	to change the way we find the appropriate language */
+bool CvGameText::read(CvXMLLoadUtility* pXML, std::string const* pLanguageName)
 {
-	CvString szTextVal;
-	CvWString wszTextVal;
 	if (!CvInfoBase::read(pXML))
-	{
 		return false;
-	}
 
-	gDLL->getXMLIFace()->SetToChild(pXML->GetXML()); // Move down to Child level
-	pXML->GetXmlVal(m_szType);		// TAG
+	gDLL->getXMLIFace()->SetToChild(pXML->GetXML());
+	pXML->GetXmlVal(m_szType); // TAG
 
-	static const int iMaxNumLanguages = GC.getDefineINT("MAX_NUM_LANGUAGES");
-	int iNumLanguages = NUM_LANGUAGES ? NUM_LANGUAGES : iMaxNumLanguages + 1;
+	//static const int iMaxNumLanguages = GC.getDefineINT("MAX_NUM_LANGUAGES");
+	//int iNumLanguages = NUM_LANGUAGES ? NUM_LANGUAGES : iMaxNumLanguages + 1;
 
-	int j=0;
-	for (j = 0; j < iNumLanguages; j++)
+	bool bValid = false;
+	if (pLanguageName != NULL && !pLanguageName->empty())
 	{
-		pXML->SkipToNextVal();	// skip comments
-
-		if (!gDLL->getXMLIFace()->NextSibling(pXML->GetXML()) || j == iMaxNumLanguages)
+		FAssert(getNumLanguages() > 0);
+		// again, a big wtf to the original devs for not making the argument const.
+		if (gDLL->getXMLIFace()->LocateFirstSiblingNodeByTagName(pXML->GetXML(),
+			const_cast<TCHAR*>(pLanguageName->c_str())))
 		{
-			NUM_LANGUAGES = j;
-			break;
+			bValid = true;
 		}
-		if (j == GAMETEXT.getCurrentLanguage()) // Only add appropriate language Text 
+		else
 		{
-			// TEXT
-			if (pXML->GetChildXmlValByName(wszTextVal, "Text"))
+			// if the language string is set, but we can't find it, use language #0.
+			if (pXML->SkipToNextVal() && gDLL->getXMLIFace()->NextSibling(pXML->GetXML()))
+				bValid = true;
+		}
+	}
+	else
+	{
+		/*	otherwise, if the language string has not been set, just count
+			until we get to our language number.
+			Note: if the language name isn't set, then maybe the number of languages
+			isn't set either. (in the original code, it was determined here.)
+			So lets set it now. */
+		int iNumLanguages = getNumLanguages();
+		if (iNumLanguages <= 0)
+		{
+			iNumLanguages = std::min(gDLL->getXMLIFace()->GetNumSiblings(pXML->GetXML()),
+					GC.getDefineINT("MAX_NUM_LANGUAGES"));
+			setNumLanguages(iNumLanguages);
+		}
+		for (int j = 0; j < iNumLanguages; j++)
+		{
+			if (!pXML->SkipToNextVal() ||
+				!gDLL->getXMLIFace()->NextSibling(pXML->GetXML()))
 			{
-				setText(wszTextVal);
+				break;
 			}
-			else
+			if (j == GAMETEXT.getCurrentLanguage()) // Only add appropriate language Text
 			{
-				pXML->GetXmlVal(wszTextVal);
-				setText(wszTextVal);
-				if (NUM_LANGUAGES > 0)
-				{
-					break;
-				}
-			}
-
-			// GENDER
-			if (pXML->GetChildXmlValByName(wszTextVal, "Gender"))
-			{
-				setGender(wszTextVal);
-			}
-
-			// PLURAL
-			if (pXML->GetChildXmlValByName(wszTextVal, "Plural"))
-			{
-				setPlural(wszTextVal);
-			}
-			if (NUM_LANGUAGES > 0)
-			{
+				bValid = true;
 				break;
 			}
 		}
 	}
-
+	// the setting of the text, moved from above.
+	if (bValid)
+	{
+		CvWString wszTextVal;
+		// TEXT
+		if (pXML->GetChildXmlValByName(wszTextVal, "Text"))
+			setText(wszTextVal);
+		else
+		{
+			pXML->GetXmlVal(wszTextVal);
+			setText(wszTextVal);
+		}
+		// GENDER
+		if (pXML->GetChildXmlValByName(wszTextVal, "Gender"))
+			setGender(wszTextVal);
+		// PLURAL
+		if (pXML->GetChildXmlValByName(wszTextVal, "Plural"))
+			setPlural(wszTextVal);
+	}
 	gDLL->getXMLIFace()->SetToParent(pXML->GetXML()); // Move back up to Parent
-
-	return true;
+	return bValid;
 }
 
 //////////////////////////////////////////////////////////////////////////

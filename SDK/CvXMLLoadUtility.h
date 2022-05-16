@@ -291,7 +291,8 @@ private:
 	//
 	void SetGlobalActionInfo();
 	void SetGlobalAnimationPathInfo(CvAnimationPathInfo** ppAnimationPathInfo, char* szTagName, int* iNumVals);
-	void SetGameText(const char* szTextGroup, const char* szTagName);
+	void SetGameText(const char* szTextGroup, const char* szTagName,
+			std::string const& kLanguageName); // trs.lang (K-Mod)
 
 	// create a keyboard string from a KB code, Delete would be returned for KB_DELETE
 	CvWString CreateKeyStringFromKBCode(const TCHAR* pszHotKey);
