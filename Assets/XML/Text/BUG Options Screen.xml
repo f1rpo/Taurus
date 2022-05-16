@@ -20,22 +20,24 @@
 		<Italian>Opzioni BUG Mod</Italian>
 		<Spanish>BUG Mod Options</Spanish>
 	</TEXT>
+	<!-- trs.doc: Now also the Taurus help file -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTBUTTON_HELP</Tag>
-		<English>BUG Mod Help</English>
+		<English>Taurus Help</English>
 		<French>d'Aide du BUG Mod</French>
-		<German>Hilfe der BUG Mod</German>
+		<German>Taurus-Hilfe</German>
 		<Italian>Guida del BUG Mod</Italian>
 		<Spanish>Ayuda por BUG Mod</Spanish>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTBUTTON_HELP_HOVER</Tag>
-		<English>Opens the BUG Mod help file. You can hit [ALT + CTRL + F1] from the main interface.</English>
+		<English>Opens the Taurus help file. You can also hit [ALT + CTRL + F1] from the main interface.</English>
 		<French>Ouvre le fichier d'aide du BUG Mod. Vous pouvez aussi utiliser [ALT + CTRL + F1] dans l'écran principal du jeu.</French>
-		<German>Öffnet die Hilfe-Datei der BUG Mod (Tastenkombination [STRG + ALT + F1] im Hauptbildschirm)</German>
+		<German>Öffnet die externe Taurus-Hilfe (Tastenkombination [STRG + ALT + F1] im Hauptbildschirm)</German>
 		<Italian>Apre il file della Guida del BUG Mod. Puoi utilizzare la scorciatoia [ALT + CTRL + F1] dall'interfaccia principale.</Italian>
 		<Spanish>Opens the BUG Mod help file. You can hit [ALT + CTRL + F1] from the main interface.</Spanish>
 	</TEXT>
+
 	<!-- trs: was "BUG Options screen" -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTBUTTON_EXIT_HOVER</Tag>

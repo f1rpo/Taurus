@@ -1,6 +1,7 @@
 ## BugHelp
 ##
 ## Opens BUG's help file, "BUG Mod Help.chm", or the online version, for the user's language.
+## trs.doc: Now the Taurus help file, named differently.
 ##
 ## TODO:
 ##   Move to configuration XML
@@ -36,7 +37,8 @@ def launch(argsList=None):
 	else:
 		# trs.doc: Same as for Mac.  There is no French or Spanish translation.
 		sLang = ["ENG", "ENG", "DEU", "ITA", "ENG"]
-		name = "BUG Mod Help-%s.chm" % (sLang[CyGame().getCurrentLanguage()])
+		# trs.doc: Was BUG Mod Help-...
+		name = "TaurusHelp-%s.chm" % (sLang[CyGame().getCurrentLanguage()])
 		file = BugPath.findInfoFile(name)
 		if file:
 			import os

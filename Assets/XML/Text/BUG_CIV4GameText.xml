@@ -43,12 +43,13 @@
 	</TEXT>
 	
 	<!-- Help -->
-	
+
+	<!-- trs.doc: Now also the Taurus help file -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_HELP_OPENING</Tag>
-		<English>Opening the BUG Mod help file...</English>
+		<English>Opening the Taurus help file...</English>
 		<French>Ouverture du fichier d'aide du BUG Mod...</French>
-		<German>Öffnen der Hilfe-Datei der BUG Mod...</German>
+		<German>Öffnen der Taurus-Hilfe-Datei...</German>
 		<Italian>Apertura della Guida del BUG Mod in corso...</Italian>
 		<Spanish>Opening the BUG Mod help file...</Spanish>
 	</TEXT>
