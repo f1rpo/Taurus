@@ -1668,12 +1668,13 @@
 		</InterfaceArtInfo>
 <!-- BUG - Wonders Tab - end -->			
 
-<!-- BUG - Main Interface - BUG Options Screen - Start -->			
+<!-- BUG - Main Interface - BUG Options Screen - Start -->
+		<!-- trs: Path was Art/BUG/BUGMantis.dds - which is now unused. -->
 		<InterfaceArtInfo>
 			<Type>BUG_OPTIONS_SCREEN_BUTTON</Type>
-			<Path>Art/BUG/BUGMantis.dds</Path>
+			<Path>Art/Taurus/OptionsButton.dds</Path>
 		</InterfaceArtInfo>
-<!-- BUG - Main Interface - BUG Options Screen - end -->			
+<!-- BUG - Main Interface - BUG Options Screen - end -->
 
 		<InterfaceArtInfo>
 			<Type>QUESTION_MARK</Type>
