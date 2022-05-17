@@ -21,6 +21,7 @@ credits = [
 			"Cammagno - Italian (Game and Documentation)",
 			"Falc - French (Game)",
 			"The Doc - German (Game and Documentation)",
+			"mrbighead - German for BUG 4.5", # trs.doc
 		"-",
 		"MOD_AUTHORS|Mod Authors",
 			"12monkeys - Plot List Enhancements",
@@ -43,6 +44,7 @@ credits = [
 			" -    Military Advisor Deployment and Strategic Advantages, Power Ratio,",
 			" -    Raw Yields, Sevopedia Traits, War/Peace/Enemy in EFA Glance, WhipAssist",
 			" -    (extended BES, CDA, Civ4lerts, GP Progress Bar, PLE, Reminder, Sevopedia, Strategy Layer)",
+			" -    all of the incomplete BUG 4.5 and BULL 1.3", # trs.doc
 			"Eotinb - Autolog, Reminder",
 			"Fallblau - Modified Hall of Fame Screen",
 			"fitchn - Civilopedia Index",
