@@ -1,11 +1,11 @@
 #CvModName.py
 
-# <trs>
+# <trs.>
 modName = "Taurus"
 displayName = "Taurus"
 modVersion = "1.00"
 civVersion = "3.19"
-# </trs>
+# </trs.>
 civName = "BtS"
 
 def getName():

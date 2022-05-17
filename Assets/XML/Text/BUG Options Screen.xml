@@ -11,14 +11,13 @@
 
 <!-- Title and Buttons -->
 
-	<!-- trs: Was "BUG Mod options" -->
+	<!-- trs. Was "BUG Mod options" -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TITLE</Tag>
 		<English>Mod Options</English>
 		<French>Options du BUG Mod</French>
 		<German>Mod-Optionen</German>
 		<Italian>Opzioni BUG Mod</Italian>
-		<Spanish>BUG Mod Options</Spanish>
 	</TEXT>
 	<!-- trs.doc: Now also the Taurus help file -->
 	<TEXT>
@@ -38,23 +37,19 @@
 		<Spanish>Opens the BUG Mod help file. You can hit [ALT + CTRL + F1] from the main interface.</Spanish>
 	</TEXT>
 
-	<!-- trs: was "BUG Options screen" -->
+	<!-- trs. was "BUG Options screen" -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTBUTTON_EXIT_HOVER</Tag>
 		<English>Exits the Options screen</English>
 		<French>Sortir de l'écran d'options du BUG.</French>
 		<German>Optionsmenü schließen</German>
 		<Italian>Esci dalla schermata delle Opzioni del BUG Mod.</Italian>
-		<Spanish>Exits the BUG Options screen.</Spanish>
 	</TEXT>
-	<!-- trs: Was "BUG Options Screen"  -->
+	<!-- trs. Was "BUG Options Screen"  -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTIONS_SCREEN_HOVER</Tag>
 		<English>Shows the Mod Options screen</English>
-		<French>Shows the BUG Option Screen.</French>
 		<German>Ruft die Mod-Optionen auf</German>
-		<Italian>Shows the BUG Option Screen.</Italian>
-		<Spanish>Shows the BUG Option Screen.</Spanish>
 	</TEXT>
 
 <!-- Tabs and Labels -->

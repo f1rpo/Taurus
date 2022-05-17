@@ -1,6 +1,6 @@
 trs.doc: Will try to keep this file up to date. Taurus additions here and
-in program code are tagged with "trs.CAT" comments, where CAT describes the
-category of the change. There is also a Git repository:
+in program code are tagged with "trs." or "trs.CAT" comments, where CAT
+describes th category of the change. There is also a Git repository:
 https://github.com/f1rpo/Taurus
 
 

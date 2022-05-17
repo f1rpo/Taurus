@@ -38,7 +38,7 @@
 				<change module="BugUtil" function="readLoggingOptions"/>
 			</option>
 		</section>
-		<!-- trs: Commented out. Was already disabled through
+		<!-- trs. Commented out. Was already disabled through
 			 BugSystemOptionsTab.py - but I want to double down on that.
 			 No updates for this mod are going to come from that place. -->
 		<!--section id="Subversion">

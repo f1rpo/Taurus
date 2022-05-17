@@ -51,10 +51,8 @@
 		<French>Ouverture du fichier d'aide du BUG Mod...</French>
 		<German>Öffnen der Taurus-Hilfe-Datei...</German>
 		<Italian>Apertura della Guida del BUG Mod in corso...</Italian>
-		<Spanish>Opening the BUG Mod help file...</Spanish>
 	</TEXT>
-	<!-- trs: Unused, and let's keep it that way.
-		 (Because the separate files for FRA and ESP are gone.) -->
+	<!-- trs. Unused, and let's keep it that way. -->
 	<!--TEXT>
 		<Tag>TXT_KEY_BUG_HELP_LANGUAGE</Tag>
 		<English>BUG Mod Help - ENG.chm</English>

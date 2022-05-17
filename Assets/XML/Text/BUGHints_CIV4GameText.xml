@@ -120,7 +120,7 @@
 		<Italian>*Suggerimento del BUG Team*: Scorta sempre i tuoi Coloni. E' molto pericoloso vagare per le Terre Selvagge (specialmente quelle inesplorate).</Italian>
 		<Spanish>*BUG Hint*: Always consider escorting your Settlers.  It's mighty dangerous out in the Wilderness.</Spanish>
 	</TEXT>
-	<!-- trs.hints: Not really good advice -->
+	<!-- trs.doc: Not really good advice -->
 	<!--TEXT>
 		<Tag>TXT_KEY_BUG_HINT_8</Tag>
 		<English>*BUG Hint*: Play to your Civilization's traits, and specialize your Empire.  No use being Charismatic and Aggressive and never starting a war.</English>
@@ -137,7 +137,7 @@
 		<Italian>*Suggerimento del BUG Team*: Vendere le risorse che non usi più, come Rame e Ferro, può rendere parecchio a lungo termine. Però assicurati di venderle ad una nazione amica più debole!</Italian>
 		<Spanish>*BUG Hint*: Selling resources that you no longer use, such as copper or iron, can pay off nicely over the long run.</Spanish>
 	</TEXT>
-	<!-- trs.hints: Too unspecific to be helpful -->
+	<!-- trs.doc: Too unspecific to be helpful -->
 	<!--TEXT>
 		<Tag>TXT_KEY_BUG_HINT_10</Tag>
 		<English>*BUG Hint*: Don't neglect your Diplomacy!  Pay attention to the information you gather, telling you what is available out there.</English>
@@ -154,7 +154,7 @@
 		<Italian>*Suggerimento del BUG Team*: Circunnaviga il globo per primo, e tutte le tue Unità Navali presenti e future riceveranno un bonus di +1 al loro movimento.</Italian>
 		<Spanish>*BUG Hint*: Be the first to circle the globe, and your Naval Units all receive +1 movement.</Spanish>
 	</TEXT>
-	<!-- trs.hints: Misleading. There is no risk prior to non-Animal Barbarians. -->
+	<!-- trs.doc: Misleading. There is no risk prior to non-Animal Barbarians. -->
 	<!--TEXT>
 		<Tag>TXT_KEY_BUG_HINT_12</Tag>
 		<English>*BUG Hint*: Animals can't enter your land, so it can be worth the risk to leave your city undefended and use your warrior for early exploration.</English>
@@ -171,7 +171,7 @@
 		<Italian>*Suggerimento del BUG Team*: Stabilisci relazioni mercantili con nazioni che vanno d'accordo per evitare penalità nei rapporti.</Italian>
 		<Spanish>*BUG Hint*: Form trade relations with nations that get along with each other to avoid an diplomatic repercussions.</Spanish>
 	</TEXT>
-	<!-- trs.hints: BS -->
+	<!-- trs.doc: B.S. -->
 	<!--TEXT>
 		<Tag>TXT_KEY_BUG_HINT_14</Tag>
 		<English>*BUG Hint*: If you neglect your military, and your power becomes weak, a neighbor WILL attack you.</English>
@@ -188,7 +188,7 @@
 		<Italian>*Suggerimento del BUG Team*: Disloca le tue unità navali vicino alle tue risorse acquatiche e mettile di pattuglia per proteggerle.</Italian>
 		<Spanish>*BUG Hint*: Station naval units near your water based resources, and put them on Sea Patrol to protect your resources.</Spanish>
 	</TEXT>
-	<!-- trs.hints: Highest bidder is often the most dangerous rival -->
+	<!-- trs.doc: Highest bidder is often the most dangerous rival -->
 	<!--TEXT>
 		<Tag>TXT_KEY_BUG_HINT_16</Tag>
 		<English>*BUG Hint*: When selling Technologies, shop around for the highest bidder, and then work your way down.</English>
@@ -205,7 +205,7 @@
 		<Italian>*Suggerimento del BUG Team*: Tieni d'occhio i cambiamenti di forma di governo dei tuoi vicini. Un cambiamento da Libertà Religiosa a Teocrazia può significare un aumento di aggressività.</Italian>
 		<Spanish>*BUG Hint*: Watch your neighbors' civics changes.  A change from Free Religion to Theocracy could mean an arms build-up.</Spanish>
 	</TEXT>
-	<!-- trs.hints: Difficult to phrase this sensibly b/c, usually, one can
+	<!-- trs.doc: Difficult to phrase this sensibly b/c, usually, one can
 		 move 2 tiles and still finish with a defensive bonus. -->
 	<!--TEXT>
 		<Tag>TXT_KEY_BUG_HINT_19</Tag>
@@ -215,7 +215,7 @@
 		<Italian>*Suggerimento del BUG Team*: A volte è meglio fermare un Esploratore su una casella di collina, foresta o giungla e perdere il movimento extra in favore della prudenza.</Italian>
 		<Spanish>*BUG Hint*: Sometimes it's better to stop a Scout or Explorer on a forest, hill, or jungle tile and lose the extra movement in favor of safety.</Spanish>
 	</TEXT-->
-	<!-- trs.hints: Enough with these old jokes -->
+	<!-- trs.doc: Enough with these old jokes -->
 	<!--TEXT>
 		<Tag>TXT_KEY_BUG_HINT_18</Tag>
 		<English>*BUG Hint*: Speak softly and carry a big stick, and you will go far.</English>
