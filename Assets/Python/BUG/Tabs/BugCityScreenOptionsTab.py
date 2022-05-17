@@ -115,6 +115,8 @@ class BugCityScreenOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addCheckbox(screen, panel, "MiscHover__BaseCommerce")
 		self.addCheckbox(screen, panel, "CityScreen__FoodAssist")
 		self.addCheckbox(screen, panel, "CityScreen__Anger_Counter")
+		# trs.fix: Used by DLL but was missing from the menu
+		self.addCheckbox(screen, panel, "CityScreen__BuildingDoubleCommerce")
 		self.addCheckbox(screen, panel, "CityScreen__CultureTurns")
 		self.addCheckbox(screen, panel, "MainInterface__ProgressBarsTickMarks")
 		self.addCheckbox(screen, panel, "CityScreen__OnlyPresentReligions")

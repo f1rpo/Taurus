@@ -118,6 +118,20 @@
 		<Italian>Quando è selezionato, la stima del surplus di produzione include la produzione corrente della Città.</Italian>
 		<Spanish>When checked, whip production overflow estimates will include the city's current [ICON_PRODUCTION].</Spanish>
 	</TEXT>
+
+	<!-- trs.fix: Help text for previously missing option.
+		 Texts based on the changelog. -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYSCREEN__BUILDINGDOUBLECOMMERCE_TEXT</Tag>
+		<English>Double Commerce</English>
+		<German>Kultur-Verdoppelung</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_CITYSCREEN__BUILDINGDOUBLECOMMERCE_HOVER</Tag>
+		<English>When checked, shows the year each building was constructed in its hover text and how many years until its [ICON_CULTURE] rate doubles.</English>
+		<German>Zeigt im Hilfe-Text der Gebäudeliste an, in welchem Jahr die Gebäude errichtet wurden und wann sich ihre [ICON_CULTURE]/Runde verdoppelt.</German>
+	</TEXT>
+
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_CITYSCREEN__CULTURETURNS_TEXT</Tag>
 		<English>Culture Turns</English>

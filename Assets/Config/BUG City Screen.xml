@@ -69,6 +69,13 @@
 			<option id="Anger_Counter" key="Anger Counter" 
 					type="boolean" default="True" 
 					get="isShowAngerCounter" dirtyBit="CityScreen"/>
+
+			<!-- trs.fix: Option was tested by DLL but missing from menu.
+				 Setting it to False by default b/c it's a BULL 1.3 addition
+				 and potentially annoying. -->
+			<!-- Building Double Commerce by EmperorFool -->
+			<option id="BuildingDoubleCommerce" key="Building Double Commerce" 
+					type="boolean" default="False" dirtyBit="CityScreen"/>
 			
 			<!-- Show Only Present and Extra Religions/Corporations by johny smith -->
 			<option id="OnlyPresentReligions" key="Only Present Religions" 
