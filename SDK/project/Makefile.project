@@ -5,7 +5,11 @@ PROJECT_CFLAGS = /W3 /WX /D_MOD_AIAUTOPLAY
 # Allow inline expansion of functions with an inline keyword even for debug builds
 PROJECT_LIBS = ../CxImage/lib/Gdi32.Lib ../CxImage/lib/Ole32.Lib
 PROJECT_RELEASE_LIBS = ../CxImage/lib/CxImage.lib
-PROJECT_DEBUG_LIBS = ../CxImage/lib/CxImage_debug.lib
+#PROJECT_DEBUG_LIBS = ../CxImage/lib/CxImage_debug.lib
+# The _debug lib also seems to require msvcr71d.dll to work properly.
+# At least I'm getting an error message about that file when debugging
+# with CxImage_debug.lib. Annoying, and who needs symbols for CxImage anyway?
+PROJECT_DEBUG_LIBS = ../CxImage/lib/CxImage.lib
 PROJECT_Debug_CFLAGS = /Ob1
 # For debugging memory errors that don't occur in debug builds
 #PROJECT_DebugOpt_CFLAGS = /DFASSERT_ENABLE /Oy-

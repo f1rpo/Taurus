@@ -97,7 +97,9 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 // BUG - EXE/DLL Paths - start
 		dllModule = hModule;
 
-#ifdef _DEBUG
+//ifdef _DEBUG
+// trs.debug: This is pretty annoying
+#if 0
 		MessageBox(0, "DLL attached", "Message", 0);
 #endif
 // BUG - EXE/DLL Paths - end
