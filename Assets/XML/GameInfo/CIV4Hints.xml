@@ -212,7 +212,11 @@
 		</HintInfo>
 		
 		<!-- BUG Interface Hints -->
-		
+
+		<!-- trs.doc -->
+		<HintInfo>
+			<Description>TXT_KEY_TAURUS_HINT_INTERFACE_1</Description>
+		</HintInfo>
 		<HintInfo>
 			<Description>TXT_KEY_BUG_HINT_INTERFACE_1</Description>
 		</HintInfo>

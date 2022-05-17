@@ -2,13 +2,19 @@
 <!-- BUG Hints -->
 <!-- Copyright (c) 2007, BUG Mod -->
 <Civ4GameText xmlns="http://www.firaxis.com">
+	<!-- trs.doc -->
+	<TEXT>
+		<Tag>TXT_KEY_TAURUS_HINT_INTERFACE_1</Tag>
+		<English>[Taurus] Most features are enabled by default, but that doesn't mean that they're all likely useful to most players. If the interface seems cluttered to you, open the Mod Options screen and keep only what you need.</English>
+		<German>[Taurus] Kaum ein Spieler wird alle Funktionen der Mod nutzen. Wenn Ihnen die Benutzeroberfläche überfrachtet vorkommt, dann kann das Optionsmenü Abhilfe schaffen; praktisch alles ist optional.</German>
+	</TEXT>
+	<!-- trs.doc: Now named just "Mod Options" screen -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_HINT_INTERFACE_1</Tag>
-		<English>*BUG Hint*: Press [ALT + CTRL + O] to enter The BUG Mod Options Screen.</English>
+		<English>*BUG Hint*: Press [ALT + CTRL + O] to enter the Mod Options Screen.</English>
 		<French>*Conseils du BUG*: Pressez [ALT + CTRL + O] pour accèder aux écrans d'options du BUG Mod.</French>
-		<German>[BUG] Tipp... Mit der Tastenkombination [STRG + ALT + O] lässt sich das Optionsmenü der BUG Mod aufrufen.</German>
+		<German>[BUG] Tipp... Mit der Tastenkombination [STRG + ALT + O] lässt sich das Optionsmenü der Mod aufrufen.</German>
 		<Italian>*Suggerimento del BUG Team*: Premi [ALT + CTRL + O] per accedere alla schermata di configurazione del BUG Mod.</Italian>
-		<Spanish>*BUG Hint*: Press [ALT + CTRL + O] to enter The BUG Mod Options Screen.</Spanish>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_HINT_INTERFACE_2</Tag>
