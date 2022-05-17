@@ -397,7 +397,8 @@ class DotMapLayer(StrategyLayer):
 			return False
 		eTeam = pPlayer.getTeam()
 		pPlot = gc.getMap().plot(point[X], point[Y])
-		if pPlot.isRevealed(eTeam, False):
+		#if pPlot.isRevealed(eTeam, False): trs.dotmap: Revert to BUG 4.4 behavior
+		if True:
 			CyMessageControl().sendModNetMessage(MSG_ADD_CITY, PlayerUtil.getActivePlayerID(), point[X] * 1000 + point[Y], color, layer)
 
 	def addCityMessage(self, ePlayer, xy, color, layer):

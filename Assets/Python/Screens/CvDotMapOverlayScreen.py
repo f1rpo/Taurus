@@ -238,7 +238,8 @@ class CvDotMapOverlayScreen:
 		eTeam = pPlayer.getTeam()
 
 		# update city location if plot is visible
-		if plot.isRevealed(eTeam, False):
+		#if plot.isRevealed(eTeam, False):
+		if True: # trs.dotmap: Revert this part to BUG 4.4 behavior
 			self.currentPoint = (x, y)
 			g_DotMap.highlightCity(self.currentPoint, self.currentColor)
 			self.resetInterfaceMode()
