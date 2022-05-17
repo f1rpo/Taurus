@@ -20,8 +20,8 @@ credits = [
 		"TRANSLATORS|Translators",
 			"Cammagno - Italian (Game and Documentation)",
 			"Falc - French (Game)",
+			"MrBighead - German (Game - BUG 4.1 to 4.5)", # trs.doc
 			"The Doc - German (Game and Documentation)",
-			"mrbighead - German for BUG 4.5", # trs.doc
 		"-",
 		"MOD_AUTHORS|Mod Authors",
 			"12monkeys - Plot List Enhancements",
@@ -41,10 +41,10 @@ credits = [
 			" -    (extended Autolog, Reversible Power Ratio)",
 			"Ekmek - Shortcuts in Civilopedia",
 			"EmperorFool - Advanced Scoreboard, BUG Core and Utils, BULL, Great Person Tech Prefs,",
-			" -    Military Advisor Deployment and Strategic Advantages, Power Ratio,",
-			" -    Raw Yields, Sevopedia Traits, War/Peace/Enemy in EFA Glance, WhipAssist",
+			" -    Military Advisor Deployment and Strategic Advantages, Power Ratio, Raw Yields",
+			# trs.doc: BULL, in its entirety, is already listed, so just add Stack Promotions to have BUG 4.5 covered.
+			" -    Sevopedia Traits, War/Peace/Enemy in EFA Glance, WhipAssist, Stack Promotions",
 			" -    (extended BES, CDA, Civ4lerts, GP Progress Bar, PLE, Reminder, Sevopedia, Strategy Layer)",
-			" -    all of the incomplete BUG 4.5 and BULL 1.3", # trs.doc
 			"Eotinb - Autolog, Reminder",
 			"Fallblau - Modified Hall of Fame Screen",
 			"fitchn - Civilopedia Index",
