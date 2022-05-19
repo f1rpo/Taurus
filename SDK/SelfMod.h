@@ -9,6 +9,7 @@
 class Civ4BeyondSwordMods
 {
 public:
+	// (Unused for now)
 	bool isPlotIndicatorSizePatched() const { return m_bPlotIndicatorSizePatched; }
 	void patchPlotIndicatorSize(); // (exposed to Python)
 private:
