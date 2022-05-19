@@ -16,12 +16,18 @@
 // Macro for Setting Global Art Defines
 #define INIT_XML_GLOBAL_LOAD(xmlInfoPath, infoArray, numInfos)  SetGlobalClassInfo(infoArray, xmlInfoPath, numInfos);
 
-bool CvXMLLoadUtility::ReadGlobalDefines(const TCHAR* szXMLFileName, CvCacheObject* cache)
+bool CvXMLLoadUtility::ReadGlobalDefines(
+	const TCHAR* szPath, // trs.xmlload
+	const TCHAR* szFileName, CvCacheObject* cache)
 {
 	bool bLoaded = false;	// used to make sure that the xml file was loaded correctly
 
-	if (!gDLL->cacheRead(cache, szXMLFileName))			// src data file name
-	{
+	//if (!gDLL->cacheRead(cache, szXMLFileName))			// src data file name
+	// <trs.xmlload> Akin to LoadGlobalClassInfo
+	if (!gDLL->cacheRead(cache, std::strlen(szPath) == 0 ?
+		CvString::format("xml\\%s.xml", szFileName) :
+		CvString::format("xml\\\\%s\\\\%s.xml", szPath, szFileName)))
+	{ // </trs.xmlload>
 		// load normally
 		if (!CreateFXml())
 		{
@@ -29,13 +35,19 @@ bool CvXMLLoadUtility::ReadGlobalDefines(const TCHAR* szXMLFileName, CvCacheObje
 		}
 
 		// load the new FXml variable with the szXMLFileName file
-		bLoaded = LoadCivXml(m_pFXml, szXMLFileName);
+		//bLoaded = LoadCivXml(m_pFXml, szXMLFileName);
+		// <trs.xmlload>
+		bLoaded = LoadCivXml(m_pFXml, std::strlen(szPath) == 0 ?
+				CvString::format("xml\\%s", szFileName) :
+				CvString::format("xml\\%s/%s", szPath, szFileName));
 		if (!bLoaded)
 		{
-			char	szMessage[1024];
-			sprintf( szMessage, "LoadXML call failed for %s \n Current XML file is: %s", szXMLFileName, GC.getCurrentXMLFile().GetCString());
+			char szMessage[1024];
+			//sprintf( szMessage, "LoadXML call failed for %s \n Current XML file is: %s", szXMLFileName, GC.getCurrentXMLFile().GetCString());
+			sprintf(szMessage, "LoadXML call failed for %s.", CvString::format("%s/%s",
+					szPath, szFileName).GetCString());
 			errorMessage(szMessage, XML_LOAD_ERROR);
-		}
+		} // </trs.xmlload>
 
 		// if the load succeeded we will continue
 		if (bLoaded)
@@ -179,21 +191,19 @@ bool CvXMLLoadUtility::SetGlobalDefines()
 	//
 
 	CvCacheObject* cache = gDLL->createGlobalDefinesCacheObject("GlobalDefines.dat");	// cache file name
-
-	if (!ReadGlobalDefines("xml\\GlobalDefines.xml", cache))
+	// <trs.xmlload> Read from subfolder, two new files.
+	char const* aszGlobalDefines[][2] = {
+		{ "", "GlobalDefines.xml" },
+		{ "", "PythonCallbackDefines.xml" },
+		{ "GlobalDefines", "GlobalDefinesAlt.xml" },
+		{ "GlobalDefines", "Taurus.xml" },
+		{ "GlobalDefines", "ReDefines.xml" },
+	};
+	for (int i = 0; i < ARRAYSIZE(aszGlobalDefines); i++)
 	{
-		return false;
-	}
-
-	if (!ReadGlobalDefines("xml\\GlobalDefinesAlt.xml", cache))
-	{
-		return false;
-	}
-
-	if (!ReadGlobalDefines("xml\\PythonCallbackDefines.xml", cache))
-	{
-		return false;
-	}
+		if (!ReadGlobalDefines(aszGlobalDefines[i][0], aszGlobalDefines[i][1], cache))
+			return false;
+	} // </trs.xmlload>
 
 	if (gDLL->isModularXMLLoading())
 	{
@@ -202,7 +212,7 @@ bool CvXMLLoadUtility::SetGlobalDefines()
 
 		for (std::vector<CvString>::iterator it = aszFiles.begin(); it != aszFiles.end(); ++it)
 		{
-			if (!ReadGlobalDefines(*it, cache))
+			if (!ReadGlobalDefines("", *it, cache))
 			{
 				return false;
 			}
@@ -213,7 +223,7 @@ bool CvXMLLoadUtility::SetGlobalDefines()
 
 		for (std::vector<CvString>::iterator it = aszModularFiles.begin(); it != aszModularFiles.end(); ++it)
 		{
-			if (!ReadGlobalDefines(*it, cache))
+			if (!ReadGlobalDefines("", *it, cache))
 			{
 				return false;
 			}

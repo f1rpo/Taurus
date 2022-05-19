@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- trs. For global defines added by Taurus. Those are _not_ going to toggle
+	 individual BUG options on and off like the defines in GlobalDefinesAlt -
+	 there's no point in that when the mod is always bundled with BUG.
+	 Defines that overwrite settings in the BtS GlobalDefines.xml should also
+	 not be placed here; use GlobalReDefines.xml instead. -->
+<Civ4Defines xmlns="x-schema:CIV4GlobalDefinesSchema.xml">
+
+	<!-- trs.:  -->
+	<Define>
+		<DefineName></DefineName>
+        <iDefineIntVal></iDefineIntVal>
+    </Define>
+
+</Civ4Defines>

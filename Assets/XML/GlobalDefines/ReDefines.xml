@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!-- trs. Any defines that override the BtS version of GlobalDefines.xml
+	 should go here. -->
+<Civ4Defines xmlns="x-schema:CIV4GlobalDefinesSchema.xml">
+
+	<!-- (none so far) -->
+
+</Civ4Defines>

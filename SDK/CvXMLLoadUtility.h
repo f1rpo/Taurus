@@ -50,7 +50,8 @@ public:
 	DllExport bool LoadGraphicOptions();
 
 	// read the global defines from a specific file
-	DllExport bool ReadGlobalDefines(const TCHAR* szXMLFileName, CvCacheObject* cache);
+	bool ReadGlobalDefines(/* trs.xmlload: */ const TCHAR* szPath,
+			const TCHAR* szFileName, CvCacheObject* cache);
 	// loads globaldefines.xml and calls various other functions to load relevant global variables
 	DllExport bool SetGlobalDefines();
 	// loads globaltypes.xml and calls various other functions to load relevant global variables
