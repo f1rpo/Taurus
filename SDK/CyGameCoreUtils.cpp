@@ -4,6 +4,7 @@
 #include "CyPlot.h"
 #include "CyCity.h"
 #include "CyUnit.h"
+#include "SelfMod.h" // trs.balloon
 
 int cyIntRange(int iNum, int iLow, int iHigh)
 {
@@ -275,3 +276,8 @@ int cyCalculateLevel(int iExperience, int ePlayer)
 }
 // BUG - Unit Experience - end
 
+// trs.balloon:
+void cyUpdatePlotIndicatorSize()
+{
+	smc::BtS_EXE.patchPlotIndicatorSize();
+}

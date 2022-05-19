@@ -687,6 +687,11 @@ public:
 	DllExport void setDefineINT( const char * szName, int iValue );
 	DllExport void setDefineFLOAT( const char * szName, float fValue );
 	DllExport void setDefineSTRING( const char * szName, const char * szValue );
+	// trs.
+	bool getDefineBOOL(char const* szName) const
+	{
+		return (getDefineINT(szName) > 0);
+	}
 
 	int getMOVE_DENOMINATOR();
 	int getNUM_UNIT_PREREQ_OR_BONUSES();

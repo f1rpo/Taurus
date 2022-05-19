@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <map>
 #include <hash_map>
+#include <algorithm> // trs.
 
 #define DllExport   __declspec( dllexport ) 
 
