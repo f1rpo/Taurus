@@ -298,6 +298,16 @@ private:
 	CvWString CreateKeyStringFromKBCode(const TCHAR* pszHotKey);
 
 	void orderHotkeyInfo(int** ppiSortedIndex, int* pHotkeyIndex, int iLength);
+	/*	<trs.xmlload> (Some BtS code said "XML Error", some "XML Load Error"
+		not sure if that's meaningful, but let's preserve that.)*/
+	enum XMLErrorTypes
+	{
+		GENERAL_XML_ERROR,
+		XML_LOAD_ERROR,
+	};
+	static void errorMessage(char const* szMessage,
+			XMLErrorTypes eErrType = GENERAL_XML_ERROR);
+	// </trs.xmlload>
 	void logMsg(char* format, ... );
 };
 
