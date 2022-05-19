@@ -1,6 +1,7 @@
 // trs.smc: New implementation file; see comment in header.
 #include "CvGameCoreDLL.h"
 #include "SelfMod.h"
+#include "CvBugOptions.h"
 
 Civ4BeyondSwordMods smc::BtS_EXE;
 
@@ -84,23 +85,19 @@ public:
 		PlotIndicatorSize ffBaseSize(42, 68);
 		bool bAdjustToFoV = true;
 		bool bAdjustToRes = false;
-	#ifdef BUG_OPTIONS
 		{
-			int iUserChoice = BUGOption::getValue("MainInterface__PlotIndicatorSize");
+			int iUserChoice = getBugOptionINT("Taurus__PlotIndicatorSize");
 			switch (iUserChoice)
 			{
-			case 0: ffBaseSize.onScreen -= 2; break; // "automatic" behavior
+				/* "Automatic" behavior: Subtract a little b/c the BtS size
+					is a bit too big overall, i.e. even on the lowest resolution. */
+			case 0: ffBaseSize.onScreen -= 2; break;
 			case 1: std::swap(bAdjustToFoV, bAdjustToRes); break; // BtS behavior
 			/*	Note that this formula ignores how the choices are labeled.
 				That menu text needs to be kept consistent with our code here. */
 			default: ffBaseSize.onScreen = 15 + 5 * static_cast<float>(iUserChoice);
 			}
 		}
-	#else
-		/*	Subtract a little b/c the BtS size is a bit too big overall,
-			i.e. even on the lowest resolution. */
-		ffBaseSize.onScreen -= 2;
-	#endif
 		/*	The EXE will adjust to height. Rather than try to change that in the EXE,
 			we'll proactively cancel out the adjustment. */
 		if (!bAdjustToRes)
@@ -113,8 +110,7 @@ public:
 						but the adjustment really just seems to be a bad idea. */
 					// std::pow(fHeightRatio, 0.85f)
 		}
-		/*	[This part is aimed at BUG integration but does no harm w/o BUG.]
-			FoV correlates with screen size, (typical) camera distance and
+		/*	FoV correlates with screen size, (typical) camera distance and
 			the player's distance from the screen. And BtS seems to make a small
 			adjustment based on FoV and camera distance too (probably
 			not explicitly). So it's hard to reason about this adjustment.
@@ -122,24 +118,20 @@ public:
 			about one quarter of a plot's side length. */
 		if (bAdjustToFoV)
 		{
-			float fTypicalFoV = 40;
+			float fTypicalFoV = 42;
 			ffBaseSize.onScreen *= std::min(2.f, std::max(0.5f,
 					std::sqrt(fTypicalFoV / GC.getFIELD_OF_VIEW())));
 		}
 		/*	(I'm not going to dirty the globe layer in response to a FoV change - that
 			would probably cause stuttering while the player adjusts the FoV slider.) */
-	#ifdef BUG_OPTIONS
 		{
-			int iUserChoice = BUGOption::getValue("MainInterface__OffScreenUnitSizeMult");
+			int iUserChoice = getBugOptionINT("Taurus__OffScreenUnitSizeMult");
 			if (iUserChoice == 7)
-			{	// Meaning "disable". 0 size seems to do accomplish that.
+			{	// Meaning "disable". 0 size seems to accomplish that.
 				ffBaseSize.offScreen = 0;
 			}
 			else ffBaseSize.offScreen = ffBaseSize.onScreen * (0.8f + 0.2f * iUserChoice);
 		}
-	#else
-		ffBaseSize.offScreen = ffBaseSize.onScreen * 1.4f;
-	#endif
 
 		if (ffBaseSize.equals(ffMostRecentBaseSize))
 			return;

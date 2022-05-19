@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!-- trs. Config for all options added by the Taurus mod.
+	 (Can still split this up later if it becomes cluttered.) -->
+<mod id="Taurus" module="TaurusCore"
+	 name="Taurus" author="f1rpo" version="1.0" date="19/05/2022">
+ 
+	<options id="Taurus" file="Taurus.ini">
+		<section id="Map">
+
+			<!-- trs.balloon: start -->
+			<!-- (Caveat: The DLL doesn't have access to these ID strings;
+				 the behavior is only based only on the order of the choices.) -->
+			<list	id="PlotIndicatorSize" key="Plot Indicator Size"
+					type="int" default="0" listType="string"
+					dirtyBit="GlobeLayer">
+				<change module="TaurusCore" function="updatePlotIndicatorSize"/>
+				<choice id="Auto"/> <choice id="BtS"/>
+				<choice id="25"/> <choice id="30"/> <choice id="35"/>
+				<choice id="40"/> <choice id="45"/> <choice id="50"/> <choice id="55"/>
+				<choice id="60"/> <choice id="65"/>
+			</list>
+			<list   id="OffScreenUnitSizeMult" key="Off Screen Unit Size Mult"
+					type="int" default="3" listType="string">
+				<change module="TaurusCore" function="updatePlotIndicatorSize"/>
+				<choice id="0.8"/> <choice id="1.0"/> <choice id="1.2"/> <choice id="1.4"/>
+				<choice id="1.6"/> <choice id="1.8"/> <choice id="2.0"/> <choice id="2.2"/>
+				<choice id="Disable"/>
+			</list>
+			<!-- trs.balloon: end -->
+
+		</section>
+	</options>
+
+</mod>

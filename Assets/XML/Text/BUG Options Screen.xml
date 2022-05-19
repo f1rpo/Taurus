@@ -147,13 +147,19 @@
 		<Italian>Mappa</Italian>
 		<Spanish>Map</Spanish>
 	</TEXT>
+	<!-- trs. Renamed from "Strategy Layer". New text contrasts better
+		 with (other) map layer options (and with the Strategy globe layer). -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTLABEL_STRATEGYOVERLAY</Tag>
-		<English>Strategy Layer:</English>
-		<French>Strategy Layer:</French>
+		<English>Dot Map Overlay:</English>
 		<German>Strategie-Overlay:</German>
-		<Italian>Livello Strategico:</Italian>
-		<Spanish>Strategy Layer:</Spanish>
+	</TEXT>
+	<!-- trs. Map layers - but this goes on the Map tab,
+		 so that should be clear. -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPTLABEL_MAPLAYERS</Tag>
+		<English>Layers:</English>
+		<German>Ansichten:</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTLABEL_CITYBAR</Tag>

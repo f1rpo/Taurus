@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!-- trs.doc: Game text for Taurus additions to Mod Options screen -->
+<Civ4GameText xmlns="http://www.firaxis.com">
+
+	<!-- trs.balloon: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__PLOTINDICATORSIZE_TEXT</Tag>
+		<English>Balloon Size</English>
+		<German>Ballon-Größe</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__PLOTINDICATORSIZE_LIST</Tag>
+		<English>Auto|BtS|25|30|35|40|45|50|55|60|65</English>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__PlotIndicatorSize_HOVER</Tag>
+		<English>The size of the balloon icons that the game uses for the Resource and Unit Display and for indicating tiles where some event has occurred. [COLOR_HIGHLIGHT_TEXT]Auto[COLOR_REVERT] sets the size based on the camera's [COLOR_HIGHLIGHT_TEXT]Field of View[COLOR_REVERT] value, [COLOR_HIGHLIGHT_TEXT]BtS[COLOR_REVERT] sets it based on the screen resolution. The other choices aim at (approximately) a specific diameter in pixels.</English>
+		<German>Die Größe der "Sprechblasen" in denen Ressourcen-, Einheiten- und Ereignis-Symbole angezeigt werden. [COLOR_HIGHLIGHT_TEXT]Auto[COLOR_REVERT] bedeutet, dass die Größe abhängig von der [COLOR_HIGHLIGHT_TEXT]Sichtfeld[COLOR_REVERT]-Größe gewählt wird, [COLOR_HIGHLIGHT_TEXT]BtS[COLOR_REVERT], dass sie von der Bildauflösung abhängt. Es kann auch ein bestimmter Durchmesser in Pixeln (ungefähr) eingestellt werden.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__OFFSCREENUNITSIZEMULT_TEXT</Tag>
+		<English>Off-Screen Balloon Size</English>
+		<German>Ballon-Größe Bildrand</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__OFFSCREENUNITSIZEMULT_LIST</Tag>
+		<English>0.8|1.0|1.2|1.4|1.6|1.8|2.0|Disable</English>
+		<German>0.8|1.0|1.2|1.4|1.6|1.8|2.0|Keine</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__OFFSCREENUNITSIZEMULT_HOVER</Tag>
+		<English>Multiplier for the [COLOR_HIGHLIGHT_TEXT]Balloon Size[COLOR_REVERT] when the currently selected unit is off-screen. (Off-screen indicators shown for certain events are not affected by this multiplier.) [COLOR_HIGHLIGHT_TEXT]1.4[COLOR_REVERT] is the Taurus default, [COLOR_HIGHLIGHT_TEXT]1.6[COLOR_REVERT] is closest to the original behavior. [COLOR_HIGHLIGHT_TEXT]Disable[COLOR_REVERT] means that no balloon is shown for off-screen units. Changes won't take effect until a different unit is selected.</English>
+		<German>Faktor, mit dem die [COLOR_HIGHLIGHT_TEXT]Ballon-Größe[COLOR_REVERT] multipliziert wird, wenn die derzeit ausgewählte Einheit nicht im Bild ist. Standard in Taurus ist [COLOR_HIGHLIGHT_TEXT]1.4[COLOR_REVERT], in BtS betrug der Faktor ca. [COLOR_HIGHLIGHT_TEXT]1.6[COLOR_REVERT]. Die Einheiten-Ballons am Bildrand können auch ganz deaktiviert werden ([COLOR_HIGHLIGHT_TEXT]Keine[COLOR_REVERT]). Änderungen werden erst nach Auswahl einer anderen Einheit wirksam. (Ein Ballon am Bildrand wird auch bei manchen Ereignis-Meldungen angezeigt; diese Option hier betrifft aber nur Einheiten.)</German>
+	</TEXT>
+	<!-- trs.balloon: end -->
+
+</Civ4GameText>

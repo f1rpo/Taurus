@@ -20,7 +20,10 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		column = self.addOneColumnLayout(screen, panel)
 		
 		left, center, right = self.addThreeColumnLayout(screen, column, "Top", True)
-		self.createStrategyLayerPanel(screen, left)
+		# trs. Since there is no four-column layout ...
+		leftL, leftR = self.addTwoColumnLayout(screen, left, "MapOverlays", True)
+		self.createStrategyLayerPanel(screen, leftL) # trs. Was (screen, left).
+		self.createOtherLayersPanel(screen, leftR) # trs. New panel.
 		self.createCityBarPanel(screen, center)
 		self.createTileHoverPanel(screen, center)
 		self.createMiscellaneousPanel(screen, right)
@@ -36,10 +39,28 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addCheckbox(screen, panel, "StrategyOverlay__Enabled")
 		self.addCheckbox(screen, panel, "StrategyOverlay__ShowDotMap")
 		self.addCheckbox(screen, panel, "StrategyOverlay__DotMapDrawDots")
-		left, right = self.addTwoColumnLayout(screen, panel, "DotMapBrightness")
-		#self.addTextEdit(screen, left, right, "StrategyOverlay__DotMapDotIcon")
-		self.addSlider(screen, left, right, "StrategyOverlay__DotMapBrightness", False, False, False, "up", 0, 100)
-		self.addSlider(screen, left, right, "StrategyOverlay__DotMapHighlightBrightness", False, False, False, "up", 0, 100)
+		# trs. Don't have room for two columns in here anymore
+		#left, right = self.addTwoColumnLayout(screen, panel, "DotMapBrightness")
+		#self.addTextEdit(screen, panel, panel, "StrategyOverlay__DotMapDotIcon")
+
+		# trs. Was labelPanel=left, controlPanel=right in both calls
+		# (and in the addTextEdit above, which was already commented out).
+		# stacked=True param added to put the labels on a separate line.
+		self.addSlider(screen, panel, panel,
+				"StrategyOverlay__DotMapBrightness",
+				False, False, False, "up", 0, 100, True)
+		self.addSlider(screen, panel, panel,
+				"StrategyOverlay__DotMapHighlightBrightness",
+				False, False, False, "up", 0, 100, True)
+
+	# trs. For map overlays (broadly speaking) other than the DotMap.
+	# Might add more here in the future.
+	def createOtherLayersPanel(self, screen, panel):
+		self.addLabel(screen, panel, "MapLayers")
+		# <trs.balloon>
+		self.addTextDropdown(screen, panel, panel, "Taurus__PlotIndicatorSize")
+		self.addTextDropdown(screen, panel, panel, "Taurus__OffScreenUnitSizeMult")
+		# </trs.balloon>
 		
 	def createCityBarPanel(self, screen, panel):
 		self.addLabel(screen, panel, "CityBar", "CityBar:")
