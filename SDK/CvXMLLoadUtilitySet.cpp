@@ -8,7 +8,6 @@
 #include "CvGlobals.h"
 #include "CvArtFileMgr.h"
 #include "CvGameTextMgr.h"
-#include <algorithm>
 #include "CvInfoWater.h"
 #include "FProfiler.h"
 #include "FVariableSystem.h"

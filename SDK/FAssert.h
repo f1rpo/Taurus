@@ -50,4 +50,7 @@ bool FAssertDlg( const char*, const char*, const char*, unsigned int, bool& );
 
 #endif
 
+// trs.
+#define FErrorMsg(msg) FAssertMsg(false, msg)
+
 #endif // FASSERT_H
