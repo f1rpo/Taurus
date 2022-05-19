@@ -280,6 +280,11 @@ public:
 
 	DllExport bool isFinalInitialized() const;																		// Exposed to Python
 	DllExport void setFinalInitialized(bool bNewValue);
+	// <trs.balloon>
+	void setScreenDimensions(int iWidth, int iHeight); // (exposed to Python)
+	int getScreenWidth() const;
+	int getScreenHeight() const;
+	// </trs.balloon>
 
 	bool getPbemTurnSent() const;
 	DllExport void setPbemTurnSent(bool bNewValue);
@@ -577,6 +582,7 @@ protected:
 	int m_iInitTech;
 	int m_iInitWonders;
 	int m_iAIAutoPlay;
+	int m_iScreenWidth, m_iScreenHeight; // smcpoc
 
 	unsigned int m_uiInitialTime;
 

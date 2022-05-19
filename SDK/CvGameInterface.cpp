@@ -3144,3 +3144,25 @@ void CvGame::handleDiplomacySetAIComment(DiploCommentTypes eComment) const
 		}
 	}
 }
+
+
+/*	<trs.balloon> Could get this through winuser.h, but that's not trivial.
+	Let's just let Python provide the info to us. */
+void CvGame::setScreenDimensions(int iWidth, int iHeight)
+{
+	// Avoid warped plot indicators upon changing resolution
+	if (m_iScreenWidth != iWidth || m_iScreenHeight != iHeight)
+		gDLL->getInterfaceIFace()->setDirty(GlobeLayer_DIRTY_BIT, true);
+	m_iScreenWidth = iWidth;
+	m_iScreenHeight = iHeight;
+}
+
+int CvGame::getScreenWidth() const
+{
+	return m_iScreenWidth;
+}
+
+int CvGame::getScreenHeight() const
+{
+	return m_iScreenHeight;
+} // </trs.balloon>
