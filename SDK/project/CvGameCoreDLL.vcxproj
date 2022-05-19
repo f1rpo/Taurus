@@ -134,6 +134,7 @@
     <ClCompile Include="..\CyUnitInterface1.cpp" />
     <ClCompile Include="..\FAssert.cpp" />
     <ClCompile Include="..\FDialogTemplate.cpp" />
+    <ClCompile Include="..\SelfMod.cpp" />
     <ClCompile Include="..\_precompile.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -233,6 +234,7 @@
     <ClInclude Include="..\FProfiler.h" />
     <ClInclude Include="..\FVariableSystem.h" />
     <ClInclude Include="..\LinkedList.h" />
+    <ClInclude Include="..\SelfMod.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\FVariableSystem.inl" />

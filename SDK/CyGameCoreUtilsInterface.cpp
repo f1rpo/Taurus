@@ -74,4 +74,5 @@ void CyGameCoreUtilsPythonInterface()
 	python::def("calculateExperience", cyCalculateExperience, "int (int iLevel, int /*PlayerTypes*/ iPlayer)");
 	python::def("calculateLevel", cyCalculateLevel, "int (int iExperience, int /*PlayerTypes*/ iPlayer)");
 // BUG - Unit Experience - end
+	python::def("cyUpdatePlotIndicatorSize", cyUpdatePlotIndicatorSize, "void (void)"); // trs.balloon
 }

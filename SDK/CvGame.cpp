@@ -465,6 +465,7 @@ void CvGame::reset(HandicapTypes eHandicap, bool bConstructorCall)
 	m_iInitTech = 0;
 	m_iInitWonders = 0;
 	m_iAIAutoPlay = 0;
+	m_iScreenWidth = m_iScreenHeight = 0; // trs.balloon
 
 	m_uiInitialTime = 0;
 

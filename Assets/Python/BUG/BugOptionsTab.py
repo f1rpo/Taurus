@@ -409,11 +409,21 @@ class BugOptionsTab:
 				self.addMissingOption(screen, dropPanel, dropOption)
 	
 
-	def addSlider (self, screen, labelPanel, controlPanel, name, spacer=False, vertical=False, expanding=True, fill=None, min=0, max=100):
+	def addSlider (self, screen, labelPanel, controlPanel, name,
+			spacer=False, vertical=False, expanding=True, fill=None, min=0, max=100,
+			stacked = False): # trs. Put the label on a separate line
 		option = self.getOption(name)
 		if (option is not None):
 			# create label
 			if (labelPanel is not None):
+				label = name + "Label"
+				# <trs.>
+				if stacked:
+					self.addLabel(screen, labelPanel, label, option.getTitle() + ":")
+					self.addSlider(screen, None, controlPanel,
+							name, spacer, vertical, expanding, fill, min, max)
+					return
+				# </trs.>
 				if (labelPanel == controlPanel or spacer):
 					box = name + "HBox"
 					screen.attachHBox(labelPanel, box)
@@ -423,7 +433,6 @@ class BugOptionsTab:
 					if (labelPanel == controlPanel):
 						controlPanel = box
 					labelPanel = box
-				label = name + "Label"
 				screen.attachLabel(labelPanel, label, option.getTitle())
 				screen.setControlFlag(label, "CF_LABEL_DEFAULTSIZE")
 				

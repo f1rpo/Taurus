@@ -74,5 +74,6 @@ int cyGetEspionageModifier(int /*TeamTypes*/ iOurTeam, int /*TeamTypes*/ iTarget
 int cyCalculateExperience(int iLevel, int /*PlayerTypes*/ ePlayer);
 int cyCalculateLevel(int iExperience, int /*PlayerTypes*/ ePlayer);
 // BUG - Unit Experience - end
+void cyUpdatePlotIndicatorSize(); // trs.balloon
 
 #endif	// CyGameCoreUtils_h

@@ -35,6 +35,7 @@
 // BUG - Ignore Harmless Barbarians - start
 #include "CvBugOptions.h"
 // BUG - Ignore Harmless Barbarians - end
+#include "SelfMod.h" // trs.balloon
 
 
 // Public Functions...
@@ -21346,6 +21347,10 @@ int CvPlayer::getMusicScriptId(PlayerTypes eForPlayer) const
 
 void CvPlayer::getGlobeLayerColors(GlobeLayerTypes eGlobeLayerType, int iOption, std::vector<NiColorA>& aColors, std::vector<CvPlotIndicatorData>& aIndicators) const
 {
+	/*	<trs.balloon> (No real harm in updating layers before the patch;
+		just seems wasteful.) */
+	if (!smc::BtS_EXE.isPlotIndicatorSizePatched())
+		return; // </trs.balloon>
 	switch (eGlobeLayerType)
 	{
 	case GLOBE_LAYER_TRADE:

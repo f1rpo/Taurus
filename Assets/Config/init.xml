@@ -163,6 +163,9 @@
 	<!-- BUFFY -->
 	
 	<load mod="BUFFY"/>
+
+	<!-- trs. -->
+	<load mod="Taurus"/>
 	
 	
 	<!-- Options Screen -->
