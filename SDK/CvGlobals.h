@@ -128,6 +128,7 @@ class CvEspionageMissionInfo;
 class CvUnitArtStyleTypeInfo;
 class CvVoteSourceInfo;
 class CvMainMenuInfo;
+class ModName; // trs.modname
 
 
 class CvGlobals
@@ -679,6 +680,7 @@ public:
 
 	DllExport FVariableSystem* getDefinesVarSystem();
 	DllExport void cacheGlobals();
+	bool isCachingDone() const { return (m_iMAX_HIT_POINTS > 0); } // trs.modname
 
 	// ***** EXPOSED TO PYTHON *****
 	DllExport int getDefineINT( const char * szName ) const;
@@ -789,6 +791,7 @@ public:
 	CvDLLUtilityIFaceBase* getDLLIFace() { return m_pDLL; }		// inlined for perf reasons, do not use outside of dll
 #endif
 	DllExport CvDLLUtilityIFaceBase* getDLLIFaceNonInl();
+	ModName const& getModName() const { return m_modName; } // trs.modname
 	DllExport void setDLLProfiler(FProfiler* prof);
 	FProfiler* getDLLProfiler();
 	DllExport void enableDLLProfiler(bool bEnable);
@@ -917,6 +920,8 @@ protected:
 	bool m_bZoomOut;
 	bool m_bZoomIn;
 	bool m_bLoadGameFromFile;
+
+	ModName m_modName; // trs.modname
 
 	FMPIManager * m_pFMPMgr;
 

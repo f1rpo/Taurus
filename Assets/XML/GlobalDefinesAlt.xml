@@ -7,13 +7,17 @@
 	Will instead use this file for any GlobalDefines that Taurus adds. -->
 <Civ4Defines xmlns="x-schema:CIV4GlobalDefinesSchema.xml">
 
-	<!-- Re-defines ...
-	
-		 As a convention, let's put any defines that override BtS upfront. -->
+	<!--
+		 Re-defines ...
+		 (As a convention, let's put any defines that override BtS upfront.)
+	-->
+
 
 	<!-- (No redefines so far) -->
 
-	<!-- Taurus defines ... -->
+	<!--
+		Taurus defines ...
+	-->
 
 	<!-- trs.smc: Set to 1 to disable all code that modifies the EXE
 		 at runtime. In case that those modifications render the mod unplayable
@@ -22,6 +26,27 @@
 	<Define>
 		<DefineName>DISABLE_EXE_RUNTIME_MODS</DefineName>
         <iDefineIntVal>0</iDefineIntVal>
+    </Define>
+
+	<!-- trs.modname: Whether to include the name of the mod's install folder,
+		 e.g. "Mods/Taurus", in savegames. So long as the saved name starts
+		 with "Taurus", all other installations of Taurus should be able
+		 to load it, but BtS (unmodified or with custom assets) and
+		 non-Taurus mods will be unable to load it. -->
+	<Define>
+		<DefineName>SAVE_INSTALL_PATH</DefineName>
+        <iDefineIntVal>0</iDefineIntVal>
+    </Define>
+	<!-- trs.modname: When the above is 0, this string (to be typed
+		 w/o quotation marks) replaces the true name of the install folder
+		 (e.g. "Taurus") in the install path written into savegames.
+		 Special case: If an empty string is used (recommended), then
+		 an empty install path is written, which means that BtS will be able
+		 to load the savegame. All Taurus installations will also be able to
+		 load it. -->
+	<Define>
+		<DefineName>SAVED_MOD_NAME</DefineName>
+        <DefineTextVal></DefineTextVal>
     </Define>
 
 </Civ4Defines>

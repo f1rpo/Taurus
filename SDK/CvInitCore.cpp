@@ -13,6 +13,7 @@
 // BUG - Save Format - start
 #include "BugMod.h"
 // BUG - Save Format - end
+# include "SelfMod.h" // trs.modname
 
 // BUG - EXE/DLL Paths - start
 #include "moduleobject.h"
@@ -1900,8 +1901,9 @@ void CvInitCore::read(FDataStreamBase* pStream)
 	pStream->Read(&uiSaveFlag);		// flags for expansion (see SaveBits)
 
 // BUG - Save Format - start
-	bool bugSaveFlag = uiSaveFlag & BUG_DLL_SAVE_FORMAT;
+	bool bReadNumGameOptions = uiSaveFlag & BUG_DLL_SAVE_FORMAT;
 	uiSaveFlag &= ~BUG_DLL_SAVE_FORMAT;
+// BUG - Save Format - end
 
 	// GAME DATA
 	pStream->Read((int*)&m_eType);
@@ -1938,7 +1940,7 @@ void CvInitCore::read(FDataStreamBase* pStream)
 	}
 
 // BUG - Save Format - start
-	if (bugSaveFlag)
+	if (bReadNumGameOptions)
 	{
 		// read and ignore number of game options as it's only for external tools
 		int iNumGameOptions = 0;
@@ -2015,22 +2017,15 @@ void CvInitCore::read(FDataStreamBase* pStream)
 
 void CvInitCore::write(FDataStreamBase* pStream)
 {
-	uint uiSaveFlag=1;
-// BUG - Save Format - start
-	// If any optional mod alters the number of game options or save format in any way,
-	// set the BUG save format bit and write out the number of game options later.
-	// It is safe to have multiple #ifdefs trigger.
-	bool bugSaveFlag = false;
-#ifdef _BUFFY
-	bugSaveFlag = true;
-	uiSaveFlag |= BUG_DLL_SAVE_FORMAT;
-#endif
-#ifdef _MOD_GWARM
-	bugSaveFlag = true;
-	uiSaveFlag |= BUG_DLL_SAVE_FORMAT;
-#endif
-// BUG - Save Format - end
-	pStream->Write(uiSaveFlag);		// flag for expansion, see SaveBits)
+	/*	<trs.modname> Preamble has been written to pStream by the EXE.
+		Can now restore the true mod name in the EXE. */
+	if (!GC.getDefineBOOL("SAVE_INSTALL_PATH"))
+		smc::BtS_EXE.setExternalModName(GC.getModName().getName());
+	// </trs.modname>
+	uint uiSaveFlag=1;		// flag for expansion, see SaveBits)
+	// BUG - Save Format (trs.modname: Mostly moved into BugMod.h):
+	uiSaveFlag |= BULL_MOD_SAVE_MASK;
+	pStream->Write(uiSaveFlag);
 
 	// GAME DATA
 	pStream->Write(m_eType);
@@ -2056,12 +2051,12 @@ void CvInitCore::write(FDataStreamBase* pStream)
 	pStream->Write(m_iNumVictories);
 	pStream->Write(m_iNumVictories, m_abVictories);
 
-// BUG - Save Format - start
-	if (bugSaveFlag)
-	{
-		// write out the number of game options for the external parser tool
-		pStream->Write(NUM_GAMEOPTION_TYPES);
-	}
+// BUG - Save Format - start (trs.modname: simplified)
+#if BULL_MOD_SAVE_MASK
+	// If any optional mod alters the number of game options,
+	// write out the number of game options for the external parser tool
+	pStream->Write(NUM_GAMEOPTION_TYPES);
+#endif
 // BUG - Save Format - end
 
 	pStream->Write(NUM_GAMEOPTION_TYPES, m_abOptions);

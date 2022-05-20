@@ -3127,6 +3127,9 @@ int CvGlobals::getCITY_HOME_PLOT()
 
 void CvGlobals::setDLLIFace(CvDLLUtilityIFaceBase* pDll)
 {
+	// <trs.modname> Cache the mod name provided by EXE
+	if (pDll != m_pDLL && pDll != NULL)
+		m_modName.update(*pDll); // </trs.modname>
 	m_pDLL = pDll;
 }
 
