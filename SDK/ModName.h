@@ -46,6 +46,7 @@ private:
 	{
 	public:
 		char const* GetCString() const { return &m_cFirstChar; }
+		int getCapacity() const { return m_iCapacity; }
 		// The EXE will provide a C string, like in the function above.
 		static FString* create(char const* szExternal);
 		bool assign(char const* szChars);
@@ -53,9 +54,11 @@ private:
 		FString(); // W/o implementation; will get our instances only from the EXE.
 		int const m_iCapacity; // Can't grow the char array
 		int m_iSize;
-		/*	It's an array. Don't know how that gets allocated locally like this
-			if its capacity is dynamic. I'm guessing that a raw block of memory
-			is allocated on the heap and then reinterpreted. */
+		/*	MSVC's std::string uses
+			union { Elem _Buf[_BUF_SIZE]; _Elem *_Ptr; }
+			however, a test with a really long mod name has confirmed that this
+			local char array has a dynamic size. I guess through allocation of
+			raw memory and a reinterpret_cast. */
 		char m_cFirstChar;
 		char const& at(int i) const { return *(&m_cFirstChar + i); }
 		char& at(int i) { return *(&m_cFirstChar + i); }

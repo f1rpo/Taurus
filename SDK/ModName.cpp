@@ -53,11 +53,10 @@ void ModName::setExtModName(const char* szName)
 		replaceRightmost(sNewFullPath, getExtName(), szName);
 		replaceRightmost(sNewPathInRoot, getExtName(), szName);
 	}
-	/*	I've seen FString capacity 31 in the debugger, not counting the
-		terminating \0. That's how much space we can expect at best. */
-	if (std::max(sNewFullPath.length(), sNewPathInRoot.length()) > 31)
+	if (((int)sNewFullPath.length()) > m_pExtFullPath->getCapacity() ||
+		((int)sNewPathInRoot.length()) > m_pExtPathInRoot->getCapacity())
 	{
-		FErrorMsg("Likely not enough capacity for new name");
+		FErrorMsg("Insufficient capacity for new mod name");
 		return;
 	}
 	bool bSuccess = (m_pExtFullPath->assign(sNewFullPath.c_str()) &&
@@ -96,7 +95,7 @@ void ModName::resetExt()
 bool ModName::FString::isValid() const
 {
 	// Verify that our instance is laid out as expected
-	if (m_iCapacity >= 31 && // The only value I've seen in the debugger
+	if (m_iCapacity >= 31 && // The smallest value I've seen in the debugger
 		m_iCapacity <= 128 && // sanity test
 		m_iSize >= 0 && m_iSize <= m_iCapacity)
 	{
