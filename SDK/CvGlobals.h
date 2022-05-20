@@ -13,6 +13,7 @@
 
 class FProfiler;
 class CvDLLUtilityIFaceBase;
+class ModName; // trs.modname
 class CvRandom;
 class CvGameAI;
 class CMessageControl;
@@ -128,7 +129,6 @@ class CvEspionageMissionInfo;
 class CvUnitArtStyleTypeInfo;
 class CvVoteSourceInfo;
 class CvMainMenuInfo;
-class ModName; // trs.modname
 
 
 class CvGlobals
@@ -791,7 +791,7 @@ public:
 	CvDLLUtilityIFaceBase* getDLLIFace() { return m_pDLL; }		// inlined for perf reasons, do not use outside of dll
 #endif
 	DllExport CvDLLUtilityIFaceBase* getDLLIFaceNonInl();
-	ModName const& getModName() const { return m_modName; } // trs.modname
+	ModName& getModName() { return *m_pModName; } // trs.modname
 	DllExport void setDLLProfiler(FProfiler* prof);
 	FProfiler* getDLLProfiler();
 	DllExport void enableDLLProfiler(bool bEnable);
@@ -920,8 +920,6 @@ protected:
 	bool m_bZoomOut;
 	bool m_bZoomIn;
 	bool m_bLoadGameFromFile;
-
-	ModName m_modName; // trs.modname
 
 	FMPIManager * m_pFMPMgr;
 
@@ -1218,6 +1216,7 @@ protected:
 
 	// DLL interface
 	CvDLLUtilityIFaceBase* m_pDLL;
+	ModName* m_pModName; // trs.modname
 
 	FProfiler* m_Profiler;		// profiler
 	CvString m_szDllProfileText;

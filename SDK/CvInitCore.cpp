@@ -13,7 +13,7 @@
 // BUG - Save Format - start
 #include "BugMod.h"
 // BUG - Save Format - end
-# include "SelfMod.h" // trs.modname
+#include "ModName.h" // trs.modname
 
 // BUG - EXE/DLL Paths - start
 #include "moduleobject.h"
@@ -2020,7 +2020,7 @@ void CvInitCore::write(FDataStreamBase* pStream)
 	/*	<trs.modname> Preamble has been written to pStream by the EXE.
 		Can now restore the true mod name in the EXE. */
 	if (!GC.getDefineBOOL("SAVE_INSTALL_PATH"))
-		smc::BtS_EXE.setExternalModName(GC.getModName().getName());
+		GC.getModName().resetExt();
 	// </trs.modname>
 	uint uiSaveFlag=1;		// flag for expansion, see SaveBits)
 	// BUG - Save Format (trs.modname: Mostly moved into BugMod.h):

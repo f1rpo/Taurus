@@ -1,5 +1,13 @@
-/*	trs.modname: Small class for storing the mod's install location
-	as provided by CvDLLUtilityIFaceBase::getModName */
+/*	trs.modname: Class for accessing and modifying(!) strings stored in the DLL
+	and in the EXE(!) that contain the name of the folder where the mod is
+	installed and its path. Regarding the path, our class only stores what
+	CvDLLUtilityIFaceBase::getModName provides, and, regardless of the bFullPath
+	parameter, that always seems to be a path relative to the parent folder of
+	the "Mods" folder. Let's refer to that parent folder as the "root" folder.
+	So the paths stored will be e.g. "Mods/Taurus". We'll still use separate
+	variables for the paths returned by getModName b/c we can't be sure that the
+	"full path" can't be longer under some circumstances, or the "mod name"
+	just the name of the mod's folder. */
 #pragma once
 #ifndef MOD_NAME_H
 #define MOD_NAME_H
@@ -7,28 +15,54 @@
 class ModName
 {
 public:
-	ModName() : m_uiExtAddrFullPath(0), m_uiExtAddrPathInRoot(0) {}
-	void update(CvDLLUtilityIFaceBase const& kUtility);
-	void replaceName(char const* szName);
+	ModName(char const* szFullPath, char const* szPathInRoot);
+	/*	These first three getters always return the (true) names as set
+		by the ctor */
 	char const* getFullPath() const { return m_sFullPath.c_str(); }
 	char const* getPathInRoot() const { return m_sPathInRoot.c_str(); }
-	char const* getName() const { return m_sName.c_str(); } // name of the Taurus folder
-	// See comment in update about these two
-	char* getFullPathExt() const
-	{
-		return reinterpret_cast<char*>(m_uiExtAddrFullPath);
-	}
-	char* getPathInRootExt() const
-	{
-		return reinterpret_cast<char*>(m_uiExtAddrPathInRoot);
-	}
-	
+	// Just the name of the mod's folder, e.g. "Taurus".
+	char const* getName() const { return m_sName.c_str(); }
+	/*	These three getters return the names currently stored in the EXE.
+		These can temporarily, while reading or writing a savegame, differ
+		from the true names. */
+	char const* getExtFullPath() const { return m_pExtFullPath->GetCString(); }
+	char const* getExtPathInRoot() const { return m_pExtPathInRoot->GetCString(); }
+	char const* getExtName() const { return m_sExtName.c_str(); }
+	// Replaces the name of the mod folder in the paths stored by the EXE
+	void setExtModName(const char* szName);
+	// Restore the true paths in the EXE (if they've been changed)
+	void resetExt();
+
 private:
-	CvString m_sFullPath;
-	CvString m_sPathInRoot;
-	CvString m_sName;
-	uint m_uiExtAddrFullPath;
-	uint m_uiExtAddrPathInRoot;
+	std::string m_sFullPath;
+	std::string m_sPathInRoot;
+	std::string m_sName;
+	std::string m_sExtName; // Not stored separately by the EXE; handy to have.
+
+	/*	I'm guessing that the string structure used by the EXE for storing
+		the mod name is the mysterious FString class (F for "Firaxis Game Engine")
+		mentioned in comments in CvString.h. */
+	class FString
+	{
+	public:
+		char const* GetCString() const { return &m_cFirstChar; }
+		// The EXE will provide a C string, like in the function above.
+		static FString* create(char const* szExternal);
+		bool assign(char const* szChars);
+	private:
+		FString(); // W/o implementation; will get our instances only from the EXE.
+		int const m_iCapacity; // Can't grow the char array
+		int m_iSize;
+		/*	It's an array. Don't know how that gets allocated locally like this
+			if its capacity is dynamic. I'm guessing that a raw block of memory
+			is allocated on the heap and then reinterpreted. */
+		char m_cFirstChar;
+		char const& at(int i) const { return *(&m_cFirstChar + i); }
+		char& at(int i) { return *(&m_cFirstChar + i); }
+		bool isValid() const;
+	};
+	FString* m_pExtFullPath;
+	FString* m_pExtPathInRoot;
 };
 
 #endif

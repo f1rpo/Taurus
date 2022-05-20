@@ -3,7 +3,7 @@
 #include "CvDllPythonEvents.h"
 #include "CvInitCore.h"
 #include "BugMod.h" // trs.modname
-#include "SelfMod.h" // trs.modname
+#include "ModName.h" // trs.modname
 
 //
 // static, singleton accessor
@@ -479,9 +479,9 @@ void CvEventReporter::preSave()
 	// <trs.modname>
 	if (!GC.getDefineBOOL("SAVE_INSTALL_PATH"))
 	{
-		smc::BtS_EXE.setExternalModName(GC.getDefineSTRING("SAVED_MOD_NAME"));
+		GC.getModName().setExtModName(GC.getDefineSTRING("SAVED_MOD_NAME"));
 	#if BULL_MOD_SAVE_MASK
-		FAssertMsg(gDLL->getModName()[0] != '\0',
+		FAssertMsg(gDLL->getModName() != NULL,
 				"Shouldn't claim that no mod loaded when saves not compatible with BtS");
 	#endif
 	} // </trs.modname>

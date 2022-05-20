@@ -11,15 +11,8 @@ public:
 	bool isPlotIndicatorSizePatched() const { return m_bPlotIndicatorSizePatched; }
 	void patchPlotIndicatorSize(); // (exposed to Python via CyGameCoreUtils) 
 	// </trs.balloon>
-	/*	trs.modname: Modifies the EXE so that it uses szName as the name
-		of the Taurus folder in the install path */
-	void setExternalModName(char const* szName);
 private:
 	bool m_bPlotIndicatorSizePatched; // trs.balloon
-	// <trs.modname>
-	ModName m_externalModName;
-	void setExternalModName(char const* szName, bool bRestore);
-	// </trs.modname>
 };
 
 namespace smc

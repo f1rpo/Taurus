@@ -27,7 +27,7 @@
 // BUG - BUG Info - start
 #include "CvBugOptions.h"
 // BUG - BUG Info - end
-
+#include "ModName.h" // trs.modname
 // BUFFY - DLL Info - start
 #ifdef _BUFFY
 #include "Buffy.h"
@@ -140,6 +140,7 @@ m_borderFinder(NULL),
 m_areaFinder(NULL),
 m_plotGroupFinder(NULL),
 m_pDLL(NULL),
+m_pModName(NULL), // trs.modname
 m_aiPlotDirectionX(NULL),
 m_aiPlotDirectionY(NULL),
 m_aiPlotCardinalDirectionX(NULL),
@@ -233,6 +234,7 @@ m_paMainMenus(NULL)
 
 CvGlobals::~CvGlobals()
 {
+	SAFE_DELETE(m_pModName); // trs.modname
 }
 
 //
@@ -3127,10 +3129,16 @@ int CvGlobals::getCITY_HOME_PLOT()
 
 void CvGlobals::setDLLIFace(CvDLLUtilityIFaceBase* pDll)
 {
-	// <trs.modname> Cache the mod name provided by EXE
-	if (pDll != m_pDLL && pDll != NULL)
-		m_modName.update(*pDll); // </trs.modname>
+	bool bChanged = (pDll != m_pDLL && pDll != NULL); // trs.modname
 	m_pDLL = pDll;
+	// <trs.modname>
+	if (bChanged)
+	{
+		SAFE_DELETE(m_pModName);
+		m_pModName = new ModName(
+				pDll->getModName(true),
+				pDll->getModName(false));
+	} // </trs.modname>
 }
 
 void CvGlobals::setDLLProfiler(FProfiler* prof)

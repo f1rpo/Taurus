@@ -3,69 +3,153 @@
 #include "ModName.h"
 
 
-void ModName::update(CvDLLUtilityIFaceBase const& kUtility)
+ModName::ModName(char const* szFullPath, char const* szPathInRoot)
+:	m_pExtFullPath(NULL), m_pExtPathInRoot(NULL)
 {
-	/*	Regardless of the bFullPath param, I'm always seeing the same result,
-		namely a path relative to the parent folder of the Mods folder
-		(I refer to that parent folder as "root"): "Mods\AdvCiv\"
-		I don't know that bFullPath will never make a difference, so it seems
-		safer to store both strings. Maybe the full path could be longer
-		than what I've seen, maybe the non-full path could be just the
-		actual mod name. We will, in any case, extract the actual mod name
-		into m_sName.
-		For another quirk, if we set the FString instances (see SelfMod.cpp)
-		that store the paths inside the EXE to size 0, getModName will return
-		NULL, not an empty string. So we also need to hold onto the addresses
-		of the FStrings, or we won't be able to change them again. (Due to their
-		peculiar memory layout, we can just as well hold onto the addresses of
-		the char buffers.) */
-	char const* szExtFullPath; char const* szExtPathInRoot;
-	m_sFullPath = szExtFullPath = kUtility.getModName(true);
-	m_sPathInRoot = szExtPathInRoot = kUtility.getModName(false);
-	// Don't keep these as pointers, or we'll have to write our own (boring) copy ctor.
-	m_uiExtAddrFullPath = reinterpret_cast<uint>(szExtFullPath);
-	m_uiExtAddrPathInRoot = reinterpret_cast<uint>(szExtPathInRoot);
+	m_sFullPath = szFullPath;
+	m_sPathInRoot = szPathInRoot;
+	m_pExtFullPath = FString::create(szFullPath);
+	m_pExtPathInRoot = FString::create(szPathInRoot);
+	FAssert(m_pExtFullPath != NULL && m_pExtPathInRoot != NULL);
 	m_sName = m_sPathInRoot;
 	size_t posMods = m_sName.find("Mods");
-	if (posMods != CvString::npos)
+	if (posMods != std::string::npos)
 	{
 		/*	Skip over "Mods" plus the path separator.
 			And chop off the separator at the end. */
 		m_sName = m_sName.substr(posMods + 5, m_sName.length() - posMods - 6);
 	}
+	else FErrorMsg("Failed to parse mod's folder name");
+	m_sExtName = m_sName;
 }
+
 
 namespace
 {
-	bool replaceRightmost(CvString& s,
+	void replaceRightmost(std::string& s,
 		char const* szPattern, char const* szReplacement)
 	{
 		size_t pos = s.rfind(szPattern);
-		if (pos == CvString::npos)
-			return false;
-		s.replace(pos, std::strlen(szPattern), szReplacement);
-		return true;
+		if (pos != std::string::npos)
+			s.replace(pos, std::strlen(szPattern), szReplacement);
+		else FErrorMsg("Pattern not found");
 	}
 }
 
-void ModName::replaceName(char const* szName)
+
+void ModName::setExtModName(const char* szName)
 {
-	if (szName[0] == '\0')
+	if (m_pExtFullPath == NULL || m_pExtPathInRoot == NULL)
 	{
-		// Empty name implies empty paths (no Mods folder involved)
-		m_sName = m_sPathInRoot = m_sFullPath = "";
+		FErrorMsg("Can't change external mod name b/c failed parsing it in ctor");
 		return;
 	}
-#ifdef FASSERT_ENABLE
-	bool bSuccess =
-#endif
-	replaceRightmost(m_sPathInRoot, m_sName.c_str(), szName);
-	FAssertMsg(bSuccess, "Mod name not found in mod path from root");
-#ifdef FASSERT_ENABLE
-	bSuccess =
-#endif
-	replaceRightmost(m_sFullPath, m_sName.c_str(), szName);
-	FAssertMsg(bSuccess, "Mod name not found in full mod path");
-	m_sName = szName;
-	// (Leave the m_uiExtAddr... members alone; the addresses in the EXE don't change.)
+	std::string sNewFullPath, sNewPathInRoot;
+	// Empty name implies empty paths (no Mods folder involved)
+	if (szName[0] != '\0')
+	{
+		sNewFullPath = getExtFullPath();
+		sNewPathInRoot = getExtPathInRoot();
+		replaceRightmost(sNewFullPath, getExtName(), szName);
+		replaceRightmost(sNewPathInRoot, getExtName(), szName);
+	}
+	/*	I've seen FString capacity 31 in the debugger, not counting the
+		terminating \0. That's how much space we can expect at best. */
+	if (std::max(sNewFullPath.length(), sNewPathInRoot.length()) > 31)
+	{
+		FErrorMsg("Likely not enough capacity for new name");
+		return;
+	}
+	bool bSuccess = (m_pExtFullPath->assign(sNewFullPath.c_str()) &&
+			m_pExtPathInRoot->assign(sNewPathInRoot.c_str()));
+	if (!bSuccess ||
+		/*	The EXE will return NULL instead of an empty string
+			when the FString size is 0 */
+		((gDLL->getModName(true) == NULL || gDLL->getModName(false) == NULL) ?
+		szName[0] != '\0' :
+		(std::strcmp(sNewFullPath.c_str(), gDLL->getModName(true)) != 0 ||
+		std::strcmp(sNewPathInRoot.c_str(), gDLL->getModName(false)) != 0)))
+	{
+		/*	Our std::string members should all be good.
+			Just need to make the FStrings consistent with them. */
+		resetExt();
+		/*	Result still won't be what our caller expects - szName has
+			not been adopted. */
+		FErrorMsg("Failed to change mod name in EXE");
+	}
+	// Don't update this until we're certain of having succeeded
+	else m_sExtName = szName;
+}
+
+
+void ModName::resetExt()
+{
+	if (m_pExtFullPath->assign(m_sFullPath.c_str()) &&
+		m_pExtPathInRoot->assign(m_sPathInRoot.c_str()))
+	{
+		m_sExtName = m_sName;
+	}
+	else FErrorMsg("Failed to reset external mod name");
+}
+
+
+bool ModName::FString::isValid() const
+{
+	// Verify that our instance is laid out as expected
+	if (m_iCapacity >= 31 && // The only value I've seen in the debugger
+		m_iCapacity <= 128 && // sanity test
+		m_iSize >= 0 && m_iSize <= m_iCapacity)
+	{
+		if (m_iSize > 0)
+		{
+			if (at(m_iSize) != '\0')
+				return false;
+			for (int i = 0; i < m_iSize; i++)
+			{
+				if (at(i) == '\0')
+					return false;
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+
+ModName::FString* ModName::FString::create(char const* szExternal)
+{
+	if (szExternal == NULL)
+		return NULL;
+	FString& kInst = *reinterpret_cast<FString*>(
+			const_cast<char*>(szExternal - sizeof(int) * 2));
+	if (!kInst.isValid())
+	{
+		FErrorMsg("Invalid FString data");
+		return NULL;
+	}
+	return &kInst;
+}
+
+
+bool ModName::FString::assign(char const* szChars)
+{
+	bool bSuccess = false;
+	int iNewSize = 0;
+	for (int i = 0; i < m_iCapacity; i++)
+	{
+		char c = szChars[i];
+		at(i) = c;
+		if (c == '\0')
+		{
+			bSuccess = true;
+			break;
+		}
+		iNewSize++;
+	}
+	/*	Don't know if the string class in the EXE ensures that too;
+		it looks like it in the debugger. */
+	for (int i = iNewSize; i < m_iCapacity; i++)
+		at(i) = '\0';
+	m_iSize = iNewSize;
+	return bSuccess;
 }

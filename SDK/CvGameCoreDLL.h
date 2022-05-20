@@ -179,7 +179,6 @@ namespace python = boost::python;
 #include "CvEnums.h"
 #include "CvStructs.h"
 #include "CvDLLUtilityIFaceBase.h"
-#include "ModName.h" // trs.modname
 
 //jason tests
 #include "CvPlayerAI.h"
