@@ -4,6 +4,7 @@
 #include "CvInitCore.h"
 #include "BugMod.h" // trs.modname
 #include "SelfMod.h" // trs.modname
+#include "ExtraSaveGameState.h" // trs.xtrasav
 
 //
 // static, singleton accessor
@@ -554,9 +555,13 @@ void CvEventReporter::readStatistics(FDataStreamBase* pStream)
 {
 	m_kStatistics.reset();
 	m_kStatistics.read(pStream);
+	GC.getGame().getExtraSaveState().read(*pStream); // trs.xtrasav
 }
 void CvEventReporter::writeStatistics(FDataStreamBase* pStream)
 {
 	m_kStatistics.write(pStream);
+	/*	trs.xtrasav: This really seems to be the end, i.e. the EXE doesn't write
+		(and attempt to read) some sort of coda after the statistics. */
+	GC.getGame().getExtraSaveState().write(*pStream);
 }
 

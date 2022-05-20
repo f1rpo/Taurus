@@ -33,6 +33,7 @@
 // BUG - start
 #include "BugMod.h"
 // BUG - end
+#include "ExtraSaveGameState.h" // trs.xtrasav
 
 // Public Functions...
 
@@ -65,6 +66,7 @@ CvGame::CvGame()
 	m_paHeadquarters = NULL;
 
 	m_pReplayInfo = NULL;
+	m_pExtraSaveState = NULL; // trs.xtrasav
 
 	m_aiShrineBuilding = NULL;
 	m_aiShrineReligion = NULL;
@@ -425,6 +427,7 @@ void CvGame::uninit()
 
 	clearReplayMessageMap();
 	SAFE_DELETE(m_pReplayInfo);
+	SAFE_DELETE(m_pExtraSaveState); // trs.xtrasav
 
 	m_aPlotExtraYields.clear();
 	m_aPlotExtraCosts.clear();
@@ -442,6 +445,8 @@ void CvGame::reset(HandicapTypes eHandicap, bool bConstructorCall)
 	//--------------------------------
 	// Uninit class
 	uninit();
+
+	m_pExtraSaveState = new ExtraSaveGameState(); // trs.xtrasav
 
 	m_iElapsedGameTurns = 0;
 	m_iStartTurn = 0;
@@ -485,6 +490,7 @@ void CvGame::reset(HandicapTypes eHandicap, bool bConstructorCall)
 	m_eWinner = NO_TEAM;
 	m_eVictory = NO_VICTORY;
 	m_eGameState = GAMESTATE_ON;
+	m_eCurrentLayer = NUM_GLOBE_LAYER_TYPES; // trs.xtrasav (example)
 
 	m_szScriptData = "";
 
@@ -7808,6 +7814,13 @@ void CvGame::read(FDataStreamBase* pStream)
 
 	uint uiFlag=0;
 	pStream->Read(&uiFlag);	// flags for expansion
+	// <trs.xtrasav> (Akin to BULL code in CvInitCore::read)
+	{
+		bool bExtra = (uiFlag & ExtraSaveGameState::saveVersionFlag());
+		if (bExtra)
+			uiFlag &= ~ExtraSaveGameState::saveVersionFlag();
+		GC.getGame().getExtraSaveState().setReadEnabled(bExtra);
+	} // </trs.xtrasav>
 
 	if (uiFlag < 1)
 	{
@@ -7854,6 +7867,9 @@ void CvGame::read(FDataStreamBase* pStream)
 	pStream->Read((int*)&m_eWinner);
 	pStream->Read((int*)&m_eVictory);
 	pStream->Read((int*)&m_eGameState);
+	/*	trs.xtrasav (example): Will cause m_eCurrentLayer to be written to pStream
+		once all the data that BtS expects has been written */
+	getExtraSaveState().setCurrentLayer(&m_eCurrentLayer);
 
 	pStream->ReadString(m_szScriptData);
 
@@ -8031,8 +8047,11 @@ void CvGame::write(FDataStreamBase* pStream)
 {
 	int iI;
 
-	uint uiFlag=1;
-	pStream->Write(uiFlag);		// flag for expansion
+	uint uiFlag=1;		// flag for expansion
+	/*	trs.xtrasav: Flag the savegame as containing extra data
+		at the end of the stream  */
+	uiFlag |= ExtraSaveGameState::saveVersionFlag();
+	pStream->Write(uiFlag);
 
 	pStream->Write(m_iElapsedGameTurns);
 	pStream->Write(m_iStartTurn);
@@ -8074,6 +8093,7 @@ void CvGame::write(FDataStreamBase* pStream)
 	pStream->Write(m_eWinner);
 	pStream->Write(m_eVictory);
 	pStream->Write(m_eGameState);
+	getExtraSaveState().setCurrentLayer(&m_eCurrentLayer); // trs.xtrasav (example)
 
 	pStream->WriteString(m_szScriptData);
 

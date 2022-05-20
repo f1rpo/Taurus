@@ -13,6 +13,7 @@ class CvPlot;
 class CvCity;
 class CvReplayMessage;
 class CvReplayInfo;
+class ExtraSaveGameState; // trs.xtrasav
 
 typedef std::vector<const CvReplayMessage*> ReplayMessageList;
 
@@ -417,7 +418,11 @@ public:
 	// Script data needs to be a narrow string for pickling in Python
 	std::string getScriptData() const;																										// Exposed to Python	
 	void setScriptData(std::string szNewValue);																						// Exposed to Python	
-																																												
+	// <trs.xtrasav>
+	ExtraSaveGameState& getExtraSaveState() { return *m_pExtraSaveState; }
+	ExtraSaveGameState const& getExtraSaveState() const { return *m_pExtraSaveState; }
+	// </trs.xtrasav>
+
 	bool isDestroyedCityName(CvWString& szName) const;													
 	void addDestroyedCityName(const CvWString& szName);													
 																																												
@@ -603,8 +608,10 @@ protected:
 	VictoryTypes m_eVictory;
 	GameStateTypes m_eGameState;
 	PlayerTypes m_eEventPlayer;
+	GlobeLayerTypes m_eCurrentLayer; // trs.xtrasav (example)
 
 	CvString m_szScriptData;
+	ExtraSaveGameState* m_pExtraSaveState; // trs.xtrasav (saved by CvEventReporter)
 
 	int* m_aiRankPlayer;        // Ordered by rank...
 	int* m_aiPlayerRank;        // Ordered by player ID...
