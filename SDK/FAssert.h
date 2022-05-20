@@ -45,7 +45,9 @@ bool FAssertDlg( const char*, const char*, const char*, unsigned int, bool& );
 
 #else
 // FASSERT_ENABLE not defined
-#define FAssert( expr )
+/*	trs. void(0) added to allow FAssert in otherwise empty branches
+	and to force semicolon. */
+#define FAssert( expr ) (void)0
 #define FAssertMsg( expr, msg )
 
 #endif

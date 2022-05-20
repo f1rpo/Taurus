@@ -11635,7 +11635,7 @@ void CvGameTextMgr::setHappyHelp(CvWStringBuffer &szBuffer, CvCity& city)
 
 		szBuffer.append(gDLL->getText("TXT_KEY_HAPPY_TOTAL_HAPPY", iTotalHappy));
 
-		FAssert(iTotalHappy == city.happyLevel())
+		FAssert(iTotalHappy == city.happyLevel());
 	}
 }
 
