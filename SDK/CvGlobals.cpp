@@ -2671,6 +2671,9 @@ void CvGlobals::cacheGlobals()
 	m_iUSE_ON_UPDATE_CALLBACK = getDefineINT("USE_ON_UPDATE_CALLBACK");
 	m_iUSE_ON_UNIT_CREATED_CALLBACK = getDefineINT("USE_ON_UNIT_CREATED_CALLBACK");
 	m_iUSE_ON_UNIT_LOST_CALLBACK = getDefineINT("USE_ON_UNIT_LOST_CALLBACK");
+
+	// trs.modname: All global defines having been loaded
+	m_pModName->setDefaultSubstName(getDefineSTRING("REPLACEMENT_MOD_NAME"));
 }
 
 int CvGlobals::getDefineINT( const char * szName ) const

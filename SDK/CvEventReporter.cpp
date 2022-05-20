@@ -482,7 +482,7 @@ void CvEventReporter::preSave()
 	// <trs.modname>
 	if (!getBugOptionBOOL("Taurus__SaveModName"))
 	{
-		GC.getModName().setExtModName(GC.getDefineSTRING("REPLACEMENT_MOD_NAME"));
+		GC.getModName().setExtModName();
 	#if BULL_MOD_SAVE_MASK
 		FAssertMsg(gDLL->getModName() != NULL,
 				"Shouldn't claim that no mod loaded when saves not compatible with BtS");
