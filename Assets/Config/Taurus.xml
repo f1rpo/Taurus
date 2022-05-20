@@ -28,6 +28,10 @@
 			</list>
 			<!-- trs.balloon: end -->
 
+			<!-- trs.modname -->
+			<option id="SaveModName" key="Save Mod Name"
+					type="boolean" default="True"/>
+
 		</section>
 	</options>
 

@@ -13,7 +13,10 @@
 // BUG - Save Format - start
 #include "BugMod.h"
 // BUG - Save Format - end
-#include "ModName.h" // trs.modname
+// <trs.modname>
+#include "ModName.h"
+#include "CvBugOptions.h"
+// </trs.modname>
 
 // BUG - EXE/DLL Paths - start
 #include "moduleobject.h"
@@ -2019,7 +2022,7 @@ void CvInitCore::write(FDataStreamBase* pStream)
 {
 	/*	<trs.modname> Preamble has been written to pStream by the EXE.
 		Can now restore the true mod name in the EXE. */
-	if (!GC.getDefineBOOL("SAVE_INSTALL_PATH"))
+	if (!getBugOptionBOOL("Taurus__SaveModName"))
 		GC.getModName().resetExt();
 	// </trs.modname>
 	uint uiSaveFlag=1;		// flag for expansion, see SaveBits)

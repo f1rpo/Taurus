@@ -28,24 +28,15 @@
         <iDefineIntVal>0</iDefineIntVal>
     </Define>
 
-	<!-- trs.modname: Whether to include the name of the mod's install folder,
-		 e.g. "Mods/Taurus", in savegames. So long as the saved name starts
-		 with "Taurus", all other installations of Taurus should be able
-		 to load it, but BtS (unmodified or with custom assets) and
-		 non-Taurus mods will be unable to load it. -->
+	<!-- trs.modname: This string (to be typed w/o quotation marks) is
+		 only used when the Save Mod Name option on the System tab of the
+		 Mod Options screen is _not_ checked.
+		 The string gets written into savegames as the name of the mod.
+		 An empty string allows unmodified BtS to load the mod's savegames.
+		 (For "exporting" a savegame to another mod, e.g. BUG, it should be
+		 more convenient to use the Ctrl+Alt+S shortcut.) -->
 	<Define>
-		<DefineName>SAVE_INSTALL_PATH</DefineName>
-        <iDefineIntVal>0</iDefineIntVal>
-    </Define>
-	<!-- trs.modname: When the above is 0, this string (to be typed
-		 w/o quotation marks) replaces the true name of the install folder
-		 (e.g. "Taurus") in the install path written into savegames.
-		 Special case: If an empty string is used (recommended), then
-		 an empty install path is written, which means that BtS will be able
-		 to load the savegame. All Taurus installations will also be able to
-		 load it. -->
-	<Define>
-		<DefineName>SAVED_MOD_NAME</DefineName>
+		<DefineName>REPLACEMENT_MOD_NAME</DefineName>
         <DefineTextVal></DefineTextVal>
     </Define>
 
