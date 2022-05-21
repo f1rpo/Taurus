@@ -11,15 +11,35 @@ ModName::ModName(char const* szFullPath, char const* szPathInRoot)
 	m_pExtFullPath = FString::create(szFullPath);
 	m_pExtPathInRoot = FString::create(szPathInRoot);
 	FAssert(m_pExtFullPath != NULL && m_pExtPathInRoot != NULL);
+	char const cSep1 = '\\';
+	char const cSep2 = '/';
 	m_sName = m_sPathInRoot;
-	size_t posMods = m_sName.find("Mods");
-	if (posMods != std::string::npos)
+	// Looking for this folder name seems like the safest bet
+	std::string sMods = "Mods";
+	size_t posMods = m_sName.find(sMods);
+	if (posMods != m_sName.npos)
 	{
 		/*	Skip over "Mods" plus the path separator.
 			And chop off the separator at the end. */
-		m_sName = m_sName.substr(posMods + 5, m_sName.length() - posMods - 6);
+		int iOffsetStart = sMods.length() + 1;
+		int iOffsetEnd = iOffsetStart;
+		char const cLastChar = m_sName[m_sName.length() - 1];
+		if (cLastChar == cSep1 || cLastChar == cSep2)
+			iOffsetEnd++;
+		m_sName = m_sName.substr(posMods + iOffsetStart,
+				m_sName.length() - posMods - iOffsetEnd);
 	}
-	else FErrorMsg("Failed to parse mod's folder name");
+	else
+	{
+		/*	I'm not sure that the folder name is hardcoded. Don't know where
+			the EXE gets it. Let's try to work with different names too. */
+		std::vector<std::string> asTokens;
+		std::string sSeps; sSeps += cSep1; sSeps += cSep2;
+		boost::split(asTokens, m_sName, boost::is_any_of(sSeps));
+		if (asTokens.size() > 1 && asTokens.size() <= 3)
+			m_sName = asTokens[1];
+		else FErrorMsg("Failed to parse mod's folder name");
+	}
 	m_sExtName = m_sName;
 }
 

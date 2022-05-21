@@ -167,6 +167,9 @@ void stopProfilingDLL();
 # include <boost/python/def.hpp>
 
 namespace python = boost::python;
+// <trs.modname> (Tokenization in C++03 is a horror (even with boost)
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp> // </trs.modname>
 
 #include "FAssert.h"
 #include "CvGameCoreDLLDefNew.h"
