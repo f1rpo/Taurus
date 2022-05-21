@@ -8199,6 +8199,14 @@ void CvGame::saveReplay(PlayerTypes ePlayer)
 	gDLL->getEngineIFace()->SaveReplay(ePlayer);
 }
 
+// trs.modname:
+void CvGame::exportSaveGame()
+{
+	CvPopupInfo* pInfo = new CvPopupInfo(BUTTONPOPUP_EXPORT_SAVE);
+	if (pInfo != NULL)
+		GET_PLAYER(getActivePlayer()).addPopup(pInfo, true);
+}
+
 
 void CvGame::showEndGameSequence()
 {

@@ -11,7 +11,7 @@
 #include "CvGameTextMgr.h"
 #include "CvMessageControl.h"
 #include "SelfMod.h" // trs.balloon
-
+#include "ModName.h" // trs.modname
 // BUG - start
 #include "CvBugOptions.h"
 // BUG - end
@@ -1709,6 +1709,10 @@ void CvGame::doControl(ControlTypes eControl)
 	{
 		return;
 	}
+
+	/*	trs.modname: Hack to ensure that subsequent saves can't be affected
+		by canceled export-save */
+	GC.getModName().exportDone();
 
 	switch (eControl)
 	{

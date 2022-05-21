@@ -190,10 +190,11 @@
 			<Description>TXT_KEY_SHORTCUTS_MOUSE</Description>
 			<Civilopedia>TXT_KEY_SHORTCUTS_MOUSE_PEDIA</Civilopedia>
 		</NewConceptInfo>
+		<!-- trs.doc: "MODS", not just "BUG". -->
 		<NewConceptInfo>
-			<Type>CONCEPT_SHORTCUTS_BUG</Type>
-			<Description>TXT_KEY_SHORTCUTS_BUG</Description>
-			<Civilopedia>TXT_KEY_SHORTCUTS_BUG_PEDIA</Civilopedia>
+			<Type>CONCEPT_SHORTCUTS_MODS</Type>
+			<Description>TXT_KEY_SHORTCUTS_MODS</Description>
+			<Civilopedia>TXT_KEY_SHORTCUTS_MODS_PEDIA</Civilopedia>
 		</NewConceptInfo>
 		<NewConceptInfo>
 			<Type>CONCEPT_SHORTCUTS_MAP</Type>

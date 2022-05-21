@@ -4,7 +4,7 @@
 
 
 ModName::ModName(char const* szFullPath, char const* szPathInRoot)
-:	m_pExtFullPath(NULL), m_pExtPathInRoot(NULL)
+:	m_pExtFullPath(NULL), m_pExtPathInRoot(NULL), m_bExporting(false)
 {
 	m_sFullPath = szFullPath;
 	m_sPathInRoot = szPathInRoot;
@@ -44,6 +44,17 @@ ModName::ModName(char const* szFullPath, char const* szPathInRoot)
 }
 
 
+int ModName::getExtNameLengthLimit() const
+{
+	int iLimit = std::min(m_pExtFullPath->getCapacity(),
+			m_pExtPathInRoot->getCapacity());
+	// Path other than name will take up characters
+	iLimit -= std::max(m_sFullPath.length(), m_sPathInRoot.length());
+	iLimit += m_sName.length();
+	return iLimit;
+}
+
+
 namespace
 {
 	void replaceRightmost(std::string& s,
@@ -56,9 +67,11 @@ namespace
 	}
 }
 
-
-void ModName::setExtModName(const char* szName)
+void ModName::setExtModName(const char* szName, bool bExporting)
 {
+	// Mod name set for one-time export takes precedence
+	if (m_bExporting && !bExporting)
+		return;
 	if (m_pExtFullPath == NULL || m_pExtPathInRoot == NULL)
 	{
 		FErrorMsg("Can't change external mod name b/c failed parsing it in ctor");
@@ -79,6 +92,7 @@ void ModName::setExtModName(const char* szName)
 		FErrorMsg("Insufficient capacity for new mod name");
 		return;
 	}
+	m_bExporting = bExporting;
 	bool bSuccess = (m_pExtFullPath->assign(sNewFullPath.c_str()) &&
 			m_pExtPathInRoot->assign(sNewPathInRoot.c_str()));
 	if (!bSuccess ||
@@ -101,8 +115,28 @@ void ModName::setExtModName(const char* szName)
 }
 
 
+void ModName::exportDone()
+{
+	if (m_bExporting)
+	{
+		m_bExporting = false;
+		resetExt();
+	}
+}
+
+
 void ModName::resetExt()
 {
+	if (m_bExporting)
+		return;
+	// Avoid messing with the EXE unnecessarily
+	if (gDLL->getModName(true) != NULL &&
+		std::strcmp(gDLL->getModName(true), m_sFullPath.c_str()) == 0 &&
+		gDLL->getModName(false) != NULL &&
+		std::strcmp(gDLL->getModName(false), m_sPathInRoot.c_str()) == 0)
+	{
+		return;
+	}
 	if (m_pExtFullPath->assign(m_sFullPath.c_str()) &&
 		m_pExtPathInRoot->assign(m_sPathInRoot.c_str()))
 	{

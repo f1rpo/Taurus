@@ -2022,9 +2022,9 @@ void CvInitCore::write(FDataStreamBase* pStream)
 {
 	/*	<trs.modname> Preamble has been written to pStream by the EXE.
 		Can now restore the true mod name in the EXE. */
-	if (!getBugOptionBOOL("Taurus__SaveModName"))
-		GC.getModName().resetExt();
-	// </trs.modname>
+	GC.getModName().exportDone();
+	GC.getModName().resetExt(); // </trs.modname>
+
 	uint uiSaveFlag=1;		// flag for expansion, see SaveBits)
 	// BUG - Save Format (trs.modname: Mostly moved into BugMod.h):
 	uiSaveFlag |= BULL_MOD_SAVE_MASK;

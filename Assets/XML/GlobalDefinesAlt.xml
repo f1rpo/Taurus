@@ -33,8 +33,8 @@
 		 Mod Options screen is _not_ checked.
 		 The string gets written into savegames as the name of the mod.
 		 An empty string allows unmodified BtS to load the mod's savegames.
-		 (For "exporting" a savegame to another mod, e.g. BUG, it should be
-		 more convenient to use the Ctrl+Alt+S shortcut.) -->
+		 (For exporting a savegame to another mod, e.g. BUG, it should be
+		 more convenient to use the Ctrl+Shift+S shortcut.) -->
 	<Define>
 		<DefineName>REPLACEMENT_MOD_NAME</DefineName>
         <DefineTextVal></DefineTextVal>

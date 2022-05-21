@@ -27,6 +27,7 @@
 #include "BugMod.h"
 #include "CvBugOptions.h"
 // BUG - end
+#include "ModName.h" // trs.modname
 
 // Public Functions...
 
@@ -750,6 +751,25 @@ void CvDLLButtonPopup::OnOkClicked(CvPopup* pPopup, PopupReturn *pPopupReturn, C
 	case BUTTONPOPUP_FOUND_RELIGION:
 		CvMessageControl::getInstance().sendFoundReligion(GC.getGameINLINE().getActivePlayer(), (ReligionTypes)pPopupReturn->getButtonClicked(), (ReligionTypes)info.getData1());
 		break;
+	// <trs.modname>
+	case BUTTONPOPUP_EXPORT_SAVE:
+		if (pPopupReturn->getButtonClicked() > 0)
+		{
+			CvWString swModName(pPopupReturn->getEditBoxString());
+			gDLL->stripSpecialCharacters(swModName);
+			CvString sModName(swModName);
+			/*	Important to trigger the save dialog before setting
+				ModName to exporting state */
+			GC.getGame().doControl(CONTROL_SAVE_NORMAL);
+			GC.getModName().setExtModName(sModName.c_str(), true);
+		}
+		/*	Cancel button - We haven't changed the external mod name, so
+			there is nothing to do. But what if the player cancels the
+			SAVE_NORMAL dialog? Really difficult to learn about that in the DLL.
+			I've put exportDone calls in CvDLLWidgetData::parseHelp and
+			CvGame::doControl. That should be pretty reliable. */
+		//else {}
+		break; // </trs.modname>
 
 	default:
 		FAssert(false);
@@ -964,6 +984,10 @@ bool CvDLLButtonPopup::launchButtonPopup(CvPopup* pPopup, CvPopupInfo &info)
 	case BUTTONPOPUP_FOUND_RELIGION:
 		bLaunched = launchFoundReligionPopup(pPopup, info);
 		break;
+	// <trs.modname>
+	case BUTTONPOPUP_EXPORT_SAVE:
+		bLaunched = launchExportSavePopup(pPopup, info);
+		break; // </trs.modname>
 	default:
 		FAssert(false);
 		break;
@@ -2630,5 +2654,26 @@ bool CvDLLButtonPopup::launchFoundReligionPopup(CvPopup* pPopup, CvPopupInfo &in
 
 	gDLL->getInterfaceIFace()->popupLaunch(pPopup, false, POPUPSTATE_IMMEDIATE);
 
+	return true;
+}
+
+// trs.modname: (based on launchDetailsPopup)
+bool CvDLLButtonPopup::launchExportSavePopup(CvPopup* pPopup, CvPopupInfo &info)
+{
+	CvDLLInterfaceIFaceBase& kUI = *gDLL->getInterfaceIFace();
+	kUI.popupSetHeaderString(pPopup, gDLL->getText("TXT_KEY_POPUP_EXPORT_SAVE_TITLE"));
+	kUI.popupSetBodyString(pPopup, gDLL->getText("TXT_KEY_MENU_ENTER_MOD_NAME"));
+	char const* szDefault = GC.getDefineSTRING("REPLACEMENT_MOD_NAME");
+	/*	Leaving the field empty will work too (export for BtS), but I'd rather
+		show an example of an actual mod name. */
+	if (cstring::empty(szDefault))
+		szDefault = GC.getModName().getName();
+	kUI.popupCreateEditBox(pPopup, szDefault, WIDGET_GENERAL, "",
+			0, POPUP_LAYOUT_STRETCH, 0,
+			// This limit is important; we can't write longer strings into the EXE.
+			GC.getModName().getExtNameLengthLimit());
+	kUI.popupAddGenericButton(pPopup, gDLL->getText("TXT_KEY_MAIN_MENU_OK"), NULL, 1);
+	kUI.popupAddGenericButton(pPopup, gDLL->getText("TXT_KEY_SCREEN_CANCEL"), NULL, 0);
+	kUI.popupLaunch(pPopup, false, POPUPSTATE_IMMEDIATE);
 	return true;
 }

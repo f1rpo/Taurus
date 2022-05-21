@@ -28,15 +28,18 @@ public:
 	char const* getExtFullPath() const { return m_pExtFullPath->GetCString(); }
 	char const* getExtPathInRoot() const { return m_pExtPathInRoot->GetCString(); }
 	char const* getExtName() const { return m_sExtName.c_str(); }
-	void setDefaultSubstName(char const* szName) { m_sDefaultSubstName = szName; }
-	/*	Replaces the name of the mod folder in the paths stored by the EXE.
-		NULL means to use the DefaultSubstName. */
-	void setExtModName(const char* szName = NULL);
+	int getExtNameLengthLimit() const;
+	// Replaces the name of the mod folder in the paths stored by the EXE
+	void setExtModName(const char* szName,
+			/*	Whether the name change should apply only until exportDone is called.
+				Also, until then, setExtModName and resetExt calls will be ignored. */
+			bool bExporting = false);
+	void exportDone();
 	// Restore the true paths in the EXE (if they've been changed)
 	void resetExt();
 
 private:
-	std::string m_sDefaultSubstName;
+	bool m_bExporting;
 	std::string m_sFullPath;
 	std::string m_sPathInRoot;
 	std::string m_sName;
