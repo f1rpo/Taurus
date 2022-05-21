@@ -42,8 +42,8 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TAURUS__SAVEMODNAME_HOVER</Tag>
-		<English>When checked, the name of the mod's folder (e.g. "Taurus") is written into our savegames. This is what mods normally do and has the effect that other mods and BtS without mods refuse to load our savegames. Unchecking this option means that our savegames look just like unmodified savegames, so BtS (also with custom assets) will be able to load them. A downside is that double-clicking a savegame in Windows Explorer will no longer launch our mod.</English>
-		<German>Speichert den Ordner-Namen des Mods (z.B. "Taurus") in Spielständen. Das geschieht bei praktisch allen Mods und hat den Effekt, dass andere Mods sowie BtS ohne Mods diese Spielstände als inkompatibel zurückweisen. Ist die Option deaktiviert, dann wird kein Odner-Name gespeichert und BtS (ggf. auch mit installierten [COLOR_BUILDING_TEXT]CustomAssets[COLOR_REVERT]) akzeptiert unsere Spielstände. Allerdings lässt sich der Mod dann nicht mehr per Doppelklick auf eine Spielstands-Datei starten.</German>
+		<English>When checked, the name of the mod's folder (e.g. "Taurus") is written into your savegames. This is what mods normally do, and prevents other mods and BtS without mods from loading your savegames. Unchecking this option means that your savegames look just like unmodified savegames, so BtS (also with custom assets) will be able to load them. A downside is that double-clicking a savegame in Windows Explorer will no longer launch this mod.</English>
+		<German>Speichert den Ordner-Namen des Mods (z.B. "Taurus") in Spielständen. Das geschieht bei praktisch allen Mods und hat den Effekt, dass andere Mods sowie BtS ohne Mods diese Spielstände als inkompatibel zurückweisen. Ist die Option deaktiviert, dann wird kein Odner-Name gespeichert und BtS (ggf. auch mit installierten [COLOR_BUILDING_TEXT]CustomAssets[COLOR_REVERT]) akzeptiert unsere Spielstände. Allerdings lässt sich die Mod dann nicht mehr per Doppelklick auf eine Spielstands-Datei starten.</German>
 	</TEXT>
 	<!-- trs.modname: end -->
 
