@@ -166,8 +166,14 @@ public:
 	CvMap& getMapINLINE() { return *m_map; }				// inlined for perf reasons, do not use outside of dll
 	CvGameAI& getGameINLINE() { return *m_game; }			// inlined for perf reasons, do not use outside of dll
 #endif
-	DllExport CvMap& getMap();
-	DllExport CvGameAI& getGame();
+	/*	<trs.> The INLINE functions above are now deprecated.
+		The External functions are exported through the .def file
+		and should not be used DLL-internally. */
+	CvMap& getMapExternal();
+	CvMap& getMap() { return *m_map; }
+	CvGameAI& getGameExternal();
+	CvGameAI& getGame() { return *m_game; }
+	// </trs.>
 	DllExport CvGameAI *getGamePointer();
 	DllExport CvRandom& getASyncRand();
 	DllExport CMessageQueue& getMessageQueue();
@@ -683,7 +689,9 @@ public:
 	bool isCachingDone() const { return (m_iMAX_HIT_POINTS > 0); } // trs.modname
 
 	// ***** EXPOSED TO PYTHON *****
-	DllExport int getDefineINT( const char * szName ) const;
+	// trs.debug: (exported through .def file)
+	int getDefineINTExternal( const char* szName ) const;
+	int getDefineINT( const char * szName ) const;
 	DllExport float getDefineFLOAT( const char * szName ) const;
 	DllExport const char * getDefineSTRING( const char * szName ) const;
 	DllExport void setDefineINT( const char * szName, int iValue );
@@ -709,6 +717,7 @@ public:
 	DllExport int getUNIT_MULTISELECT_MAX();
 	int getPERCENT_ANGER_DIVISOR();
 	DllExport int getEVENT_MESSAGE_TIME();
+	int getEVENT_MESSAGE_STAGGER_TIME() const { return m_iEVENT_MESSAGE_STAGGER_TIME; } // trs.debug
 	int getROUTE_FEATURE_GROWTH_MODIFIER();
 	int getFEATURE_GROWTH_MODIFIER();
 	int getMIN_CITY_RANGE();
@@ -1151,6 +1160,7 @@ protected:
 	int m_iUNIT_MULTISELECT_MAX;
 	int m_iPERCENT_ANGER_DIVISOR;
 	int m_iEVENT_MESSAGE_TIME;
+	int m_iEVENT_MESSAGE_STAGGER_TIME; // trs.debug
 	int m_iROUTE_FEATURE_GROWTH_MODIFIER;
 	int m_iFEATURE_GROWTH_MODIFIER;
 	int m_iMIN_CITY_RANGE;

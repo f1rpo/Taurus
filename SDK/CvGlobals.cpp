@@ -168,6 +168,7 @@ m_iMAX_PLOT_LIST_ROWS(0),
 m_iUNIT_MULTISELECT_MAX(0),
 m_iPERCENT_ANGER_DIVISOR(0),
 m_iEVENT_MESSAGE_TIME(0),
+m_iEVENT_MESSAGE_STAGGER_TIME(0), // trs.debug
 m_iROUTE_FEATURE_GROWTH_MODIFIER(0),
 m_iFEATURE_GROWTH_MODIFIER(0),
 m_iMIN_CITY_RANGE(0),
@@ -2609,6 +2610,7 @@ void CvGlobals::cacheGlobals()
 	m_iUNIT_MULTISELECT_MAX = getDefineINT("UNIT_MULTISELECT_MAX");
 	m_iPERCENT_ANGER_DIVISOR = getDefineINT("PERCENT_ANGER_DIVISOR");
 	m_iEVENT_MESSAGE_TIME = getDefineINT("EVENT_MESSAGE_TIME");
+	m_iEVENT_MESSAGE_STAGGER_TIME = getDefineINT("EVENT_MESSAGE_STAGGER_TIME"); // trs.debug
 	m_iROUTE_FEATURE_GROWTH_MODIFIER = getDefineINT("ROUTE_FEATURE_GROWTH_MODIFIER");
 	m_iFEATURE_GROWTH_MODIFIER = getDefineINT("FEATURE_GROWTH_MODIFIER");
 	m_iMIN_CITY_RANGE = getDefineINT("MIN_CITY_RANGE");
@@ -2671,9 +2673,16 @@ void CvGlobals::cacheGlobals()
 	m_iUSE_ON_UPDATE_CALLBACK = getDefineINT("USE_ON_UPDATE_CALLBACK");
 	m_iUSE_ON_UNIT_CREATED_CALLBACK = getDefineINT("USE_ON_UNIT_CREATED_CALLBACK");
 	m_iUSE_ON_UNIT_LOST_CALLBACK = getDefineINT("USE_ON_UNIT_LOST_CALLBACK");
+}
 
-	// trs.modname: All global defines having been loaded
-	m_pModName->setDefaultSubstName(getDefineSTRING("REPLACEMENT_MOD_NAME"));
+/*	trs.debug: Helpful for debugging and reverse-engineering to
+	have calls from the EXE in a separate function */
+int CvGlobals::getDefineINTExternal( const char * szName ) const
+{
+	// The EXE polls this while idle
+	if (szName == reinterpret_cast<char*>(0x00c9c868))
+		return getEVENT_MESSAGE_STAGGER_TIME();
+	return getDefineINT(szName);
 }
 
 int CvGlobals::getDefineINT( const char * szName ) const
@@ -3577,10 +3586,10 @@ int CvGlobals::getNumGlobeLayers() const { return NUM_GLOBE_LAYER_TYPES; }
 
 
 //
-// non-inline versions
+// non-inline versions (trs. Renamed the first two.)
 //
-CvMap& CvGlobals::getMap() { return *m_map; }
-CvGameAI& CvGlobals::getGame() { return *m_game; }
+CvMap& CvGlobals::getMapExternal() { return *m_map; }
+CvGameAI& CvGlobals::getGameExternal() { return *m_game; }
 CvGameAI *CvGlobals::getGamePointer(){ return m_game; }
 
 int CvGlobals::getMaxCivPlayers() const
