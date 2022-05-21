@@ -66,7 +66,7 @@ void ModName::setExtModName(const char* szName)
 	}
 	std::string sNewFullPath, sNewPathInRoot;
 	// Empty name implies empty paths (no Mods folder involved)
-	if (szName[0] != '\0')
+	if (!cstring::empty(szName))
 	{
 		sNewFullPath = getExtFullPath();
 		sNewPathInRoot = getExtPathInRoot();
@@ -85,7 +85,7 @@ void ModName::setExtModName(const char* szName)
 		/*	The EXE will return NULL instead of an empty string
 			when the FString size is 0 */
 		((gDLL->getModName(true) == NULL || gDLL->getModName(false) == NULL) ?
-		szName[0] != '\0' :
+		!cstring::empty(szName) :
 		(std::strcmp(sNewFullPath.c_str(), gDLL->getModName(true)) != 0 ||
 		std::strcmp(sNewPathInRoot.c_str(), gDLL->getModName(false)) != 0)))
 	{
