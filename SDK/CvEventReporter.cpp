@@ -561,5 +561,10 @@ void CvEventReporter::readStatistics(FDataStreamBase* pStream)
 void CvEventReporter::writeStatistics(FDataStreamBase* pStream)
 {
 	m_kStatistics.write(pStream);
+	/*	<trs.modname> Restore the true mod name. (The exported name is needed,
+		not in the EXE but in the DLL, to write savegame data that BAT expects.) */
+	GC.getModName().exportDone();
+	GC.getModName().resetExt();
+	// </trs.modname>
 }
 

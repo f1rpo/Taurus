@@ -689,7 +689,7 @@ public:
 	bool isCachingDone() const { return (m_iMAX_HIT_POINTS > 0); } // trs.modname
 
 	// ***** EXPOSED TO PYTHON *****
-	// trs.debug: (exported through .def file)
+	// trs.modname: (exported through .def file)
 	int getDefineINTExternal( const char* szName ) const;
 	int getDefineINT( const char * szName ) const;
 	DllExport float getDefineFLOAT( const char * szName ) const;

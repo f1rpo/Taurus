@@ -3,6 +3,146 @@
 #include "ModName.h"
 
 
+namespace
+{
+	std::string parseName(std::string sPath)
+	{
+		std::string sName = sPath;
+		char const cSep1 = '\\';
+		char const cSep2 = '/';
+		// Looking for this folder name seems like the safest bet
+		std::string sMods = "Mods";
+		size_t posMods = sName.find(sMods);
+		if (posMods != sName.npos)
+		{
+			/*	Skip over "Mods" plus the path separator.
+				And chop off the separator at the end. */
+			int iOffsetStart = sMods.length() + 1;
+			int iOffsetEnd = iOffsetStart;
+			char const cLastChar = sName[sName.length() - 1];
+			if (cLastChar == cSep1 || cLastChar == cSep2)
+				iOffsetEnd++;
+			sName = sName.substr(posMods + iOffsetStart,
+					sName.length() - posMods - iOffsetEnd);
+		}
+		else
+		{
+			/*	I'm not sure that the folder name is hardcoded. Don't know where
+				the EXE gets it. Let's try to work with different names too. */
+			std::vector<std::string> asTokens;
+			std::string sSeps; sSeps += cSep1; sSeps += cSep2;
+			boost::split(asTokens, sName, boost::is_any_of(sSeps));
+			if (asTokens.size() > 1 && asTokens.size() <= 3)
+				sName = asTokens[1];
+			else
+			{
+				FErrorMsg("Failed to parse mod's folder name");
+				return "";
+			}
+		}
+		return sName;
+	}
+}
+
+
+bool ModName::isCompatible(char const* szSavedModName) const
+{
+	// tbd.: check player option for everything-goes
+	std::string sSavedName = parseName(szSavedModName);
+	// Always accept our own saves
+	if (sSavedName == m_sName)
+		return true;
+	if (GC.getDefineBOOL("LOAD_BTS_SAVEGAMES") && sSavedName.empty())
+		return true;
+	std::string sPrefixes = GC.getDefineSTRING("COMPATIBLE_MOD_NAME_PREFIXES");
+	std::vector<std::string> asPrefixes;
+	boost::split(asPrefixes, sPrefixes, boost::is_any_of(","));
+	std::vector<std::string> asSanitizedPrefixes;
+	for (size_t i = 0; i < asPrefixes.size(); i++)
+	{
+		std::string sPrefix = asPrefixes[i];
+		int iLeadingSpaces = 0;
+		int iTrailingSpaces = 0;
+		bool bFirstNonSpaceFound = false;
+		bool bLastNonSpaceFound = false;
+		for (size_t i = 0; i < sPrefix.length(); i++)
+		{
+			if (!bFirstNonSpaceFound && sPrefix[i] == ' ')
+				iLeadingSpaces++;
+			else bFirstNonSpaceFound = true;
+			if (!bLastNonSpaceFound && sPrefix[sPrefix.length() - i - 1] == ' ')
+				iTrailingSpaces++;
+			else bLastNonSpaceFound = true;
+		}
+		sPrefix = sPrefix.substr(iLeadingSpaces, std::max(0,
+				((int)sPrefix.length()) - iTrailingSpaces - iLeadingSpaces));
+		if (!sPrefix.empty())
+			asSanitizedPrefixes.push_back(sPrefix);
+	}
+	if (asSanitizedPrefixes.empty())
+		return false;
+	for (size_t i = 0; i < asSanitizedPrefixes.size(); i++)
+	{
+		if (STDSTR_STARTS_WITH(cstring::tolower(sSavedName),
+			cstring::tolower(asSanitizedPrefixes[i])))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
+int ModName::getNumExtraGameOptions() const
+{
+	if (!m_bExporting)
+		return 0;
+	std::string sName = getExtName();
+	cstring::tolower(sName);
+	if (STDSTR_STARTS_WITH(sName, "bat"))
+		return 2;
+	if (STDSTR_STARTS_WITH(sName, "buffy"))
+		return 1;
+	return 0;
+}
+
+
+int ModName::getNumExtraUnits() const
+{
+	if (!m_bExporting)
+		return 0;
+	std::string sName = getExtName();
+	cstring::tolower(sName);
+	if (STDSTR_STARTS_WITH(sName, "bat"))
+		return 21; // Female missionaries, executives, GP
+	return 0;
+}
+
+
+int ModName::getNumExtraUnitCombats() const
+{
+	if (!m_bExporting)
+		return 0;
+	std::string sName = getExtName();
+	cstring::tolower(sName);
+	if (STDSTR_STARTS_WITH(sName, "bat"))
+		return 1; // UNITCOMBAT_IFV (for the -disabled- futuristic era)
+	return 0;
+}
+
+
+int ModName::getNumExtraFeatures() const
+{
+	if (!m_bExporting)
+		return 0;
+	std::string sName = getExtName();
+	cstring::tolower(sName);
+	if (STDSTR_STARTS_WITH(sName, "bat"))
+		return 1; // FEATURE_SCRUB, accidentally included perhaps.
+	return 0;
+}
+
+
 ModName::ModName(char const* szFullPath, char const* szPathInRoot)
 :	m_pExtFullPath(NULL), m_pExtPathInRoot(NULL), m_bExporting(false)
 {
@@ -11,35 +151,7 @@ ModName::ModName(char const* szFullPath, char const* szPathInRoot)
 	m_pExtFullPath = FString::create(szFullPath);
 	m_pExtPathInRoot = FString::create(szPathInRoot);
 	FAssert(m_pExtFullPath != NULL && m_pExtPathInRoot != NULL);
-	char const cSep1 = '\\';
-	char const cSep2 = '/';
-	m_sName = m_sPathInRoot;
-	// Looking for this folder name seems like the safest bet
-	std::string sMods = "Mods";
-	size_t posMods = m_sName.find(sMods);
-	if (posMods != m_sName.npos)
-	{
-		/*	Skip over "Mods" plus the path separator.
-			And chop off the separator at the end. */
-		int iOffsetStart = sMods.length() + 1;
-		int iOffsetEnd = iOffsetStart;
-		char const cLastChar = m_sName[m_sName.length() - 1];
-		if (cLastChar == cSep1 || cLastChar == cSep2)
-			iOffsetEnd++;
-		m_sName = m_sName.substr(posMods + iOffsetStart,
-				m_sName.length() - posMods - iOffsetEnd);
-	}
-	else
-	{
-		/*	I'm not sure that the folder name is hardcoded. Don't know where
-			the EXE gets it. Let's try to work with different names too. */
-		std::vector<std::string> asTokens;
-		std::string sSeps; sSeps += cSep1; sSeps += cSep2;
-		boost::split(asTokens, m_sName, boost::is_any_of(sSeps));
-		if (asTokens.size() > 1 && asTokens.size() <= 3)
-			m_sName = asTokens[1];
-		else FErrorMsg("Failed to parse mod's folder name");
-	}
+	m_sName = parseName(m_sPathInRoot);
 	m_sExtName = m_sName;
 }
 

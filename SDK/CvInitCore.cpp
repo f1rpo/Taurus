@@ -1,5 +1,3 @@
-// game.cpp
-
 #include "CvGameCoreDLL.h"
 #include "CvInitCore.h"
 #include "CvDLLPythonIFaceBase.h"
@@ -1208,6 +1206,20 @@ void CvInitCore::setType(const CvWString & szType)
 	}
 }
 
+// trs.modname:
+bool CvInitCore::isLoadGameType() const
+{
+	switch(getType())
+	{
+	case GAME_SP_LOAD:
+	case GAME_MP_LOAD:
+	case GAME_HOTSEAT_LOAD:
+	case GAME_PBEM_LOAD:
+	return true;
+	}
+	return false;
+}
+
 void CvInitCore::setMode(GameMode eMode)
 {
 	if (getMode() != eMode)
@@ -1943,12 +1955,12 @@ void CvInitCore::read(FDataStreamBase* pStream)
 	}
 
 // BUG - Save Format - start
+	// read and ignore number of game options as it's only for external tools
+	/*	trs.modname: To import saves, we need to read the bools for their
+		game options too (and then ignore those). */
+	int iNumGameOptions = 0;
 	if (bReadNumGameOptions)
-	{
-		// read and ignore number of game options as it's only for external tools
-		int iNumGameOptions = 0;
 		pStream->Read(&iNumGameOptions);
-	}
 // BUG - Save Format - end
 
 	if (uiSaveFlag > 0)
@@ -1960,6 +1972,12 @@ void CvInitCore::read(FDataStreamBase* pStream)
 		pStream->Read(NUM_GAMEOPTION_TYPES-1, m_abOptions);
 		m_abOptions[NUM_GAMEOPTION_TYPES-1] = false;
 	}
+	// <trs.modname>
+	for (int i = NUM_GAMEOPTION_TYPES; i < iNumGameOptions; i++)
+	{
+		bool bEnabled;
+		pStream->Read(&bEnabled); // discard
+	} // </trs.modname>
 	pStream->Read(NUM_MPOPTION_TYPES, m_abMPOptions);
 
 	pStream->Read(&m_bStatReporting);
@@ -2020,11 +2038,6 @@ void CvInitCore::read(FDataStreamBase* pStream)
 
 void CvInitCore::write(FDataStreamBase* pStream)
 {
-	/*	<trs.modname> Preamble has been written to pStream by the EXE.
-		Can now restore the true mod name in the EXE. */
-	GC.getModName().exportDone();
-	GC.getModName().resetExt(); // </trs.modname>
-
 	uint uiSaveFlag=1;		// flag for expansion, see SaveBits)
 	// BUG - Save Format (trs.modname: Mostly moved into BugMod.h):
 	uiSaveFlag |= BULL_MOD_SAVE_MASK;
@@ -2053,16 +2066,23 @@ void CvInitCore::write(FDataStreamBase* pStream)
 
 	pStream->Write(m_iNumVictories);
 	pStream->Write(m_iNumVictories, m_abVictories);
-
-// BUG - Save Format - start (trs.modname: simplified)
-#if BULL_MOD_SAVE_MASK
-	// If any optional mod alters the number of game options,
-	// write out the number of game options for the external parser tool
-	pStream->Write(NUM_GAMEOPTION_TYPES);
-#endif
-// BUG - Save Format - end
+	// <trs.modname>
+	int const iGameOptions = NUM_GAMEOPTION_TYPES +
+			GC.getModName().getNumExtraGameOptions();
+	if (iGameOptions > /* BtS game option count */ 24)
+	{
+		// BUG - Save Format - start
+		// If any optional mod alters the number of game options,
+		// write out the number of game options for the external parser tool
+		pStream->Write(NUM_GAMEOPTION_TYPES);
+		// BUG - Save Format - end
+	} // </trs.modname>
 
 	pStream->Write(NUM_GAMEOPTION_TYPES, m_abOptions);
+	// <trs.modname> When exporting, write the expected game options data.
+	for (int i = NUM_GAMEOPTION_TYPES; i < iGameOptions; i++)
+		pStream->Write(false);
+	// </trs.modname>
 	pStream->Write(NUM_MPOPTION_TYPES, m_abMPOptions);
 
 	pStream->Write(m_bStatReporting);

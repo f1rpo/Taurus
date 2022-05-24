@@ -28,7 +28,8 @@
         <iDefineIntVal>0</iDefineIntVal>
     </Define>
 
-	<!-- trs.modname: This string (to be typed w/o quotation marks) is
+	<!-- trs.modname: start -->
+	<!-- This string (to be typed w/o quotation marks) is
 		 only used when the Save Mod Name option on the System tab of the
 		 Mod Options screen is _not_ checked.
 		 The string gets written into savegames as the name of the mod.
@@ -39,5 +40,31 @@
 		<DefineName>REPLACEMENT_MOD_NAME</DefineName>
         <DefineTextVal></DefineTextVal>
     </Define>
+	<!-- If set 1, then Taurus will disable the mod name check in the EXE to
+		 load BtS savegames (with or without custom assets). If set to 0,
+		 savegames that don't contain a mod name are rejected. -->
+	<Define>
+		<DefineName>LOAD_BTS_SAVEGAMES</DefineName>
+        <iDefineIntVal>1</iDefineIntVal>
+    </Define>
+	<!-- Comma-separated list of name prefixes. Not case sensitive; spaces
+		 after a comma are ignored.
+		 If the mod name read from a savegame starts with one of these prefixes,
+		 then Taurus will disable the mod name check in the EXE to load the
+		 savegame. The list can be empty; Taurus will then still be able to load
+		 savegames whose mod name matches the name of the folder where Taurus
+		 is installed. If LOAD_BTS_SAVEGAMES is also disabled, then loading of
+		 savegames works just like in any other mod. -->
+	<Define>
+		<DefineName>COMPATIBLE_MOD_NAME_PREFIXES</DefineName>
+        <DefineTextVal>taurus, bug, bull, bat, buffy</DefineTextVal>
+    </Define>
+	<!-- Hint: Regardless of the two defines above, the 'x' key be held down
+		 while starting to load any savegame to suspend the mod name check
+		 in the EXE. This does not affect the SAVE_VERSION check; SAVE_VERSION
+		 can be re-defined (iDefineIntVal) in this XML file to work around
+		 that check. (But it's unlikely that loading will succeed when the
+		 save versions don't match.) -->
+	<!-- trs.modname: end -->
 
 </Civ4Defines>

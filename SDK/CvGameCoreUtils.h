@@ -288,15 +288,6 @@ void setListHelp(wchar* szBuffer, const wchar* szStart, const wchar* szItem, con
 void setListHelp(CvWString& szBuffer, const wchar* szStart, const wchar* szItem, const wchar* szSeparator, bool bFirst);
 void setListHelp(CvWStringBuffer& szBuffer, const wchar* szStart, const wchar* szItem, const wchar* szSeparator, bool bFirst);
 
-// trs.modname:
-namespace cstring
-{
-	inline bool empty(char const* szString)
-	{
-		return (szString[0] == '\0');
-	}
-}
-
 // PlotUnitFunc's...
 bool PUF_isGroupHead( const CvUnit* pUnit, int iData1 = -1, int iData2 = -1);
 bool PUF_isPlayer( const CvUnit* pUnit, int iData1, int iData2 = -1);

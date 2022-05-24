@@ -20,14 +20,12 @@
 #include "FVariableSystem.h"
 #include "CvInitCore.h"
 
-// BUG - DLL Info - start
-#include "BugMod.h"
-// BUG - DLL Info - end
-
-// BUG - BUG Info - start
-#include "CvBugOptions.h"
-// BUG - BUG Info - end
-#include "ModName.h" // trs.modname
+#include "BugMod.h" // BUG - DLL Info
+#include "CvBugOptions.h" // BUG - BUG Info
+// <trs.modname>
+#include "ModName.h"
+#include "SelfMod.h"
+// </trs.modname>
 // BUFFY - DLL Info - start
 #ifdef _BUFFY
 #include "Buffy.h"
@@ -2675,13 +2673,20 @@ void CvGlobals::cacheGlobals()
 	m_iUSE_ON_UNIT_LOST_CALLBACK = getDefineINT("USE_ON_UNIT_LOST_CALLBACK");
 }
 
-/*	trs.debug: Helpful for debugging and reverse-engineering to
-	have calls from the EXE in a separate function */
-int CvGlobals::getDefineINTExternal( const char * szName ) const
+// trs.modname: Separate function for external calls
+int CvGlobals::getDefineINTExternal(char const* szName) const
 {
-	// The EXE polls this while idle
+	// <trs.debug> The EXE polls this while idle; harmless - but annoying.
 	if (szName == reinterpret_cast<char*>(0x00c9c868))
-		return getEVENT_MESSAGE_STAGGER_TIME();
+		return getEVENT_MESSAGE_STAGGER_TIME(); // </trs.debug>
+	if (szName == reinterpret_cast<char*>(0x00c93dc4) && // "SAVE_VERSION"
+		GC.getInitCore().isLoadGameType() &&
+		(getDefineBOOL("LOAD_BTS_SAVEGAMES") ||
+		!cstring::empty(getDefineSTRING("COMPATIBLE_MOD_NAME_PREFIXES")) /*||
+		tbd.: check override key (x?) */))
+	{
+		smc::BtS_EXE.patchModNameCheck(&GC.getModName());
+	}
 	return getDefineINT(szName);
 }
 

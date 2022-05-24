@@ -15,6 +15,24 @@
 // Firaxis Games, copyright 2005
 //
 
+// <trs.modname> Let's make this the place for string utility functions
+namespace cstring
+{
+	inline bool empty(char const* szString)
+	{
+		return (szString[0] == '\0');
+	}
+	// Uses a C function, so it kind of fits here.
+	inline std::string& tolower(std::string& s)
+	{
+		for (size_t i = 0; i < s.length(); i++)
+			s[i] = static_cast<char>(::tolower(s[i]));
+		return s;
+	}
+}
+#define STDSTR_STARTS_WITH(s, prefix) ((s).rfind((prefix), 0) == 0)
+// </trs.modname>
+
 // wide string
 class CvWString : public std::wstring
 {

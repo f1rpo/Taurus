@@ -193,6 +193,7 @@ public:
 	DllExport GameType getType() const	{ return m_eType; }
 	DllExport void setType(GameType eType);
 	DllExport void setType(const CvWString & szType);
+	bool isLoadGameType() const; // trs.modname
 
 	DllExport GameMode getMode() const	{ return m_eMode; }
 	DllExport void setMode(GameMode eMode);

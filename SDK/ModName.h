@@ -12,7 +12,9 @@
 #ifndef MOD_NAME_H
 #define MOD_NAME_H
 
-class ModName
+#include "ModNameChecker.h"
+
+class ModName : public ModNameChecker
 {
 public:
 	ModName(char const* szFullPath, char const* szPathInRoot);
@@ -37,14 +39,17 @@ public:
 	void exportDone();
 	// Restore the true paths in the EXE (if they've been changed)
 	void resetExt();
+	/*	Whether we should attempt to load savegames with the mod name
+		szSavedModName */
+	bool isCompatible(char const* szSavedModName) const; // override
+	/*	0 except while exporting a savegame to a BULL-based mod that uses
+		additional game options, units etc. */
+	int getNumExtraGameOptions() const;
+	int getNumExtraUnits() const;
+	int getNumExtraUnitCombats() const;
+	int getNumExtraFeatures() const;
 
 private:
-	bool m_bExporting;
-	std::string m_sFullPath;
-	std::string m_sPathInRoot;
-	std::string m_sName;
-	std::string m_sExtName; // Not stored separately by the EXE; handy to have.
-
 	/*	I'm guessing that the string structure used by the EXE for storing
 		the mod name is the mysterious FString class (F for "Firaxis Game Engine")
 		mentioned in comments in CvString.h. */
@@ -64,7 +69,9 @@ private:
 			union { Elem _Buf[_BUF_SIZE]; _Elem *_Ptr; }
 			however, a test with a really long mod name has confirmed that this
 			local char array has a dynamic size. I guess through allocation of
-			raw memory and a reinterpret_cast. */
+			raw memory and a reinterpret_cast. It could well be that the class
+			I've reverse-engineered here is in fact only a component that the
+			actual FString classes hold a pointer to. */
 		char m_cFirstChar;
 		char const& at(int i) const { return *(&m_cFirstChar + i); }
 		char& at(int i) { return *(&m_cFirstChar + i); }
@@ -72,6 +79,12 @@ private:
 	};
 	FString* m_pExtFullPath;
 	FString* m_pExtPathInRoot;
+
+	bool m_bExporting;
+	std::string m_sFullPath;
+	std::string m_sPathInRoot;
+	std::string m_sName;
+	std::string m_sExtName; // Not stored separately by the EXE; handy to have.
 };
 
 #endif

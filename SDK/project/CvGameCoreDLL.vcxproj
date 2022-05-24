@@ -236,6 +236,7 @@
     <ClInclude Include="..\FVariableSystem.h" />
     <ClInclude Include="..\LinkedList.h" />
     <ClInclude Include="..\ModName.h" />
+    <ClInclude Include="..\ModNameChecker.h" />
     <ClInclude Include="..\SelfMod.h" />
   </ItemGroup>
   <ItemGroup>
