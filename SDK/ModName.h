@@ -59,7 +59,7 @@ public:
 	static UnitTypes replBATUnit(UnitTypes eBATUnitID);
 	/*	Could get this info from isCompatible, but, in theory, the callback
 		can be disabled and then the BAT import flag wouldn't get updated.
-		Let CvInitCore::read inform us instead. */
+		Also wouldn't work for BAT in CustomAssets. */
 	void setBATImport(bool b) { m_bBATImport = b; }
 	/*	This will be accurate not just while reading savegame data, but, fwiw,
 		until another save gets loaded or a new game started. */

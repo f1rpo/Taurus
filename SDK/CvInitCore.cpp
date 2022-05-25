@@ -1968,9 +1968,9 @@ void CvInitCore::read(FDataStreamBase* pStream)
 	int iNumGameOptions = 0;
 	if (bReadNumGameOptions)
 		pStream->Read(&iNumGameOptions);
-	/*	trs.bat: Reliable enough. BAT is the only major BUG-based mod
-		with 2 extra options. ModName::isCompatible could also set this flag,
-		but that's more complicated to get right. */
+	/*	trs.bat: BAT is the only major BUG-based mod with 2 extra options.
+		This method of detection, as opposed to ModName::isCompatible, should
+		also work for BAT in CustomAssets. */
 	GC.getModName().setBATImport(bReadNumGameOptions && iNumGameOptions == 26);
 // BUG - Save Format - end
 

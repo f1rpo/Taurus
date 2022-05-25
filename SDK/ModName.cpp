@@ -144,9 +144,16 @@ int ModName::getNumExtraFeatures() const
 
 UnitTypes ModName::replBATUnit(int iExtraID)
 {
-	FAssert(iExtraID >= 0);
-	// Tbd.: Figure out what unit ids BAT assigns exactly (through modular loading)
-	return static_cast<UnitTypes>(GC.getNumUnitInfos() - 1);
+	FAssert(iExtraID >= 0 && iExtraID < getBATExtraUnits());
+	int iID = GC.getNumUnitInfos() + iExtraID;
+	if (iExtraID < 7) // Female GPs have the lowest extra IDs
+		iID -= 7; // Male GP have the highest regular IDs
+	else if (iExtraID < 14) // Female missionary
+		iID -= 113; // Male missionary IDs are ... somewhere in the middle
+	// Female execs come last, after the female missionaries.
+	else iID -= 127; // Male execs come before male missionaries
+	FAssertBounds(0, iID, GC.getNumUnitInfos());
+	return static_cast<UnitTypes>(iID);
 }
 
 
