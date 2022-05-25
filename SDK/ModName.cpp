@@ -47,7 +47,8 @@ namespace
 
 bool ModName::isCompatible(char const* szSavedModName) const
 {
-	// tbd.: check player option for everything-goes
+	if (isNameCheckOverrideKey())
+		return true;
 	std::string sSavedName = parseName(szSavedModName);
 	// Always accept our own saves
 	if (sSavedName == m_sName)

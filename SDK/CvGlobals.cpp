@@ -2682,10 +2682,10 @@ int CvGlobals::getDefineINTExternal(char const* szName) const
 	if (szName == reinterpret_cast<char*>(0x00c93dc4) && // "SAVE_VERSION"
 		GC.getInitCore().isLoadGameType() &&
 		(getDefineBOOL("LOAD_BTS_SAVEGAMES") ||
-		!cstring::empty(getDefineSTRING("COMPATIBLE_MOD_NAME_PREFIXES")) /*||
-		tbd.: check override key (x?) */))
+		!cstring::empty(getDefineSTRING("COMPATIBLE_MOD_NAME_PREFIXES")) ||
+		getModName().isNameCheckOverrideKey()))
 	{
-		smc::BtS_EXE.patchModNameCheck(&GC.getModName());
+		smc::BtS_EXE.patchModNameCheck(&getModName());
 	}
 	return getDefineINT(szName);
 }

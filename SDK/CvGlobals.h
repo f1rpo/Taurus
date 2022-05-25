@@ -801,7 +801,7 @@ public:
 #endif
 	DllExport CvDLLUtilityIFaceBase* getDLLIFaceNonInl();
 	// <trs.modname>
-	ModName& getModName() { return *m_pModName; }
+	ModName& getModName() const { return *m_pModName; }
 	bool isModNameKnown() const { return (m_pModName != NULL); }
 	// </trs.modname>
 	DllExport void setDLLProfiler(FProfiler* prof);

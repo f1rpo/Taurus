@@ -30,6 +30,7 @@ public:
 	char const* getExtFullPath() const { return m_pExtFullPath->GetCString(); }
 	char const* getExtPathInRoot() const { return m_pExtPathInRoot->GetCString(); }
 	char const* getExtName() const { return m_sExtName.c_str(); }
+	bool isNameCheckOverrideKey() const { return GetKeyState('X') & 0x8000; }
 	int getExtNameLengthLimit() const;
 	// Replaces the name of the mod folder in the paths stored by the EXE
 	void setExtModName(const char* szName,
