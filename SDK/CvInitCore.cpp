@@ -28,6 +28,10 @@ CvString CvInitCore::exeName;
 bool CvInitCore::bPathsSet;
 // BUG - EXE/DLL Paths - end
 
+/*	trs.debug: Replace this with a similar macro added to the FAssert header.
+	Discard fnString - FILE and LINE is enough. */
+#define FASSERT_BOUNDS(lower, upper, index, fnString) FAssertBounds(lower, index, upper)
+
 // Public Functions...
 
 CvInitCore::CvInitCore()
