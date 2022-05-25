@@ -338,7 +338,6 @@ protected:
 			0x84, 0xC0,
 			0x8B, 0x5C, 0x24, 0x20
 		};
-		uint uiStartAddress = 0x004175CC;
 		byte aMoreExpectedCodeBytes[] = {
 			 0xE8, 0x8A, 0xA7, 0xFF, 0xFF,
 			 0x8B, 0x80, 0xCC, 0x00, 0x00, 0x00,
@@ -349,13 +348,12 @@ protected:
 		};
 		int iAddressOffset = findAddressOffset(
 				aMoreExpectedCodeBytes, ARRAYSIZE(aMoreExpectedCodeBytes),
-				uiStartAddress,
+				0x004175C1,
 				aExpectedCodeBytes, ARRAYSIZE(aExpectedCodeBytes),
 				0x004AE571);
 		if (iAddressOffset == MIN_INT)
 			return false;
-		uiStartAddress = static_cast<uint>(
-				static_cast<int>(uiStartAddress) + iAddressOffset);
+		uint uiStartAddress = static_cast<uint>(0x004175CC + iAddressOffset);
 		/*	The function in the EXE that performs the SAVE_VERSION check
 			(can get a debugger breakpoint through CvGlobals::getDefineINTExternal)
 			is also (via a subroutine) responsible for the mod name check:
