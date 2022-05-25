@@ -49,11 +49,11 @@ bool ModName::isCompatible(char const* szSavedModName) const
 {
 	if (isNameCheckOverrideKey())
 		return true;
+	if (GC.getDefineBOOL("LOAD_BTS_SAVEGAMES") && cstring::empty(szSavedModName))
+		return true;
 	std::string sSavedName = parseName(szSavedModName);
 	// Always accept our own saves
 	if (sSavedName == m_sName)
-		return true;
-	if (GC.getDefineBOOL("LOAD_BTS_SAVEGAMES") && sSavedName.empty())
 		return true;
 	std::string sPrefixes = GC.getDefineSTRING("COMPATIBLE_MOD_NAME_PREFIXES");
 	std::vector<std::string> asPrefixes;
@@ -82,10 +82,11 @@ bool ModName::isCompatible(char const* szSavedModName) const
 	}
 	if (asSanitizedPrefixes.empty())
 		return false;
+	cstring::tolower(sSavedName);
 	for (size_t i = 0; i < asSanitizedPrefixes.size(); i++)
 	{
-		if (STDSTR_STARTS_WITH(cstring::tolower(sSavedName),
-			cstring::tolower(asSanitizedPrefixes[i])))
+		if (STDSTR_STARTS_WITH(
+			sSavedName, cstring::tolower(asSanitizedPrefixes[i])))
 		{
 			return true;
 		}
