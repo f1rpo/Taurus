@@ -99,52 +99,69 @@ int ModName::getNumExtraGameOptions() const
 		return 0;
 	std::string sName = getExtName();
 	cstring::tolower(sName);
+	// <trs.bat>
 	if (STDSTR_STARTS_WITH(sName, "bat"))
-		return 2;
+		return getBATExtraGameOptions(); // </trs.bat>
 	if (STDSTR_STARTS_WITH(sName, "buffy"))
 		return 1;
 	return 0;
 }
 
+// <trs.bat>
+bool ModName::isExportingToBAT() const
+{
+	if (!m_bExporting)
+		return false;
+	std::string sName = getExtName();
+	cstring::tolower(sName);
+	return STDSTR_STARTS_WITH(sName, "bat");
+}
+
 
 int ModName::getNumExtraUnits() const
 {
-	if (!m_bExporting)
-		return 0;
-	std::string sName = getExtName();
-	cstring::tolower(sName);
-	if (STDSTR_STARTS_WITH(sName, "bat"))
-		return 21; // Female missionaries, executives, GP
+	if (isExportingToBAT())
+		return getBATExtraUnits();
 	return 0;
 }
 
 
 int ModName::getNumExtraUnitCombats() const
 {
-	if (!m_bExporting)
-		return 0;
-	std::string sName = getExtName();
-	cstring::tolower(sName);
-	if (STDSTR_STARTS_WITH(sName, "bat"))
-		return 1; // UNITCOMBAT_IFV (for the -disabled- futuristic era)
+	if (isExportingToBAT())
+		return getBATExtraUnitCombats();
 	return 0;
 }
 
 
 int ModName::getNumExtraFeatures() const
 {
-	if (!m_bExporting)
-		return 0;
-	std::string sName = getExtName();
-	cstring::tolower(sName);
-	if (STDSTR_STARTS_WITH(sName, "bat"))
-		return 1; // FEATURE_SCRUB, accidentally included perhaps.
+	if (isExportingToBAT())
+		return getBATExtraFeatures();
 	return 0;
 }
 
 
+UnitTypes ModName::replBATUnit(int iExtraID)
+{
+	FAssert(iExtraID >= 0);
+	// Tbd.: Figure out what unit ids BAT assigns exactly (through modular loading)
+	return static_cast<UnitTypes>(GC.getNumUnitInfos() - 1);
+}
+
+
+UnitTypes ModName::replBATUnit(UnitTypes eBATUnitID)
+{
+	int iExtra = eBATUnitID - GC.getNumUnitInfos();
+	if (iExtra < 0)
+		return eBATUnitID;
+	return replBATUnit(iExtra);
+} // </trs.bat>
+
+
 ModName::ModName(char const* szFullPath, char const* szPathInRoot)
-:	m_pExtFullPath(NULL), m_pExtPathInRoot(NULL), m_bExporting(false)
+:	m_pExtFullPath(NULL), m_pExtPathInRoot(NULL), m_bExporting(false),
+	m_bBATImport(false) // trs.bat
 {
 	m_sFullPath = szFullPath;
 	m_sPathInRoot = szPathInRoot;

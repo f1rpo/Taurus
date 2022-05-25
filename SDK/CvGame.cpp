@@ -24,6 +24,7 @@
 #include <set>
 #include "CvEventReporter.h"
 #include "CvMessageControl.h"
+#include "ModName.h" // trs.bat
 
 // interface uses
 #include "CvDLLInterfaceIFaceBase.h"
@@ -7870,6 +7871,16 @@ void CvGame::read(FDataStreamBase* pStream)
 	pStream->Read(MAX_TEAMS, m_aiTeamScore);
 
 	pStream->Read(GC.getNumUnitInfos(), m_paiUnitCreatedCount);
+	// <trs.bat>
+	if (GC.getModName().isBATImport())
+	{
+		int iCreated;
+		for (int i = 0; i < ModName::getBATExtraUnits(); i++)
+		{
+			pStream->Read(&iCreated);
+			m_paiUnitCreatedCount[ModName::replBATUnit(i)] += iCreated;
+		}
+	} // </trs.bat>
 	pStream->Read(GC.getNumUnitClassInfos(), m_paiUnitClassCreatedCount);
 	pStream->Read(GC.getNumBuildingClassInfos(), m_paiBuildingClassCreatedCount);
 	pStream->Read(GC.getNumProjectInfos(), m_paiProjectCreatedCount);
@@ -8085,6 +8096,9 @@ void CvGame::write(FDataStreamBase* pStream)
 	pStream->Write(MAX_TEAMS, m_aiTeamScore);
 
 	pStream->Write(GC.getNumUnitInfos(), m_paiUnitCreatedCount);
+	// <trs.bat>
+	for (int i = 0; i < GC.getModName().getNumExtraUnits(); i++)
+		pStream->Write(0); // </trs.bat>
 	pStream->Write(GC.getNumUnitClassInfos(), m_paiUnitClassCreatedCount);
 	pStream->Write(GC.getNumBuildingClassInfos(), m_paiBuildingClassCreatedCount);
 	pStream->Write(GC.getNumProjectInfos(), m_paiProjectCreatedCount);

@@ -45,9 +45,26 @@ public:
 	/*	0 except while exporting a savegame to a BULL-based mod that uses
 		additional game options, units etc. */
 	int getNumExtraGameOptions() const;
+	// <trs.bat> These are only needed for compatibility with BAT
 	int getNumExtraUnits() const;
 	int getNumExtraUnitCombats() const;
 	int getNumExtraFeatures() const;
+	static int getBATExtraGameOptions() { return 2; }
+	static int getBATExtraUnits() { return 21; } // Female missionaries, executives, GP
+	static int getBATExtraUnitCombats() { return 1; } // UNITCOMBAT_IFV (unused)
+	static int getBATExtraFeatures() { return 1; } // SCRUB (unused)
+	/*	Replacement for unit with BAT id equal to the
+		highest BtS id plus iExtra plus 1. (Weird but convenient to use.) */
+	static UnitTypes replBATUnit(int iExtraID);
+	static UnitTypes replBATUnit(UnitTypes eBATUnitID);
+	/*	Could get this info from isCompatible, but, in theory, the callback
+		can be disabled and then the BAT import flag wouldn't get updated.
+		Let CvInitCore::read inform us instead. */
+	void setBATImport(bool b) { m_bBATImport = b; }
+	/*	This will be accurate not just while reading savegame data, but, fwiw,
+		until another save gets loaded or a new game started. */
+	bool isBATImport() const { return m_bBATImport; }
+	// </trs.bat>
 
 private:
 	/*	I'm guessing that the string structure used by the EXE for storing
@@ -85,6 +102,9 @@ private:
 	std::string m_sPathInRoot;
 	std::string m_sName;
 	std::string m_sExtName; // Not stored separately by the EXE; handy to have.
+	// <trs.bat>
+	bool m_bBATImport;
+	bool isExportingToBAT() const; // </trs.bat>
 };
 
 #endif

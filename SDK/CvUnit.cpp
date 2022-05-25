@@ -27,9 +27,8 @@
 #include "CvPopupInfo.h"
 #include "CvArtFileMgr.h"
 
-// BUG - start
-#include "CvBugOptions.h"
-// BUG - end
+#include "CvBugOptions.h" // BUG
+#include "ModName.h" // trs.bat
 
 // Public Functions...
 
@@ -11606,8 +11605,17 @@ void CvUnit::read(FDataStreamBase* pStream)
 	pStream->Read((int*)&m_eOwner);
 	pStream->Read((int*)&m_eCapturingPlayer);
 	pStream->Read((int*)&m_eUnitType);
-	FAssert(NO_UNIT != m_eUnitType);
-	m_pUnitInfo = (NO_UNIT != m_eUnitType) ? &GC.getUnitInfo(m_eUnitType) : NULL;
+	if (m_eUnitType == NO_UNIT)
+	{
+		FAssert(NO_UNIT != m_eUnitType);
+		m_pUnitInfo = NULL;
+	}
+	else
+	{	// <trs.bat> (And refactored this if/else a little)
+		if (GC.getModName().isBATImport())
+			m_eUnitType = ModName::replBATUnit(m_eUnitType); // </trs.bat>
+		m_pUnitInfo = &GC.getUnitInfo(m_eUnitType);
+	}
 	pStream->Read((int*)&m_eLeaderUnitType);
 
 	pStream->Read((int*)&m_combatUnit.eOwner);
@@ -11624,11 +11632,24 @@ void CvUnit::read(FDataStreamBase* pStream)
 
 	pStream->Read(GC.getNumTerrainInfos(), m_paiTerrainDoubleMoveCount);
 	pStream->Read(GC.getNumFeatureInfos(), m_paiFeatureDoubleMoveCount);
+	// <trs.bat> Discard data about unused feature
+	int const iExtraFeatures = (GC.getModName().isBATImport() ?
+			ModName::getBATExtraFeatures() : 0);
+	int iBATData=-1;
+	for (int i = 0; i < iExtraFeatures; i++) pStream->Read(&iBATData); // </trs.bat>
 	pStream->Read(GC.getNumTerrainInfos(), m_paiExtraTerrainAttackPercent);
 	pStream->Read(GC.getNumTerrainInfos(), m_paiExtraTerrainDefensePercent);
 	pStream->Read(GC.getNumFeatureInfos(), m_paiExtraFeatureAttackPercent);
+	for (int i = 0; i < iExtraFeatures; i++) pStream->Read(&iBATData); // trs.bat
 	pStream->Read(GC.getNumFeatureInfos(), m_paiExtraFeatureDefensePercent);
+	for (int i = 0; i < iExtraFeatures; i++) pStream->Read(&iBATData); // trs.bat
 	pStream->Read(GC.getNumUnitCombatInfos(), m_paiExtraUnitCombatModifier);
+	// <trs.bat>
+	if (GC.getModName().isBATImport())
+	{
+		for (int i = 0; i < ModName::getBATExtraUnitCombats(); i++)
+			pStream->Read(&iBATData);
+	} // </trs.bat>
 }
 
 
@@ -11723,11 +11744,20 @@ void CvUnit::write(FDataStreamBase* pStream)
 
 	pStream->Write(GC.getNumTerrainInfos(), m_paiTerrainDoubleMoveCount);
 	pStream->Write(GC.getNumFeatureInfos(), m_paiFeatureDoubleMoveCount);
+	// <trs.bat>
+	int const iExtraFeatures = GC.getModName().getNumExtraFeatures();
+	for (int i = 0; i < iExtraFeatures; i++)
+		pStream->Write(0); // </trs.bat>
 	pStream->Write(GC.getNumTerrainInfos(), m_paiExtraTerrainAttackPercent);
 	pStream->Write(GC.getNumTerrainInfos(), m_paiExtraTerrainDefensePercent);
 	pStream->Write(GC.getNumFeatureInfos(), m_paiExtraFeatureAttackPercent);
+	for (int i = 0; i < iExtraFeatures; i++) pStream->Write(0); // trs.bat
 	pStream->Write(GC.getNumFeatureInfos(), m_paiExtraFeatureDefensePercent);
+	for (int i = 0; i < iExtraFeatures; i++) pStream->Write(0); // trs.bat
 	pStream->Write(GC.getNumUnitCombatInfos(), m_paiExtraUnitCombatModifier);
+	// <trs.bat>
+	for (int i = 0; i < GC.getModName().getNumExtraUnitCombats(); i++)
+		pStream->Write(0); // </trs.bat>
 }
 
 // Protected Functions...

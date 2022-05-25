@@ -800,7 +800,10 @@ public:
 	CvDLLUtilityIFaceBase* getDLLIFace() { return m_pDLL; }		// inlined for perf reasons, do not use outside of dll
 #endif
 	DllExport CvDLLUtilityIFaceBase* getDLLIFaceNonInl();
-	ModName& getModName() { return *m_pModName; } // trs.modname
+	// <trs.modname>
+	ModName& getModName() { return *m_pModName; }
+	bool isModNameKnown() const { return (m_pModName != NULL); }
+	// </trs.modname>
 	DllExport void setDLLProfiler(FProfiler* prof);
 	FProfiler* getDLLProfiler();
 	DllExport void enableDLLProfiler(bool bEnable);

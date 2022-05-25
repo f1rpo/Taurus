@@ -1186,6 +1186,9 @@ void CvInitCore::setType(GameType eType)
 				GET_PLAYER((PlayerTypes)i).updateHuman();
 			}
 		}
+		// <trs.bat> Cleaner to reset this in a new game
+		if (GC.isModNameKnown())
+			GC.getModName().setBATImport(false); // </trs.bat>
 	}
 }
 
@@ -1961,6 +1964,10 @@ void CvInitCore::read(FDataStreamBase* pStream)
 	int iNumGameOptions = 0;
 	if (bReadNumGameOptions)
 		pStream->Read(&iNumGameOptions);
+	/*	trs.bat: Reliable enough. BAT is the only major BUG-based mod
+		with 2 extra options. ModName::isCompatible could also set this flag,
+		but that's more complicated to get right. */
+	GC.getModName().setBATImport(bReadNumGameOptions && iNumGameOptions == 26);
 // BUG - Save Format - end
 
 	if (uiSaveFlag > 0)
@@ -2041,6 +2048,9 @@ void CvInitCore::write(FDataStreamBase* pStream)
 	uint uiSaveFlag=1;		// flag for expansion, see SaveBits)
 	// BUG - Save Format (trs.modname: Mostly moved into BugMod.h):
 	uiSaveFlag |= BULL_MOD_SAVE_MASK;
+	// <trs.modname>
+	if (GC.getModName().getNumExtraGameOptions() > 0)
+		uiSaveFlag |= BUG_DLL_SAVE_FORMAT; // </trs.modname>
 	pStream->Write(uiSaveFlag);
 
 	// GAME DATA
@@ -2071,11 +2081,10 @@ void CvInitCore::write(FDataStreamBase* pStream)
 			GC.getModName().getNumExtraGameOptions();
 	if (iGameOptions > /* BtS game option count */ 24)
 	{
-		// BUG - Save Format - start
+		// BUG - Save Format:
 		// If any optional mod alters the number of game options,
 		// write out the number of game options for the external parser tool
-		pStream->Write(NUM_GAMEOPTION_TYPES);
-		// BUG - Save Format - end
+		pStream->Write(iGameOptions);
 	} // </trs.modname>
 
 	pStream->Write(NUM_GAMEOPTION_TYPES, m_abOptions);
