@@ -127,7 +127,7 @@ private:
 		/*	Would be safer to be aware of the few different builds that (may) exist
 			and to hardcode offsets for them. So this is a problem worth reporting,
 			even if we can recover. */
-		FErrorMsg("Trying to compensate through address offset");
+		FAssertMsg(pQuickTestBytes == NULL, "Trying to compensate through address offset");
 		int iAddressOffset = 0;
 		// Base address of the EXE. Reading below that results in a crash.
 		int const iLowAddressBound = 0x00400000;
@@ -444,6 +444,7 @@ protected:
 			reinterpret_cast<byte*>(uiStartAddress)[i] = aCodeBytes[i];
 		return true;
 	}
+
 private:
 	ModNameCheckHookFun* m_pHook;
 };
@@ -496,6 +497,35 @@ public:
 protected:
 	bool apply() // override
 	{
+		/*	Handle the address offset calculations upfront.
+			(For robustness; hopefully will never be needed.) */
+		int iAddressOffset1 = 0, iAddressOffset2 = 0;
+		{
+			byte aQuickTestBytes[] = { 0x0F, 0x95, 0xC1, 0x8A, 0xC1, 0x5E, 0xC3, 0x1B, 0xC0 };
+			byte aNeedleBytes[] = {
+				0x56, 0x8B, 0x30, 0x8B, 0x01, 0x8A, 0x10, 0x8A, 0xCA, 0x3A, 0x16,
+				0x75, 0x25, 0x84, 0xC9, 0x74, 0x14, 0x8A, 0x50, 0x01, 0x8A, 0xCA,
+				0x3A, 0x56, 0x01, 0x75, 0x17, 0x83, 0xC0, 0x02, 0x83, 0xC6, 0x02,
+				0x84, 0xC9, 0x75, 0xE0, 0x33, 0xC0, 0x33, 0xC9, 0x85, 0xC0
+			};
+			iAddressOffset1 = findAddressOffset(
+					aNeedleBytes, ARRAYSIZE(aNeedleBytes), 0x004176F0,
+					aQuickTestBytes, ARRAYSIZE(aQuickTestBytes), 0x0041771B);
+			if (iAddressOffset1 == MIN_INT)
+				return false;
+		}
+		{	// A bit short, but I've checked in the EXE - the pattern is unique.
+			byte aNeedleBytes[] = {
+				0x8B, 0x08, 0x8B, 0x11, 0xFF, 0x92, 0x94, 0x01, 0x00, 0x00, 0x84, 0xC0, 0x75,
+				0x07, 0x80, 0x7C, 0x24, 0x14, 0x00, 0x74, 0x3B, 0x8D, 0x44, 0x24, 0x14
+			};
+			iAddressOffset2 = findAddressOffset(
+					aNeedleBytes, ARRAYSIZE(aNeedleBytes), 0x0040D8B9,
+					aNeedleBytes, 12, 0x0040D8B9);
+			if (iAddressOffset2 == MIN_INT)
+				return false;
+		}
+
 		/*	The mod CRC check is relatively easy to bypass. There appears to be
 			a dedicated function (starting at 0x004AE59A) for comparing the
 			saved and current CRC. In that function, this instruction seems to be
@@ -509,19 +539,19 @@ protected:
 			(The caller is the function that also calls CvGlobals::getDefineINTExternal
 			to obtain the SAVE_VERSION. The call location is 0x004AE59A.) */
 		{
-			byte* pStartAddress = reinterpret_cast<byte*>(0x00417724);
+			byte* pStartAddress = reinterpret_cast<byte*>(0x00417724 + iAddressOffset1);
 			byte aCodeBytes[][2] = {
 				//  replacement |	original
 				{	0x33/*XOR*/,	0x83 },
 				{	0xC0/*EAX*/,	0xD8 },
 				{	0x90/*NOP*/,	0xFF }
 			};
-			// Tbd.: findAddressOffset
 			if (!unprotectPage(pStartAddress, ARRAYSIZE(aCodeBytes)))
 				return false;
 			for (int i = 0; i < ARRAYSIZE(aCodeBytes); i++)
 				pStartAddress[i] = aCodeBytes[i][m_bEnable ? 1 : 0];
 		}
+
 		/*	The four CRC checks that cover the BtS, Warlords and base game files
 			are more difficult to work around. There appears to be a bug that
 			causes BtS to crash to desktop when a check fails - rather than show
@@ -557,7 +587,7 @@ protected:
 			and jump to a location near the end of the calc function where ESI
 			gets moved into EAX. */
 		{
-			byte* pStartAddress = reinterpret_cast<byte*>(0x0040D8A9);
+			byte* pStartAddress = reinterpret_cast<byte*>(0x0040D8A9 + iAddressOffset2);
 			byte aCodeBytes[][2] = {
 				//  replacement| original
 				{	0xBE,		0x75 },	// 0x0040D8A9: MOV ESI
@@ -581,7 +611,7 @@ protected:
 			just starting at a different address. (Firaxis probably copy-pasted
 			some code.) */
 		{
-			byte* pStartAddress = reinterpret_cast<byte*>(0x0040D94A);
+			byte* pStartAddress = reinterpret_cast<byte*>(0x0040D94A + iAddressOffset2);
 			byte aCodeBytes[][2] = {
 				//  replacement| original
 				{	0xBE,		0x75 },
@@ -600,7 +630,7 @@ protected:
 		}
 		// Python CRC
 		{
-			byte* pStartAddress = reinterpret_cast<byte*>(0x0040D7FA);
+			byte* pStartAddress = reinterpret_cast<byte*>(0x0040D7FA + iAddressOffset2);
 			byte aCodeBytes[][2] = {
 				//  replacement| original
 				{	0xBE,		0x75 },
@@ -621,7 +651,7 @@ protected:
 			 0040DA3E	jne 0040DA52			75 12
 			 0040DA40	mov ecx,dword ptr [...]	8B 8E C0 00 00 00 */
 		{
-			byte* pStartAddress = reinterpret_cast<byte*>(0x0040DA3E);
+			byte* pStartAddress = reinterpret_cast<byte*>(0x0040DA3E + iAddressOffset2);
 			byte aCodeBytes[][2] = {
 				//  replacement| original
 				{	0xB8,		0x75 },	// MOV EAX (need to store directly in EAX here)
