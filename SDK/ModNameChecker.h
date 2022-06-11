@@ -8,7 +8,7 @@
 class ModNameChecker
 {
 public:
-	virtual bool isCompatible(char const*) const=0;
+	virtual bool isCompatible(char const* szSavedModName, char const* szSavedModCRC) const=0;
 };
 
 #endif

@@ -37,12 +37,14 @@ public:
 			/*	Whether the name change should apply only until exportDone is called.
 				Also, until then, setExtModName and resetExt calls will be ignored. */
 			bool bExporting = false);
-	void exportDone();
+	void setSaving(bool b);
+	bool isSaving() const { return m_bSaving; }
+	bool isExporting() const { return m_bExporting; }
 	// Restore the true paths in the EXE (if they've been changed)
 	void resetExt();
 	/*	Whether we should attempt to load savegames with the mod name
-		szSavedModName */
-	bool isCompatible(char const* szSavedModName) const; // override
+		szSavedModName (override) */
+	bool isCompatible(char const* szSavedModName, char const* szSavedModCRC) const;
 	/*	0 except while exporting a savegame to a BULL-based mod that uses
 		additional game options, units etc. */
 	int getNumExtraGameOptions() const;
@@ -98,7 +100,7 @@ private:
 	FString* m_pExtFullPath;
 	FString* m_pExtPathInRoot;
 
-	bool m_bExporting;
+	bool m_bSaving, m_bExporting;
 	std::string m_sFullPath;
 	std::string m_sPathInRoot;
 	std::string m_sName;

@@ -45,7 +45,8 @@ namespace
 }
 
 
-bool ModName::isCompatible(char const* szSavedModName) const
+bool ModName::isCompatible(char const* szSavedModName,
+	char const* szSavedModCRC) const
 {
 	if (isNameCheckOverrideKey())
 		return true;
@@ -55,6 +56,10 @@ bool ModName::isCompatible(char const* szSavedModName) const
 	// Always accept our own saves
 	if (sSavedName == m_sName)
 		return true;
+	/*	Reject BUFFY (version 005) even when one of our name prefixes somehow
+		matches the mod name. BUFFY saves are encrypted, we can never read them. */
+	if (strcmp(szSavedModCRC, "e7dcd7a0b27ffe3cb49ca64c3b2ff2a6") == 0)
+		return false;
 	std::string sPrefixes = GC.getDefineSTRING("COMPATIBLE_MOD_NAME_PREFIXES");
 	std::vector<std::string> asPrefixes;
 	boost::split(asPrefixes, sPrefixes, boost::is_any_of(","));
@@ -97,7 +102,7 @@ bool ModName::isCompatible(char const* szSavedModName) const
 
 int ModName::getNumExtraGameOptions() const
 {
-	if (!m_bExporting)
+	if (!isExporting())
 		return 0;
 	std::string sName = getExtName();
 	cstring::tolower(sName);
@@ -112,7 +117,7 @@ int ModName::getNumExtraGameOptions() const
 // <trs.bat>
 bool ModName::isExportingToBAT() const
 {
-	if (!m_bExporting)
+	if (!isExporting())
 		return false;
 	std::string sName = getExtName();
 	cstring::tolower(sName);
@@ -169,7 +174,8 @@ UnitTypes ModName::replBATUnit(UnitTypes eBATUnitID)
 
 
 ModName::ModName(char const* szFullPath, char const* szPathInRoot)
-:	m_pExtFullPath(NULL), m_pExtPathInRoot(NULL), m_bExporting(false),
+:	m_pExtFullPath(NULL), m_pExtPathInRoot(NULL),
+	m_bSaving(false), m_bExporting(false),
 	m_bBATImport(false) // trs.bat
 {
 	m_sFullPath = szFullPath;
@@ -208,7 +214,7 @@ namespace
 void ModName::setExtModName(const char* szName, bool bExporting)
 {
 	// Mod name set for one-time export takes precedence
-	if (m_bExporting && !bExporting)
+	if (isExporting() && !bExporting)
 		return;
 	if (m_pExtFullPath == NULL || m_pExtPathInRoot == NULL)
 	{
@@ -253,9 +259,10 @@ void ModName::setExtModName(const char* szName, bool bExporting)
 }
 
 
-void ModName::exportDone()
+void ModName::setSaving(bool b)
 {
-	if (m_bExporting)
+	m_bSaving = b;
+	if (!isSaving() && isExporting())
 	{
 		m_bExporting = false;
 		resetExt();
@@ -265,7 +272,7 @@ void ModName::exportDone()
 
 void ModName::resetExt()
 {
-	if (m_bExporting)
+	if (isExporting())
 		return;
 	// Avoid messing with the EXE unnecessarily
 	if (gDLL->getModName(true) != NULL &&

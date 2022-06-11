@@ -54,10 +54,11 @@
 		 savegame. The list can be empty; Taurus will then still be able to load
 		 savegames whose mod name matches the name of the folder where Taurus
 		 is installed. If LOAD_BTS_SAVEGAMES is also disabled, then loading of
-		 savegames works just like in any other mod. -->
+		 savegames works just like in any other mod.
+		 Note that BUFFY saves are encrypted and therefore can't be loaded. -->
 	<Define>
 		<DefineName>COMPATIBLE_MOD_NAME_PREFIXES</DefineName>
-        <DefineTextVal>taurus, bug, bull, bat, buffy</DefineTextVal>
+        <DefineTextVal>taurus, bug, bull, bat</DefineTextVal>
     </Define>
 	<!-- Hint: Regardless of the two defines above, the 'x' key be held down
 		 while starting to load any savegame to suspend the mod name check
@@ -66,5 +67,32 @@
 		 that check. (But it's unlikely that loading will succeed when the
 		 save versions don't match.) -->
 	<!-- trs.modname: end -->
+
+	<!-- trs.lma:
+		 0 means that the check for the Lock Modified Assets (LMA) game option
+		 in the EXE is disabled for all savegames. LMA will then still disable
+		 access to developer tools (even if cheats are enabled through
+		 CivilizationIV.ini).
+
+		 1 means that the check is disabled for savegames created by other mods,
+		 i.e. for savegames that lack a particular bit that the Taurus DLL sets.
+
+		 2 means that the check is always enabled when loading savegames.
+
+		 In any case, LMA is never _written_ into savegames that are exported
+		 through Ctrl+Shift+S. For values 1 and 2, LMA _will_ be written into
+		 (non-exported) Taurus savegames even if the Save Mod Name option on
+		 the Mod Option screen is disabled. (BtS will then be unable to load
+		 those saves.)
+
+		 Caveat: When not disabled, the LMA check in the EXE may crash to
+		 desktop (instead of merely rejecting a save) when the original assets
+		 (BtS/ Warlords/ base game folder) have been modified. Perhaps also when
+		 there are custom assets under My Game. This appears to happen due to a bug
+		 in the EXE. -->
+	<Define>
+		<DefineName>RESPECT_LOCKED_ASSETS</DefineName>
+        <iDefineIntVal>1</iDefineIntVal>
+    </Define>
 
 </Civ4Defines>

@@ -2680,7 +2680,9 @@ int CvGlobals::getDefineINTExternal(char const* szName) const
 	if (szName == reinterpret_cast<char*>(0x00c9c868))
 		return getEVENT_MESSAGE_STAGGER_TIME(); // </trs.debug>
 	if (szName == reinterpret_cast<char*>(0x00c93dc4) && // "SAVE_VERSION"
-		GC.getInitCore().isLoadGameType() &&
+		isModNameKnown() &&
+		(GC.getInitCore().isLoadGameType() ||
+		(getInitCore().getActivePlayer() != NO_PLAYER && !getModName().isSaving())) &&
 		(getDefineBOOL("LOAD_BTS_SAVEGAMES") ||
 		!cstring::empty(getDefineSTRING("COMPATIBLE_MOD_NAME_PREFIXES")) ||
 		getModName().isNameCheckOverrideKey()))

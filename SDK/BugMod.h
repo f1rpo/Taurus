@@ -33,8 +33,9 @@ Defines common constants and functions for use throughout the BUG Mod.
 #else
 	#define BULL_MOD_SAVE_MASK	0
 #endif
+// One bit to the left of the BULL bit
+#define TAURUS_SAVE_FORMAT		(BUG_DLL_SAVE_FORMAT << 1)
 // </trs.modname>
-
 
 // These are display-only values, and the version should be changed for each release.
 // trs.build: Was L"BULL", L"1.3", L"216"

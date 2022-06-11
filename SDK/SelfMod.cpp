@@ -4,10 +4,11 @@
 #include "CvDLLInterfaceIFaceBase.h"
 #include "CvBugOptions.h"
 #include "ModName.h"
+#include "BugMod.h" // trs.lma
 
 Civ4BeyondSwordPatches smc::BtS_EXE;
 
-typedef int RetIntHook(); // trs.modname
+typedef int ModNameCheckHookFun(uint, uint); // trs.modname
 
 namespace
 {
@@ -16,6 +17,7 @@ namespace
 class SelfMod : boost::noncopyable
 {
 public:
+	SelfMod() : m_iAddressOffset(0) {}
 	virtual ~SelfMod() { restorePageProtections(); }
 	// Return false on unexpected failure
 	bool applyIfEnabled()
@@ -27,6 +29,7 @@ public:
 	/*	Derived classes can override this to be exempt from the
 		DISABLE_EXE_RUNTIME_MODS check */
 	virtual bool isOptionalThroughXML() const { return true; }
+	int getAddressOffset() const { return m_iAddressOffset; }
 
 protected:
 	virtual bool apply()=0; // See applyIfEnabled about the return value
@@ -76,76 +79,18 @@ protected:
 		byte* pQuickTestBytes = NULL, int iQuickTestBytes = 0, uint uiQuickTestStart = 0,
 		/*	How big an offset we contemplate. Not going to search the
 			entire virtual memory*/
-		int iMaxAbsOffset = 256 * 1024) const
+		int iMaxAbsOffset = 256 * 1024)
 	{
-		if (pQuickTestBytes != NULL &&
-			testCodeLayout(pQuickTestBytes, iQuickTestBytes, uiQuickTestStart))
-		{
-			return 0;
-		}
-		/*	Would be safer to be aware of the few different builds that (may) exist
-			and to hardcode offsets for them. So this is a problem worth reporting,
-			even if we can recover. */
-		FErrorMsg("Trying to compensate through address offset");
-		int iAddressOffset = 0;
-		// Reading such low addresses doesn't seem to be safe
-		int const iLowAddressBound = 0x00403500;
-		// Tbd.: Find a similar bound for high addresses
-		if (((int)uiExpectedStart) >= iLowAddressBound &&
-			((int)uiExpectedStart) <= MAX_INT - iMaxAbsOffset)
-		{
-			int const iMaxSubtrahend = std::min(iMaxAbsOffset, static_cast<int>(
-					uiExpectedStart - iLowAddressBound));
-			int const iMaxAddend = iMaxAbsOffset;
-			int const iHaystackBytes = iMaxSubtrahend + iMaxAddend;
-			byte* pHaystackBytes = new byte[iHaystackBytes];
-			for (int iOffset = -iMaxSubtrahend; iOffset < iMaxAddend; iOffset++)
-			{
-				pHaystackBytes[iOffset + iMaxSubtrahend] =
-						reinterpret_cast<byte*>(uiExpectedStart)[iOffset];
-			}
-			// No std::begin, std::end until C++11
-			byte* const pHaystackEnd = pHaystackBytes + iHaystackBytes;
-			byte* pos = std::search(
-					pHaystackBytes, pHaystackEnd,
-					pNeedleBytes, pNeedleBytes + iNeedleBytes);
-			if (pos == pHaystackEnd)
-			{
-				FErrorMsg("Failed to locate expected code bytes in EXE");
-				return MIN_INT;
-			}
-			iAddressOffset = ((int)std::distance(pHaystackBytes, pos))
-					- iMaxSubtrahend;
-		}
-		else
-		{
-			FErrorMsg("uiExpectedStart doesn't look like a code address");
-			return MIN_INT;
-		}
-		// Run our initial test again to be on the safe side
-		if (pQuickTestBytes != NULL &&
-			!testCodeLayout(pQuickTestBytes, iQuickTestBytes,
-			uiQuickTestStart + iAddressOffset))
-		{
-			FErrorMsg("Address offset discarded; likely incorrect.");
-			return MIN_INT;
-		}
-		return iAddressOffset;
+		// Preserve the (most recent) offset in m_iAddressOffset
+		updateAddressOffset(pNeedleBytes, iNeedleBytes, uiExpectedStart,
+				pQuickTestBytes, iQuickTestBytes, uiQuickTestStart, iMaxAbsOffset);
+		return m_iAddressOffset;
 	}
-	bool testCodeLayout(byte* pBytes, int iBytes, uint uiStart) const
-	{
-		for (int i = 0; i < iBytes; i++)
-		{
-			if (pBytes[i] != reinterpret_cast<byte*>(uiStart)[i])
-			{
-				FErrorMsg("Unexpected memory layout of EXE");
-				return false;
-			}
-		}
-		return true;
-	}
+	bool testCodeLayout(byte* pBytes, int iBytes, uint uiStart) const;
 
 private:
+	int m_iAddressOffset;
+
 	struct PageProtection
 	{
 		PageProtection(LPVOID pAddress, SIZE_T uiSize, DWORD uiProtect)
@@ -168,7 +113,93 @@ private:
 			FAssertMsg(iSuccess != 0, "Failed to restore memory protection");
 		}
 	}
+	void updateAddressOffset(
+		byte* pNeedleBytes, int iNeedleBytes, uint uiExpectedStart,
+		byte* pQuickTestBytes = NULL, int iQuickTestBytes = 0, uint uiQuickTestStart = 0,
+		int iMaxAbsOffset = 256 * 1024)
+	{
+		if (pQuickTestBytes != NULL &&
+			testCodeLayout(pQuickTestBytes, iQuickTestBytes, uiQuickTestStart))
+		{
+			m_iAddressOffset = 0;
+			return;
+		}
+		/*	Would be safer to be aware of the few different builds that (may) exist
+			and to hardcode offsets for them. So this is a problem worth reporting,
+			even if we can recover. */
+		FErrorMsg("Trying to compensate through address offset");
+		int iAddressOffset = 0;
+		// Base address of the EXE. Reading below that results in a crash.
+		int const iLowAddressBound = 0x00400000;
+		// I see mostly just zeros above this address in the VS Memory window
+		int const iHighAddressBound = 0x0FFFFFFF;
+		if (((int)uiExpectedStart) >= iLowAddressBound &&
+			((int)uiExpectedStart) <= iHighAddressBound)
+		{
+			int const iMaxSubtrahend = std::min(iMaxAbsOffset, static_cast<int>(
+					uiExpectedStart - iLowAddressBound));
+			int const iMaxAddend = std::min(iMaxAbsOffset, static_cast<int>(
+					iHighAddressBound - uiExpectedStart));
+			int const iHaystackBytes = iMaxSubtrahend + iMaxAddend;
+			byte* pHaystackBytes = new byte[iHaystackBytes];
+			for (int iOffset = -iMaxSubtrahend; iOffset < iMaxAddend; iOffset++)
+			{
+				pHaystackBytes[iOffset + iMaxSubtrahend] =
+						reinterpret_cast<byte*>(uiExpectedStart)[iOffset];
+			}
+			// No std::begin, std::end until C++11
+			byte* const pHaystackEnd = pHaystackBytes + iHaystackBytes;
+			byte* pos = std::search(
+					pHaystackBytes, pHaystackEnd,
+					pNeedleBytes, pNeedleBytes + iNeedleBytes);
+			if (pos == pHaystackEnd)
+			{
+				FErrorMsg("Failed to locate expected code bytes in EXE");
+				m_iAddressOffset = MIN_INT;
+				return;
+			}
+			iAddressOffset = ((int)std::distance(pHaystackBytes, pos))
+					- iMaxSubtrahend;
+		}
+		else
+		{
+			FErrorMsg("uiExpectedStart doesn't look like a code address");
+			m_iAddressOffset = MIN_INT;
+			return;
+		}
+		// Run our initial test again to be on the safe side
+		if (pQuickTestBytes != NULL &&
+			!testCodeLayout(pQuickTestBytes, iQuickTestBytes,
+			uiQuickTestStart + iAddressOffset))
+		{
+			FErrorMsg("Address offset discarded; likely incorrect.");
+			m_iAddressOffset = MIN_INT;
+			return;
+		}
+		m_iAddressOffset = iAddressOffset;
+		return;
+	}
 };
+// Don't want this to be inlined; out-of-class definition accomplishes that.
+bool SelfMod::testCodeLayout(byte* pBytes, int iBytes, uint uiStart) const
+{
+	for (int i = 0; i < iBytes; i++)
+	{
+		byte iActual = reinterpret_cast<byte*>(uiStart)[i]; // for inspection in debugger
+		if (pBytes[i] != iActual)
+		{
+		#ifdef _DEBUG
+			FAssertMsg(iActual != 0xCC, "Interrupt found in native code. "
+					/*	Remedy: Should probably keep breakpoints disabled
+						until SelfMod is finished */
+					"Debugger breakpoint?");
+		#endif
+			FErrorMsg("Unexpected memory layout of EXE");
+			return false;
+		}
+	}
+	return true;
+}
 
 // trs.balloon:
 class PlotIndicatorSizeMod : public SelfMod
@@ -178,7 +209,8 @@ public:
 protected:
 	bool apply() // override
 	{
-		// Cache for performance (though probably not a concern)
+		/*	Cache (Performance probably no concern, but best not to fiddle
+			with memory protections unnecessarily.) */
 		static PlotIndicatorSize ffMostRecentBaseSize;
 
 		/*	Size values for plot indicators shown onscreen and offscreen that are
@@ -324,7 +356,7 @@ private:
 class ModNameCheckHookPatch : public SelfMod
 {
 public:
-	ModNameCheckHookPatch(RetIntHook* pHook) : m_pHook(pHook) {}
+	ModNameCheckHookPatch(ModNameCheckHookFun* pHook) : m_pHook(pHook) {}
 protected:
 	bool apply() // override
 	{
@@ -390,16 +422,22 @@ protected:
 			So these tests are unnecessary - the mod name has size 0 only when
 			no mod is loaded. Our ModName::setExtModName may also set the name
 			to size 0, but that should never be the case when a savegame is being
-			loaded. Plenty of room for our hook. I'll only replace the CMP/ JE. */
-		//						CALL-rel32	signed displacement			NOP
-		byte aCodeBytes[] = {	0xE8,		0x00, 0x00, 0x00, 0x00,		0x90 };
+			loaded. */
+		byte aCodeBytes[] = {
+			//	PUSH EBP	PUSH EDI	(params of our hook)
+				0x55,		0x57,
+			//	CALL-rel32	signed displacement
+				0xE8,		0x00, 0x00, 0x00, 0x00,
+			//	POP EDI		POP EBP		(cdecl convention: caller cleans up args)
+				0x5F,		0x5D,
+				0x90 // NOP (filler)
+		};
 		uint const uiCodeBytes = ARRAYSIZE(aCodeBytes);
-		uint uiCallInstrBytes = uiCodeBytes - 1;
-		// Instruction pointer is already at the NOP
-		uint uiEIP = uiStartAddress + uiCallInstrBytes;
+		// Instruction pointer is already at the first NOP
+		uint uiEIP = uiStartAddress + uiCodeBytes - 3;
 		int iDisplacement = static_cast<int>(reinterpret_cast<uint>(m_pHook));
 		iDisplacement -= static_cast<int>(uiEIP);
-		*reinterpret_cast<int*>(&aCodeBytes[1]) = iDisplacement;
+		*reinterpret_cast<int*>(&aCodeBytes[3]) = iDisplacement;
 		if (!unprotectPage(reinterpret_cast<LPVOID>(uiStartAddress), uiCodeBytes))
 			return false;
 		for (uint i = 0; i < uiCodeBytes; i++)
@@ -407,27 +445,30 @@ protected:
 		return true;
 	}
 private:
-	RetIntHook* m_pHook;
+	ModNameCheckHookFun* m_pHook;
 };
 
 // trs.modname:
 class ModNameCheckBypassPatch : public SelfMod
 {
 public:
-	ModNameCheckBypassPatch(bool bRestore) : m_bRestore(bRestore) {}
+	ModNameCheckBypassPatch(bool bRestore, int iAddressOffset = 0)
+	:	m_bRestore(bRestore), m_iAddressOffset(iAddressOffset) {}
 protected:
 	bool apply() // override
 	{
 		/*	Here we only deal with a single branch instruction,
 			see ModNameCheckHookPatch::apply for context.
 			 004AE580	je 004AE6D7				0F 84 51 01 00 00
-			We wouldn't be here if ModNameCheckHookPatch hadn't already succeeded,
-			so there's no need for verifying that the EXE indeed looks like this.
 			That's a relative jump by 343 byte (0x00000157). We either want to
 			change this to a relative jump by 0 byte (to the very next instruction,
 			thus causing that branch to be taken always; instruction counter is
 			already incremented) - or we want to restore the original offset. */
-		byte* pStartAddress = reinterpret_cast<byte*>(0x004AE580);
+		/*	(We wouldn't be here if ModNameCheckHookPatch hadn't already succeeded,
+			so there's no need for verifying that the EXE indeed looks like this.
+			We also get our address offset from there; hopefully 0, nothing else
+			has been tested.) */
+		byte* pStartAddress = reinterpret_cast<byte*>(0x004AE580 + m_iAddressOffset);
 		pStartAddress += 2; // first two byte (and last two) are fine
 		byte aCodeBytes[][2] = {
 			//  replacement| original
@@ -437,11 +478,171 @@ protected:
 		if (!unprotectPage(pStartAddress, ARRAYSIZE(aCodeBytes)))
 			return false;
 		for (int i = 0; i < ARRAYSIZE(aCodeBytes); i++)
+		{
 			pStartAddress[i] = aCodeBytes[i][m_bRestore ? 1 : 0];
+		}
 		return true;
 	}
 private:
 	bool const m_bRestore;
+	int m_iAddressOffset;
+};
+
+// trs.lma:
+class LockedAssetsBypassPatch : public SelfMod
+{
+public:
+	LockedAssetsBypassPatch(bool bEnable) : m_bEnable(bEnable) {}
+protected:
+	bool apply() // override
+	{
+		/*	The mod CRC check is relatively easy to bypass. There appears to be
+			a dedicated function (starting at 0x004AE59A) for comparing the
+			saved and current CRC. In that function, this instruction seems to be
+			responsible for setting a nonzero return value when the CRCs differ.
+			|Code addr.| Disassembly						| Code bytes
+			------------------------------------------------------------------------------
+			 00417724	sbb eax,0FFFFFFFFh					 83 D8 FF
+			------------------------------------------------------------------------------
+			We set EAX to 0 instead through XOR EAX EAX, and the caller will then
+			assume that the CRCs are equal.
+			(The caller is the function that also calls CvGlobals::getDefineINTExternal
+			to obtain the SAVE_VERSION. The call location is 0x004AE59A.) */
+		{
+			byte* pStartAddress = reinterpret_cast<byte*>(0x00417724);
+			byte aCodeBytes[][2] = {
+				//  replacement |	original
+				{	0x33/*XOR*/,	0x83 },
+				{	0xC0/*EAX*/,	0xD8 },
+				{	0x90/*NOP*/,	0xFF }
+			};
+			// Tbd.: findAddressOffset
+			if (!unprotectPage(pStartAddress, ARRAYSIZE(aCodeBytes)))
+				return false;
+			for (int i = 0; i < ARRAYSIZE(aCodeBytes); i++)
+				pStartAddress[i] = aCodeBytes[i][m_bEnable ? 1 : 0];
+		}
+		/*	The four CRC checks that cover the BtS, Warlords and base game files
+			are more difficult to work around. There appears to be a bug that
+			causes BtS to crash to desktop when a check fails - rather than show
+			a save-is-protected popup. That's at least what I've encountered
+			with XML changes in the BtS files. I haven't been able to debug this.
+			Moreover, the comparison of the checksums happens in a function
+			(starting at 0x004A00E0) that is also used for checking whether the
+			BtS build number matches - and might have other uses too. Seems safer
+			to modify the functions that calculate (or return from cache I guess)
+			the CRCs, letting them return the same CRCs as in the savegame.
+			Those CRC calculators get called from the same outer function as
+			mentioned above; the call locations are 0x004AEBBB (DLL CRC),
+			0x004AEBF9 (Shader CRC), 0x004AEC2E (Python CRC) and 0x004AEC67 (XML CRC).
+
+			Where do we get the saved CRCs? Conveniently, they get stored as
+			C-strings (char**) at these hardcoded addresses:
+			 DLL CRC:		0x00BE2D10
+			 Shader CRC:	0x00BE2D2C
+			 Python CRC:	0x00BE2D48
+			 XML CRC:		0x00BE2D64
+			The function that stores them there gets called (four times) by the
+			outer function at 0x004AE5CE onward.
+
+			In the calc functions, it's just a matter of finding a place where
+			we can easily return w/o messing up the callstack. For the DLL CRC,
+			that place is here:
+			------------------------------------------------------------------------------
+			 0040D8A9	jne 0040D8C7			75 1C
+			 0040D8AB	call dword ptr ds:[...]	FF 15 5C 19 BC 00
+			------------------------------------------------------------------------------
+			(The second instruction calls CvGlobals::getInstance fwiw.)
+			Instead of those two instructions, we store the saved DLL CRC in ESI
+			and jump to a location near the end of the calc function where ESI
+			gets moved into EAX. */
+		{
+			byte* pStartAddress = reinterpret_cast<byte*>(0x0040D8A9);
+			byte aCodeBytes[][2] = {
+				//  replacement| original
+				{	0xBE,		0x75 },	// 0x0040D8A9: MOV ESI
+				{	0x10,		0x1C },	// saved DLL CRC (in inverse byte order) ...
+				{	0x2D,		0xFF },
+				{	0xBE,		0x15 },
+				{	0x00,		0x5C },
+				{	0xEB,		0x19 },	// 0x0040D8AE: JMP (relative)
+				{	0x59,		0xBC },	// dist: 0x0040D909 (dest) - 0x0040D8B0 = 89
+				{	0x90,		0x00 }	// 0x0040D8B0: NOP
+			};
+			if (!unprotectPage(pStartAddress, ARRAYSIZE(aCodeBytes)))
+				return false;
+			for (int i = 0; i < ARRAYSIZE(aCodeBytes); i++)
+			{
+				pStartAddress[i] = aCodeBytes[i][m_bEnable ? 1 : 0];
+			}
+		}
+		// Similar deal for the other CRCs ...
+		/*	Shader CRC - we replace the same instructions as for the DLL CRC,
+			just starting at a different address. (Firaxis probably copy-pasted
+			some code.) */
+		{
+			byte* pStartAddress = reinterpret_cast<byte*>(0x0040D94A);
+			byte aCodeBytes[][2] = {
+				//  replacement| original
+				{	0xBE,		0x75 },
+				{	0x2C,		0x1C },
+				{	0x2D,		0xFF },
+				{	0xBE,		0x15 },
+				{	0x00,		0x5C },
+				{	0xEB,		0x19 },	// 0x0040D94F: JMP (relative)
+				{	0x5E,		0xBC },	// dist: 0x0040D9AF (dest) - 0x0040D951 = 94
+				{	0x90,		0x00 }	// 0x0040D951: NOP
+			};
+			if (!unprotectPage(pStartAddress, ARRAYSIZE(aCodeBytes)))
+				return false;
+			for (int i = 0; i < ARRAYSIZE(aCodeBytes); i++)
+				pStartAddress[i] = aCodeBytes[i][m_bEnable ? 1 : 0];
+		}
+		// Python CRC
+		{
+			byte* pStartAddress = reinterpret_cast<byte*>(0x0040D7FA);
+			byte aCodeBytes[][2] = {
+				//  replacement| original
+				{	0xBE,		0x75 },
+				{	0x48,		0x1C },
+				{	0x2D,		0xFF },
+				{	0xBE,		0x15 },
+				{	0x00,		0x5C },
+				{	0xEB,		0x19 },	// 0x0040D7FF: JMP (relative)
+				{	0x5E,		0xBC },	// dist: 0x0040D85F (dest) - 0x0040D801 = 94
+				{	0x90,		0x00 }	// 0x0040D801: NOP
+			};
+			if (!unprotectPage(pStartAddress, ARRAYSIZE(aCodeBytes)))
+				return false;
+			for (int i = 0; i < ARRAYSIZE(aCodeBytes); i++)
+				pStartAddress[i] = aCodeBytes[i][m_bEnable ? 1 : 0];
+		}
+		/*	For the XML CRC, the replaced code is a little different:
+			 0040DA3E	jne 0040DA52			75 12
+			 0040DA40	mov ecx,dword ptr [...]	8B 8E C0 00 00 00 */
+		{
+			byte* pStartAddress = reinterpret_cast<byte*>(0x0040DA3E);
+			byte aCodeBytes[][2] = {
+				//  replacement| original
+				{	0xB8,		0x75 },	// MOV EAX (need to store directly in EAX here)
+				{	0x64,		0x12 },
+				{	0x2D,		0x8B },
+				{	0xBE,		0x8E },
+				{	0x00,		0xC0 },
+				{	0xEB,		0x00 },	// 0x0040DA43: JMP (relative)
+				{	0x5C,		0x00 },	// dist: 0x0040DAA1 (dest) - 0x0040DA45 = 92
+				{	0x90,		0x00 }	// 0x0040DA45: NOP
+			};
+			if (!unprotectPage(pStartAddress, ARRAYSIZE(aCodeBytes)))
+				return false;
+			for (int i = 0; i < ARRAYSIZE(aCodeBytes); i++)
+				pStartAddress[i] = aCodeBytes[i][m_bEnable ? 1 : 0];
+		}
+		return true;
+	}
+
+private:
+	bool m_bEnable;
 };
 
 } // (end of unnamed namespace)
@@ -490,14 +691,16 @@ void Civ4BeyondSwordPatches::patchModNameCheck(ModNameChecker const* pChecker)
 	bool const bHooked = isModNameCheckHooked();
 	m_pModNameChecker = pChecker;
 	if (!bHooked)
-		patchModNameCheckHook();
-	patchModNameCheck(false);
+		insertModNameCheckHook();
+	if (!m_bHookingFailed)
+		patchModNameCheck(false);
 }
 
 
-void Civ4BeyondSwordPatches::patchModNameCheckHook()
+void Civ4BeyondSwordPatches::insertModNameCheckHook()
 {
-	if (!ModNameCheckHookPatch(&modNameCheckHook).applyIfEnabled())
+	ModNameCheckHookPatch patch(&modNameCheckHook);
+	if (!patch.applyIfEnabled())
 	{
 		/*	(This not going to help on the opening menu, but gDLL->MessageBox
 			is no good either, at least not in fullscreen mode.) */
@@ -509,6 +712,7 @@ void Civ4BeyondSwordPatches::patchModNameCheckHook()
 		m_bHookingFailed = true;
 		m_pModNameChecker = NULL; // Cleaner to unregister it I guess
 	}
+	else m_iNameCheckAddressOffset = patch.getAddressOffset();
 }
 
 
@@ -516,7 +720,7 @@ void Civ4BeyondSwordPatches::patchModNameCheck(bool bEnableCheck)
 {
 	if (isModNameCheckEnabled() == bEnableCheck)
 		return;
-	if (!ModNameCheckBypassPatch(bEnableCheck).applyIfEnabled())
+	if (!ModNameCheckBypassPatch(bEnableCheck, m_iNameCheckAddressOffset).applyIfEnabled())
 	{
 		showErrorMsgToPlayer(
 				"Failed to bypass mod name check. "
@@ -528,27 +732,154 @@ void Civ4BeyondSwordPatches::patchModNameCheck(bool bEnableCheck)
 }
 
 
-int Civ4BeyondSwordPatches::modNameCheckHook()
+namespace
 {
-	char const** pszSavedModName;
-	/*	In a first try, the value of EDI had become changed somehow;
-		don't quite know why that problem isn't occurring anymore.
-		String instructions like MOVS or STOS have a side-effect on EDI,
-		but those shouldn't be generated for setting a pointer.
-		Could try to move EDI to EBX first and then from EBX to pszSavedModName
-		if the problem reoccurs. ESI, EDI, EBX, and EBP should get preserved
-		by prolog code, whereas ECX, EDX and EAX are not call-preserved.
+	// (Akin to what FDataStream does)
+	template<typename T>
+	void getFromByteStream(T& tResult, byte const* pStream, int& iPos, bool bMove = true)
+	{
+		T tCopy = *reinterpret_cast<T const*>(&pStream[iPos]);
+		tResult = tCopy;
+		if (bMove)
+			iPos += sizeof(T);
+	}
+}
+
+
+int Civ4BeyondSwordPatches::modNameCheckHook(uint uiEDI, uint uiEBP)
+{
+	char const** pszSavedModName = reinterpret_cast<char const**>(uiEDI);
+	byte const*** pppBasePtr = reinterpret_cast<byte const***>(uiEBP);
+	/*	NB: ESI, EDI, EBX, and EBP should get preserved by prolog code,
+		whereas ECX, EDX and EAX are not call-preserved.
 		I don't think the first two are relevant in the calling context,
-		except that EAX mustn't be 0. We'll return 1 to ensure that. */
-	__asm { mov pszSavedModName, edi }
+		except that EAX mustn't be 0. We'll return 1 to ensure that.
+		(Actually, ModNameCheckHookPatch now overwrites the EAX!=0 check in
+		the EXE, so we don't need to return anything.) */
 	/*	Hooking a non-static member function could be quite a bit more challenging.
 		So we have to work with the global instance instead of *this. */
 	Civ4BeyondSwordPatches& kInst = smc::BtS_EXE;
-	if (kInst.isModNameCheckHooked())
+	if (!kInst.isModNameCheckHooked() || kInst.m_bHookingFailed)
+		return 1;
+	// <trs.lma>
+	uint uiInitCoreSaveVersion = UINT_MAX;
+	bool bAnyCRC = false; // </trs.lma>
+	std::string sModCRC;
+	/*	This is the memory-mapped savegame file. (Figuring out the address was a
+		deep dive into the EXE; can't document the process for that here. I'm sure
+		it's not actually a 2D array; these are just offsets into structs.) */
+	byte const* pSaveData = (pppBasePtr[5] != NULL ? pppBasePtr[5][5] : NULL);
+	MEMORY_BASIC_INFORMATION memInfo;
+	SIZE_T uiInfoLen = 0;
+	if (pSaveData != NULL)
+		uiInfoLen = VirtualQuery(pSaveData, &memInfo, sizeof(memInfo));
+	if (uiInfoLen == sizeof(memInfo) &&
+		// To confirm that this is the memory we're looking for
+		memInfo.AllocationProtect == PAGE_READONLY)
 	{
-		kInst.patchModNameCheck(
-				!kInst.m_pModNameChecker->isCompatible(*pszSavedModName));
+		/*	Parse the Mod CRC. It's present when a mod was loaded and
+			Lock Modified Assets enabled. It's located _before_ our
+			pSaveData pointer, so we have to parse backwards a bit. */
+		uint uiModCRCChars;
+		int i;
+		for (i = -4; i >= -36; i--)
+		{
+			getFromByteStream(uiModCRCChars, pSaveData, i, false);
+			if (uiModCRCChars == 0)
+				break;
+		}
+		i = std::max(i, -36);
+		if ((i == -4 && uiModCRCChars == 0) || (i == -36 && uiModCRCChars == 32))
+		{
+			i += sizeof(uiModCRCChars);
+			for (int j = 0; j < (int)uiModCRCChars; j++)
+			{
+				char c;
+				getFromByteStream(c, pSaveData, i);
+				sModCRC += c;
+			}
+			// <trs.lma>
+			if (uiModCRCChars > 0)
+				bAnyCRC = true;
+			/*	Also need to access the CvInitCore save version flag - to decide
+				whether this is a Taurus save for which the Locked Assets check
+				should not be disabled. (CvInitCore::read will be too late.)
+				Will have to parse a bunch of other info to get there.
+				(Could maybe also go by mod name, but the mod could be Taurus w/o
+				having that folder name.) */
+			{
+				uint uiUnknown; // Skip 4 byte of unknown data
+				getFromByteStream(uiUnknown, pSaveData, i);
+				uint uiBtSBuildChars; // Skip BtS build info
+				getFromByteStream(uiBtSBuildChars, pSaveData, i);
+				if (uiBtSBuildChars == 16)
+				{
+					i += uiBtSBuildChars;
+					int iCRCsRead = 0;
+					for (int iCRCCount = 0; iCRCCount < 4; iCRCCount++)
+					{
+						// (So, if we needed the CRCs here, we could get them.)
+						//std::string sCRC;
+						uint uiCRCChars;
+						getFromByteStream(uiCRCChars, pSaveData, i);
+						if (uiCRCChars == 32 || uiCRCChars == 0)
+						{
+							for (int j = 0; j < (int)uiCRCChars; j++)
+							{
+								char c;
+								getFromByteStream(c, pSaveData, i);
+								//sCRC += c;
+							}
+							iCRCsRead++;
+							if (uiCRCChars > 0)
+								bAnyCRC = true;
+						}
+						else FErrorMsg("Unexpected CRC length");
+					}
+					if (iCRCsRead == 4)
+					{
+						uint uiUnknown; // Skip another 4 byte of unknown data
+						getFromByteStream(uiUnknown, pSaveData, i);
+						getFromByteStream(uiInitCoreSaveVersion, pSaveData, i);
+					}
+				}
+				else FAssertMsg(uiBtSBuildChars == 0, "Unexpected BtS build string length");
+			} // </trs.lma>
+		}
+		else FErrorMsg("Unexpected Mod CRC length");
 	}
+	else FErrorMsg("Failed to locate saved CRC data");
+	bool bCompatible = kInst.m_pModNameChecker->isCompatible(
+			*pszSavedModName, sModCRC.c_str());
+	// <trs.lma>
+	if (bCompatible && bAnyCRC)
+	{
+		int iLockedAssetsMode = GC.getDefineINT("RESPECT_LOCKED_ASSETS");
+		if (iLockedAssetsMode <= 0 || // If we always ignore Locked Assets
+			(iLockedAssetsMode == 1 && // If we ignore it only for non-Taurus saves
+			(uiInitCoreSaveVersion == UINT_MAX || // Failed to parse save version
+			!(uiInitCoreSaveVersion & TAURUS_SAVE_FORMAT)))) // Not a Taurus save
+		{
+			kInst.patchLockedAssetsCheck(false);
+		}
+	} // </trs.lma>
+	kInst.patchModNameCheck(!bCompatible);
 	return 1;
 }
 // </trs.modname>
+
+// trs.lma:
+void Civ4BeyondSwordPatches::patchLockedAssetsCheck(bool bEnable)
+{
+	if (bEnable == m_bLockedAssetsCheckEnabled)
+		return;
+	m_bLockedAssetsCheckEnabled = bEnable;
+	FAssert(!m_bHookingFailed);
+	if (!LockedAssetsBypassPatch(bEnable).applyIfEnabled())
+	{
+		showErrorMsgToPlayer(
+				"Failed to bypass Lock Modified Assets check. "
+				"To avoid seeing this error message, set RESPECT_LOCKED_ASSETS "
+				"to 2 in GlobalDefinesAlt.xml");
+	}
+}

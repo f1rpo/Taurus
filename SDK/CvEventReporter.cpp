@@ -487,7 +487,9 @@ void CvEventReporter::preSave()
 		FAssertMsg(gDLL->getModName() != NULL,
 				"Shouldn't claim that no mod loaded when saves not compatible with BtS");
 	#endif
-	} // </trs.modname>
+	}
+	GC.getModName().setSaving(true);
+	// </trs.modname>
 	m_kPythonEventMgr.preSave();
 }
 
@@ -561,9 +563,8 @@ void CvEventReporter::readStatistics(FDataStreamBase* pStream)
 void CvEventReporter::writeStatistics(FDataStreamBase* pStream)
 {
 	m_kStatistics.write(pStream);
-	/*	<trs.modname> Restore the true mod name. (The exported name is needed,
-		not in the EXE but in the DLL, to write savegame data that BAT expects.) */
-	GC.getModName().exportDone();
+	// <trs.modname>
+	GC.getModName().setSaving(false);
 	GC.getModName().resetExt();
 	// </trs.modname>
 }

@@ -1921,7 +1921,15 @@ void CvInitCore::read(FDataStreamBase* pStream)
 {
 	uint uiSaveFlag=0;
 	pStream->Read(&uiSaveFlag);		// flags for expansion (see SaveBits)
-
+	// <trs.modname>
+	if (uiSaveFlag == 0xE0000041)
+	{
+		FErrorMsg("Attempting to load encrypted BUFFY save");
+		// Going to crash no matter what we do
+		exit(-7);
+	}
+	bool const bTaurusSave = uiSaveFlag & TAURUS_SAVE_FORMAT;
+	uiSaveFlag &= ~TAURUS_SAVE_FORMAT; // </trs.modname>
 // BUG - Save Format - start
 	bool bReadNumGameOptions = uiSaveFlag & BUG_DLL_SAVE_FORMAT;
 	uiSaveFlag &= ~BUG_DLL_SAVE_FORMAT;
@@ -1978,7 +1986,7 @@ void CvInitCore::read(FDataStreamBase* pStream)
 	{
 		pStream->Read(NUM_GAMEOPTION_TYPES, m_abOptions);
 	}
-	else
+	else // trs.note: The else branch is for pre-BtS_3.17 saves
 	{
 		pStream->Read(NUM_GAMEOPTION_TYPES-1, m_abOptions);
 		m_abOptions[NUM_GAMEOPTION_TYPES-1] = false;
@@ -1989,6 +1997,17 @@ void CvInitCore::read(FDataStreamBase* pStream)
 		bool bEnabled;
 		pStream->Read(&bEnabled); // discard
 	} // </trs.modname>
+	/*	<trs.lma> (RESPECT_LOCKED_ASSETS mainly affects the check in the EXE,
+		but, at least for RESPECT_LOCKED_ASSETS=1 (i.e. the EXE applies the
+		check only to Taurus saves), we don't want the option to be carried
+		over when we save a previously imported save.) */
+	if (!bTaurusSave && GC.getDefineINT("RESPECT_LOCKED_ASSETS") < 2)
+	{
+		setOption(GAMEOPTION_LOCK_MODS, false);
+		/*	Lock Assets also generates a (32-character) admin password.
+			Let's keep this consistent with the game option. */
+		m_szAdminPassword = "";
+	} // </trs.lma>
 	pStream->Read(NUM_MPOPTION_TYPES, m_abMPOptions);
 
 	pStream->Read(&m_bStatReporting);
@@ -2050,18 +2069,28 @@ void CvInitCore::read(FDataStreamBase* pStream)
 void CvInitCore::write(FDataStreamBase* pStream)
 {
 	uint uiSaveFlag=1;		// flag for expansion, see SaveBits)
-	// BUG - Save Format (trs.modname: Mostly moved into BugMod.h):
+	// BUG - Save Format: (trs.modname: Mostly moved into BugMod.h)
 	uiSaveFlag |= BULL_MOD_SAVE_MASK;
 	// <trs.modname>
 	if (GC.getModName().getNumExtraGameOptions() > 0)
-		uiSaveFlag |= BUG_DLL_SAVE_FORMAT; // </trs.modname>
+		uiSaveFlag |= BUG_DLL_SAVE_FORMAT;
+	if (!GC.getModName().isExporting())
+		uiSaveFlag |= TAURUS_SAVE_FORMAT;
+	// </trs.modname>
 	pStream->Write(uiSaveFlag);
 
 	// GAME DATA
 	pStream->Write(m_eType);
 	pStream->WriteString(m_szGameName);
 	pStream->WriteString(m_szGamePassword);
-	pStream->WriteString(m_szAdminPassword);
+	// <trs.lma> Don't export pw generated for locking assets
+	if (GC.getModName().isExporting() && getOption(GAMEOPTION_LOCK_MODS))
+	{
+		CvWString szEmpty;
+		pStream->WriteString(szEmpty);
+	}
+	else // </trs.lma>
+		pStream->WriteString(m_szAdminPassword);
 	pStream->WriteString(m_szMapScriptName);
 
 	pStream->Write(m_bWBMapNoPlayers);
@@ -2089,13 +2118,25 @@ void CvInitCore::write(FDataStreamBase* pStream)
 		// If any optional mod alters the number of game options,
 		// write out the number of game options for the external parser tool
 		pStream->Write(iGameOptions);
-	} // </trs.modname>
-
-	pStream->Write(NUM_GAMEOPTION_TYPES, m_abOptions);
-	// <trs.modname> When exporting, write the expected game options data.
-	for (int i = NUM_GAMEOPTION_TYPES; i < iGameOptions; i++)
-		pStream->Write(false);
-	// </trs.modname>
+	}
+	if (GC.getModName().isExporting())
+	{
+		for (int i = 0; i < iGameOptions; i++)
+		{	// <trs.lma> Exporting locked saves wouldn't make much sense
+			if (i == GAMEOPTION_LOCK_MODS)
+				pStream->Write(false); // </trs.lma>
+			// Importing mod will expect these game options data
+			else if (i >= NUM_GAMEOPTION_TYPES)
+				pStream->Write(false);
+			else pStream->Write(m_abOptions[i]);
+		}
+	}
+	else
+	{
+		FAssertMsg(iGameOptions == NUM_GAMEOPTION_TYPES, "Is this an export or not?");
+		// </trs.modname>
+		pStream->Write(NUM_GAMEOPTION_TYPES, m_abOptions);
+	}
 	pStream->Write(NUM_MPOPTION_TYPES, m_abMPOptions);
 
 	pStream->Write(m_bStatReporting);

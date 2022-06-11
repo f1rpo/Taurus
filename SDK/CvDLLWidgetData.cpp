@@ -54,7 +54,7 @@ void CvDLLWidgetData::parseHelp(CvWStringBuffer &szBuffer, CvWidgetDataStruct &w
 	/*	trs.modname: Hack - to figure out when the save dialog was canceled after a
 		export-save popup. Widget help can't trigger while the save dialog is up
 		but triggers a lot otherwise. */
-	GC.getModName().exportDone();
+	GC.getModName().setSaving(false);
 
 	switch (widgetDataStruct.m_eWidgetType)
 	{

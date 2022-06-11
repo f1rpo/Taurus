@@ -29,21 +29,28 @@ public:
 	bool isModNameCheckHooked() const { return (m_pModNameChecker != NULL); }
 	bool isModNameCheckEnabled() const { return !m_bModNameCheckDisabled; }
 	// </trs.modname>
+	void patchLockedAssetsCheck(bool bEnable); // trs.lma
+
 	Civ4BeyondSwordPatches()
 	:	m_bPlotIndicatorSizePatched(false), // trs.balloon
+		m_bLockedAssetsCheckEnabled(true), // trs.lma
 		// trs.modname:
-		m_bModNameCheckDisabled(false), m_bHookingFailed(false), m_pModNameChecker(NULL)
+		m_bModNameCheckDisabled(false), m_bHookingFailed(false),
+		m_iNameCheckAddressOffset(0), m_pModNameChecker(NULL)
 	{}
+
 private:
 	bool m_bPlotIndicatorSizePatched; // trs.balloon
+	bool m_bLockedAssetsCheckEnabled; // trs.lma
 	// <trs.modname>
 	bool m_bModNameCheckDisabled, m_bHookingFailed;
+	int m_iNameCheckAddressOffset;
 	ModNameChecker const* m_pModNameChecker;
 
-	static int modNameCheckHook();
+	static int __cdecl modNameCheckHook(uint uiEDI, uint uiEBP);
 	void doModNameCheckCallBack(char const* szSavedModName);
 	void patchModNameCheck(bool bEnableCheck);
-	void patchModNameCheckHook();
+	void insertModNameCheckHook();
 	// </trs.modname>
 	void showErrorMsgToPlayer(CvWString szMsg);
 };

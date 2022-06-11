@@ -25,6 +25,7 @@
 #include "CvEventReporter.h"
 #include "CvMessageControl.h"
 #include "ModName.h" // trs.bat
+#include "SelfMod.h" // trs.lma
 
 // interface uses
 #include "CvDLLInterfaceIFaceBase.h"
@@ -7803,6 +7804,9 @@ uint CvGame::getNumReplayMessages() const
 
 void CvGame::read(FDataStreamBase* pStream)
 {
+	// trs.lma: Re-enable the Locked Assets check once we're past it
+	smc::BtS_EXE.patchLockedAssetsCheck(true);
+
 	int iI;
 
 	reset(NO_HANDICAP);

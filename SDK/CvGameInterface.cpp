@@ -1712,7 +1712,7 @@ void CvGame::doControl(ControlTypes eControl)
 
 	/*	trs.modname: Hack to ensure that subsequent saves can't be affected
 		by canceled export-save */
-	GC.getModName().exportDone();
+	GC.getModName().setSaving(false);
 
 	switch (eControl)
 	{
