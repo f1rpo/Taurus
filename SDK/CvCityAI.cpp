@@ -13,6 +13,7 @@
 #include "CyArgsList.h"
 #include "CvInfos.h"
 #include "FProfiler.h"
+#include "UnofficialPatch.h" // trs.modname
 
 #include "CvDLLPythonIFaceBase.h"
 #include "CvDLLInterfaceIFaceBase.h"
@@ -7332,6 +7333,7 @@ int CvCityAI::AI_yieldValue(short* piYields, short* piCommerceYields, bool bAvoi
 /************************************************************************************************/
 	// Rounding can be a problem, particularly for small commerce amounts.  Added safe guards to make
 	// sure commerce is counted, even if just a tiny amount.
+	bool const bUP16 = isEnableUP16(); // trs.modname (uses not tagged w/ comments)
 	if (AI_isEmphasizeYield(YIELD_PRODUCTION))
 	{
 		iProductionValue *= 130;
@@ -7343,17 +7345,19 @@ int CvCityAI::AI_yieldValue(short* piYields, short* piCommerceYields, bool bAvoi
 			iFoodValue /= 100;
 		}
 		
-		if (!AI_isEmphasizeYield(YIELD_COMMERCE) && iCommerceValue > 0)
+		if (!AI_isEmphasizeYield(YIELD_COMMERCE) && (iCommerceValue > 0 || !bUP16))
 		{
 			iCommerceValue *= 60;
 			iCommerceValue /= 100;
-			iCommerceValue = std::max(1, iCommerceValue);
+			if (bUP16)
+				iCommerceValue = std::max(1, iCommerceValue);
 		}
-		if (!AI_isEmphasizeYield(YIELD_FOOD) && iFoodValue > 0)
+		if (!AI_isEmphasizeYield(YIELD_FOOD) && (iFoodValue > 0 || !bUP16))
 		{
 			iFoodValue *= 75;
 			iFoodValue /= 100;
-			iFoodValue = std::max(1, iFoodValue);
+			if (bUP16)
+				iFoodValue = std::max(1, iFoodValue);
 		}
 	}
 	if (AI_isEmphasizeYield(YIELD_FOOD))
@@ -7370,57 +7374,58 @@ int CvCityAI::AI_yieldValue(short* piYields, short* piCommerceYields, bool bAvoi
 	{
 		iCommerceValue *= 130;
 		iCommerceValue /= 100;
-		if (!AI_isEmphasizeYield(YIELD_PRODUCTION) && iProductionValue > 0)
+		if (!AI_isEmphasizeYield(YIELD_PRODUCTION) && (iProductionValue > 0 || !bUP16))
 		{
 			iProductionValue *= 75;
 			iProductionValue /= 100;
-			iProductionValue = std::max(1,iProductionValue);
+			if (bUP16)
+				iProductionValue = std::max(1,iProductionValue);
 		}
-		if (!AI_isEmphasizeYield(YIELD_FOOD) && iFoodValue > 0)
+		if (!AI_isEmphasizeYield(YIELD_FOOD) && (iFoodValue > 0 || !bUP16))
 		{
 			//Don't supress twice.
 			if (!AI_isEmphasizeYield(YIELD_PRODUCTION))
 			{
 				iFoodValue *= 80;
 				iFoodValue /= 100;
-				iFoodValue = std::max(1, iFoodValue);
+				if (bUP16)
+					iFoodValue = std::max(1, iFoodValue);
 			}
 		}
 	}
 		
-	if( iProductionValue > 0 )
+	if (iProductionValue > 0 || !bUP16)
 	{
-	if (isFoodProduction())
-	{
-		iProductionValue *= 100 + (bWorkerOptimization ? 0 : AI_specialYieldMultiplier(YIELD_PRODUCTION));
-		iProductionValue /= 100;		
-	}
-	else
-	{
-		iProductionValue *= iBaseProductionModifier;
-		iProductionValue /= (iBaseProductionModifier + iExtraProductionModifier);
+		if (isFoodProduction())
+		{
+			iProductionValue *= 100 + (bWorkerOptimization ? 0 : AI_specialYieldMultiplier(YIELD_PRODUCTION));
+			iProductionValue /= 100;		
+		}
+		else
+		{
+			iProductionValue *= iBaseProductionModifier;
+			iProductionValue /= (iBaseProductionModifier + iExtraProductionModifier);
 		
-		iProductionValue += iSlaveryValue;
-		iProductionValue *= (100 + (bWorkerOptimization ? 0 : AI_specialYieldMultiplier(YIELD_PRODUCTION)));
+			iProductionValue += iSlaveryValue;
+			iProductionValue *= (100 + (bWorkerOptimization ? 0 : AI_specialYieldMultiplier(YIELD_PRODUCTION)));
 		
-		iProductionValue /= GET_PLAYER(getOwnerINLINE()).AI_averageYieldMultiplier(YIELD_PRODUCTION);
+			iProductionValue /= GET_PLAYER(getOwnerINLINE()).AI_averageYieldMultiplier(YIELD_PRODUCTION);
+		}
+		iValue += std::max(bUP16 ? 1 : iProductionValue, iProductionValue);
 	}
 	
-		iValue += std::max(1,iProductionValue);
-	}
-	
-	if( iCommerceValue > 0 )
+	if (iCommerceValue > 0 || !bUP16)
 	{
-	iCommerceValue *= (100 + (bWorkerOptimization ? 0 : AI_specialYieldMultiplier(YIELD_COMMERCE)));
-	iCommerceValue /= GET_PLAYER(getOwnerINLINE()).AI_averageYieldMultiplier(YIELD_COMMERCE);
-		iValue += std::max(1, iCommerceValue);
+		iCommerceValue *= (100 + (bWorkerOptimization ? 0 : AI_specialYieldMultiplier(YIELD_COMMERCE)));
+		iCommerceValue /= GET_PLAYER(getOwnerINLINE()).AI_averageYieldMultiplier(YIELD_COMMERCE);
+		iValue += std::max(bUP16 ? 1 : iCommerceValue, iCommerceValue);
 	}
-//	
-	if( iFoodValue > 0 )
+
+	if (iFoodValue > 0 || !bUP16)
 	{
-	iFoodValue *= 100;
-	iFoodValue /= GET_PLAYER(getOwnerINLINE()).AI_averageYieldMultiplier(YIELD_FOOD);
-		iValue += std::max(1, iFoodValue);
+		iFoodValue *= 100;
+		iFoodValue /= GET_PLAYER(getOwnerINLINE()).AI_averageYieldMultiplier(YIELD_FOOD);
+		iValue += std::max(bUP16 ? 1 : iFoodValue, iFoodValue);
 	}
 /************************************************************************************************/
 /* UNOFFICIAL_PATCH                        END                                                  */

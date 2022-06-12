@@ -25,6 +25,7 @@
 #include "FAStarNode.h"
 #include "CvEventReporter.h"
 #include "ModName.h" // trs.bat
+#include "UnofficialPatch.h" // trs.modname
 
 #define DANGER_RANGE						(4)
 #define GREATER_FOUND_RANGE			(5)
@@ -1523,7 +1524,8 @@ int CvPlayerAI::AI_commerceWeight(CommerceTypes eCommerce, CvCity* pCity) const
 		break;
 	case COMMERCE_CULTURE:
 		// COMMERCE_CULTURE AIWeightPercent is 25% in default xml
-	
+	{
+		bool const bUP16 = isEnableUP16(); // trs.modname (uses not tagged w/ comments)
 		if (pCity != NULL)
 		{
 			if (pCity->getCultureTimes100(getID()) >= 100 * GC.getGameINLINE().getCultureThreshold((CultureLevelTypes)(GC.getNumCultureLevelInfos() - 1)))
@@ -1539,7 +1541,8 @@ int CvPlayerAI::AI_commerceWeight(CommerceTypes eCommerce, CvCity* pCity) const
 			else if (AI_isDoStrategy(AI_STRATEGY_CULTURE3))
 */
 			// Slider check works for detection of whether human player is going for cultural victory
-			else if (AI_isDoStrategy(AI_STRATEGY_CULTURE3) || getCommercePercent(COMMERCE_CULTURE) >= 90 )
+			else if (AI_isDoStrategy(AI_STRATEGY_CULTURE3) ||
+				getCommercePercent(COMMERCE_CULTURE) >= (bUP16 ? 90 : 81) )
 			{
 				int iCultureRateRank = pCity->findCommerceRateRank(COMMERCE_CULTURE);
 				int iCulturalVictoryNumCultureCities = GC.getGameINLINE().culturalVictoryNumCultureCities();
@@ -1559,11 +1562,13 @@ int CvPlayerAI::AI_commerceWeight(CommerceTypes eCommerce, CvCity* pCity) const
 					iWeight *= 2;
 				}
 			}
-			else if (AI_isDoStrategy(AI_STRATEGY_CULTURE2) || getCommercePercent(COMMERCE_CULTURE) >= 70)
+			else if (AI_isDoStrategy(AI_STRATEGY_CULTURE2) ||
+				getCommercePercent(COMMERCE_CULTURE) >= (bUP16 ? 70 : 71))
 			{
 				iWeight *= 3;
 			}
-			else if (AI_isDoStrategy(AI_STRATEGY_CULTURE1) || getCommercePercent(COMMERCE_CULTURE) >= 50)
+			else if (AI_isDoStrategy(AI_STRATEGY_CULTURE1) ||
+				getCommercePercent(COMMERCE_CULTURE) >= (bUP16 ? 50 : 51))
 			{
 				iWeight *= 2;
 			}
@@ -1578,17 +1583,20 @@ int CvPlayerAI::AI_commerceWeight(CommerceTypes eCommerce, CvCity* pCity) const
 		// pCity == NULL
 		else
 		{
-			if (AI_isDoStrategy(AI_STRATEGY_CULTURE3) || getCommercePercent(COMMERCE_CULTURE) >= 90 )
+			if (AI_isDoStrategy(AI_STRATEGY_CULTURE3) ||
+				getCommercePercent(COMMERCE_CULTURE) >= (bUP16 ? 90 : 91) )
 			{
 				iWeight *= 3;
 				iWeight /= 4;
 			}
-			else if (AI_isDoStrategy(AI_STRATEGY_CULTURE2) || getCommercePercent(COMMERCE_CULTURE) >= 70)
+			else if (AI_isDoStrategy(AI_STRATEGY_CULTURE2) ||
+				getCommercePercent(COMMERCE_CULTURE) >= (bUP16 ? 70 : 71))
 			{
 				iWeight *= 2;
-			iWeight /= 3;
-		}
-			else if (AI_isDoStrategy(AI_STRATEGY_CULTURE1) || getCommercePercent(COMMERCE_CULTURE) >= 50 )
+				iWeight /= 3;
+			}
+			else if (AI_isDoStrategy(AI_STRATEGY_CULTURE1) ||
+				getCommercePercent(COMMERCE_CULTURE) >= (bUP16 ? 50 : 51) )
 			{
 				iWeight /= 2;
 			}
@@ -1601,6 +1609,7 @@ int CvPlayerAI::AI_commerceWeight(CommerceTypes eCommerce, CvCity* pCity) const
 /* UNOFFICIAL_PATCH                        END                                                  */
 /************************************************************************************************/
 		break;
+	}
 	case COMMERCE_ESPIONAGE:
 		{
 			int iEspMultiplier = 0;
@@ -4109,7 +4118,8 @@ TechTypes CvPlayerAI::AI_bestTech(int iMaxPathLength, bool bIgnoreCost, bool bAs
 /*                                                                                              */
 /* Bugfix                                                                                       */
 /************************************************************************************************/
-												iValue += iTempValue;
+												if (isEnableUP16()) // trs.modname
+													iValue += iTempValue;
 /************************************************************************************************/
 /* UNOFFICIAL_PATCH                        END                                                  */
 /************************************************************************************************/                                            
@@ -4128,12 +4138,14 @@ TechTypes CvPlayerAI::AI_bestTech(int iMaxPathLength, bool bIgnoreCost, bool bAs
 /*                                                                                              */
 /* Bugfix                                                                                       */
 /************************************************************************************************/
-/* original bts code
-											if (kLoopBuilding.getCommerceChange(COMMERCE_CULTURE) > 0)
-											{
-	                                            bIsCultureBuilding = true;
-	                                        }
-*/
+											if (!isEnableUP16()) // trs.modname
+											{	// original bts code
+												if (kLoopBuilding.getCommerceChange(COMMERCE_CULTURE) > 0)
+												{
+													bIsCultureBuilding = true;
+												}
+											}
+											else // trs.modname
 											if( !isLimitedWonderClass((BuildingClassTypes)iJ) )
 											{
 												if (kLoopBuilding.getCommerceChange(COMMERCE_CULTURE) > 0 || kLoopBuilding.getObsoleteSafeCommerceChange(COMMERCE_CULTURE) > 0)
@@ -4156,7 +4168,10 @@ TechTypes CvPlayerAI::AI_bestTech(int iMaxPathLength, bool bIgnoreCost, bool bAs
 /* original bts code
                                                 iBuildingValue += (150 * kLoopBuilding.getCommerceChange(COMMERCE_CULTURE)) * iMultiplier;
 */
-                                                iBuildingValue += (150 * (kLoopBuilding.getCommerceChange(COMMERCE_CULTURE) + kLoopBuilding.getObsoleteSafeCommerceChange(COMMERCE_CULTURE))) * iMultiplier;
+                                                iBuildingValue += (150 * (kLoopBuilding.getCommerceChange(COMMERCE_CULTURE) +
+														(!isEnableUP16() ? 0 : // trs.modname
+														kLoopBuilding.getObsoleteSafeCommerceChange(COMMERCE_CULTURE))))
+														* iMultiplier;
 /************************************************************************************************/
 /* UNOFFICIAL_PATCH                        END                                                  */
 /************************************************************************************************/
@@ -4223,7 +4238,8 @@ TechTypes CvPlayerAI::AI_bestTech(int iMaxPathLength, bool bIgnoreCost, bool bAs
 																{
 																	if (kLoopBuilding.getCommerceChange(COMMERCE_CULTURE) >= 3 || 
 																		kLoopBuilding.getObsoleteSafeCommerceChange(COMMERCE_CULTURE) >= 3 ||
-																		kLoopBuilding.getCommerceModifier(COMMERCE_CULTURE) >= 10)
+																		kLoopBuilding.getCommerceModifier(COMMERCE_CULTURE) >= 10
+																		|| !isEnableUP16()) // trs.modname
 																	{
 																		iValue += 400;
 																	}
@@ -4276,7 +4292,9 @@ TechTypes CvPlayerAI::AI_bestTech(int iMaxPathLength, bool bIgnoreCost, bool bAs
 /* original bts code
 													if (kLoopBuilding.getCommerceChange(COMMERCE_CULTURE) > 0)
 */
-													if (kLoopBuilding.getCommerceChange(COMMERCE_CULTURE) > 0 || kLoopBuilding.getObsoleteSafeCommerceChange(COMMERCE_CULTURE) > 0)
+													if (kLoopBuilding.getCommerceChange(COMMERCE_CULTURE) > 0 ||
+														(kLoopBuilding.getObsoleteSafeCommerceChange(COMMERCE_CULTURE) > 0
+														&& isEnableUP16())) // trs.modname
 /************************************************************************************************/
 /* UNOFFICIAL_PATCH                        END                                                  */
 /************************************************************************************************/
@@ -9140,8 +9158,11 @@ int CvPlayerAI::AI_executiveValue(CvArea* pArea, CorporationTypes eCorporation, 
 /* Bugfix                                                                                       */
 /************************************************************************************************/
 /* original bts code
-		if (iSpreadExternalValue = 0)
-*/
+		if (iSpreadExternalValue = 0)*/
+		// <trs.modname>
+		if (!isEnableUP16())
+			iSpreadExternalValue = 0;
+		else // </trs.modname>
 		if (iSpreadExternalValue == 0)
 /************************************************************************************************/
 /* UNOFFICIAL_PATCH                        END                                                  */
@@ -14093,10 +14114,17 @@ int CvPlayerAI::AI_cultureVictoryTechValue(TechTypes eTech) const
 /*                                                                                              */
 /* Bugfix                                                                                       */
 /************************************************************************************************/
-/* original bts code
-				iValue += (150 * kLoopBuilding.getCommerceChange(COMMERCE_CULTURE)) * 20;
-*/
-				iValue += (150 * (kLoopBuilding.getCommerceChange(COMMERCE_CULTURE) + kLoopBuilding.getObsoleteSafeCommerceChange(COMMERCE_CULTURE))) / 20;
+				// <trs.modname>
+				if (!isEnableUP16())
+				{	// original bts code
+					iValue += (150 * kLoopBuilding.getCommerceChange(COMMERCE_CULTURE)) * 20;
+				}
+				else // </trs.modname>
+				{
+					iValue += (150 *
+							(kLoopBuilding.getCommerceChange(COMMERCE_CULTURE) +
+							kLoopBuilding.getObsoleteSafeCommerceChange(COMMERCE_CULTURE))) / 20;
+				}
 /************************************************************************************************/
 /* UNOFFICIAL_PATCH                        END                                                  */
 /************************************************************************************************/

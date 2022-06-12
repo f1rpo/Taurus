@@ -5733,6 +5733,9 @@ void CvGame::doTurn()
 				// Break only after first found alive player
 				break;
 			}
+			/*	(trs.modname, note: I'm not going to disable this UP 1.6 change
+				in network games - although it can de-sync games with BULL 1.2 -
+				because I think this is a showstopper bug for BULL 1.2 either way.) */
 /*************************************************************************************************/
 /* UNOFFICIAL_PATCH                         END                                                  */
 /*************************************************************************************************/

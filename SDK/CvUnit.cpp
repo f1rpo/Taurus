@@ -29,6 +29,7 @@
 
 #include "CvBugOptions.h" // BUG
 #include "ModName.h" // trs.bat
+#include "UnofficialPatch.h" // trs.modname
 
 // Public Functions...
 
@@ -3163,7 +3164,8 @@ bool CvUnit::canLoadUnit(const CvUnit* pUnit, const CvPlot* pPlot) const
 /* Bugfix                                                                                       */
 /************************************************************************************************/
 	// From Mongoose SDK
-	if (isCargo() && getTransportUnit() == pUnit)
+	if (isCargo() && (getTransportUnit() == pUnit
+		|| !isEnableUP16())) // trs.modname
 	{
 		return false;
 	}
@@ -4609,7 +4611,8 @@ bool CvUnit::canPillage(const CvPlot* pPlot) const
 /* Bugfix                                                                                       */
 /************************************************************************************************/
 	// From Mongoose SDK
-	if (isCargo())
+	if (isCargo()
+		&& isEnableUP16()) // trs.modname
 	{
 		return false;
 	}

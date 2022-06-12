@@ -25,6 +25,7 @@
 #include "CyArgsList.h"
 #include "CvDLLPythonIFaceBase.h"
 #include "CvEventReporter.h"
+#include "UnofficialPatch.h" // trs.modname
 
 #define STANDARD_MINIMAP_ALPHA		(0.6f)
 
@@ -5948,9 +5949,8 @@ int CvPlot::calculateImprovementYieldChange(ImprovementTypes eImprovement, Yield
 /*                                                                                               */
 /* Bugfix                                                                                        */
 /*************************************************************************************************/
-/* original bts code
-	return iYield;
-*/
+	if (!isEnableUP16()) // trs.modname
+		return iYield; // original bts code
 	// Improvement cannot actually produce negative yield
 	int iCurrYield = calculateNatureYield(eYield, (ePlayer == NO_PLAYER) ? NO_TEAM : GET_PLAYER(ePlayer).getTeam(), bOptimal);
 
