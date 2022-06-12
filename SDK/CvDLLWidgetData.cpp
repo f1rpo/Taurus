@@ -24,6 +24,7 @@
 #include "BugMod.h"
 #include "CvBugOptions.h"
 // BUG - end
+#include "ModName.h" // trs.modname
 
 // BUFFY - start
 #ifdef _BUFFY
@@ -50,6 +51,11 @@ void CvDLLWidgetData::freeInstance()
 
 void CvDLLWidgetData::parseHelp(CvWStringBuffer &szBuffer, CvWidgetDataStruct &widgetDataStruct)
 {
+	/*	trs.modname: Hack - to figure out when the save dialog was canceled after a
+		export-save popup. Widget help can't trigger while the save dialog is up
+		but triggers a lot otherwise. */
+	GC.getModName().setSaving(false);
+
 	switch (widgetDataStruct.m_eWidgetType)
 	{
 	case WIDGET_PLOT_LIST:

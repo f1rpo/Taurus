@@ -13,6 +13,7 @@
 
 class FProfiler;
 class CvDLLUtilityIFaceBase;
+class ModName; // trs.modname
 class CvRandom;
 class CvGameAI;
 class CMessageControl;
@@ -153,6 +154,7 @@ public:
 	DllExport CvPortal& getPortal();
 	DllExport CvSetupData& getSetupData();
 	DllExport CvInitCore& getInitCore();
+	CvInitCore const& getInitCore() const { return *m_initCore; } // trs.modname
 	DllExport CvInitCore& getLoadedInitCore();
 	DllExport CvInitCore& getIniInitCore();
 	DllExport CvMessageCodeTranslator& getMessageCodes();
@@ -165,8 +167,14 @@ public:
 	CvMap& getMapINLINE() { return *m_map; }				// inlined for perf reasons, do not use outside of dll
 	CvGameAI& getGameINLINE() { return *m_game; }			// inlined for perf reasons, do not use outside of dll
 #endif
-	DllExport CvMap& getMap();
-	DllExport CvGameAI& getGame();
+	/*	<trs.> The INLINE functions above are now deprecated.
+		The External functions are exported through the .def file
+		and should not be used DLL-internally. */
+	CvMap& getMapExternal();
+	CvMap& getMap() { return *m_map; }
+	CvGameAI& getGameExternal();
+	CvGameAI& getGame() { return *m_game; }
+	// </trs.>
 	DllExport CvGameAI *getGamePointer();
 	DllExport CvRandom& getASyncRand();
 	DllExport CMessageQueue& getMessageQueue();
@@ -679,9 +687,12 @@ public:
 
 	DllExport FVariableSystem* getDefinesVarSystem();
 	DllExport void cacheGlobals();
+	bool isCachingDone() const { return (m_iMAX_HIT_POINTS > 0); } // trs.modname
 
 	// ***** EXPOSED TO PYTHON *****
-	DllExport int getDefineINT( const char * szName ) const;
+	// trs.modname: (exported through .def file)
+	int getDefineINTExternal( const char* szName ) const;
+	int getDefineINT( const char * szName ) const;
 	DllExport float getDefineFLOAT( const char * szName ) const;
 	DllExport const char * getDefineSTRING( const char * szName ) const;
 	DllExport void setDefineINT( const char * szName, int iValue );
@@ -707,6 +718,7 @@ public:
 	DllExport int getUNIT_MULTISELECT_MAX();
 	int getPERCENT_ANGER_DIVISOR();
 	DllExport int getEVENT_MESSAGE_TIME();
+	int getEVENT_MESSAGE_STAGGER_TIME() const { return m_iEVENT_MESSAGE_STAGGER_TIME; } // trs.debug
 	int getROUTE_FEATURE_GROWTH_MODIFIER();
 	int getFEATURE_GROWTH_MODIFIER();
 	int getMIN_CITY_RANGE();
@@ -789,6 +801,10 @@ public:
 	CvDLLUtilityIFaceBase* getDLLIFace() { return m_pDLL; }		// inlined for perf reasons, do not use outside of dll
 #endif
 	DllExport CvDLLUtilityIFaceBase* getDLLIFaceNonInl();
+	// <trs.modname>
+	ModName& getModName() const { return *m_pModName; }
+	bool isModNameKnown() const { return (m_pModName != NULL); }
+	// </trs.modname>
 	DllExport void setDLLProfiler(FProfiler* prof);
 	FProfiler* getDLLProfiler();
 	DllExport void enableDLLProfiler(bool bEnable);
@@ -1148,6 +1164,7 @@ protected:
 	int m_iUNIT_MULTISELECT_MAX;
 	int m_iPERCENT_ANGER_DIVISOR;
 	int m_iEVENT_MESSAGE_TIME;
+	int m_iEVENT_MESSAGE_STAGGER_TIME; // trs.debug
 	int m_iROUTE_FEATURE_GROWTH_MODIFIER;
 	int m_iFEATURE_GROWTH_MODIFIER;
 	int m_iMIN_CITY_RANGE;
@@ -1213,6 +1230,7 @@ protected:
 
 	// DLL interface
 	CvDLLUtilityIFaceBase* m_pDLL;
+	ModName* m_pModName; // trs.modname
 
 	FProfiler* m_Profiler;		// profiler
 	CvString m_szDllProfileText;

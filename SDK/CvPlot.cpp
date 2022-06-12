@@ -6853,7 +6853,7 @@ void CvPlot::changeBlockadedCount(TeamTypes eTeam, int iChange)
 
 		m_aiBlockadedCount[eTeam] += iChange;
 		FAssert(getBlockadedCount(eTeam) >= 0);
-		FAssert(getBlockadedCount(eTeam) == 0 || isWater())
+		FAssert(getBlockadedCount(eTeam) == 0 || isWater());
 
 		CvCity* pWorkingCity = getWorkingCity();
 		if (NULL != pWorkingCity)

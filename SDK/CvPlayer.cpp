@@ -36,6 +36,7 @@
 #include "CvBugOptions.h"
 // BUG - Ignore Harmless Barbarians - end
 #include "SelfMod.h" // trs.balloon
+#include "ModName.h" // trs.bat
 
 
 // Public Functions...
@@ -15980,6 +15981,12 @@ void CvPlayer::read(FDataStreamBase* pStream)
 	pStream->Read(GC.getNumBuildingInfos(), m_paiExtraBuildingHappiness);
 	pStream->Read(GC.getNumBuildingInfos(), m_paiExtraBuildingHealth);
 	pStream->Read(GC.getNumFeatureInfos(), m_paiFeatureHappiness);
+	// <trs.bat>
+	if (GC.getModName().isBATImport())
+	{
+		int iScrubHappy;
+		pStream->Read(&iScrubHappy); // discard
+	} // </trs.bat>
 	pStream->Read(GC.getNumUnitClassInfos(), m_paiUnitClassCount);
 	pStream->Read(GC.getNumUnitClassInfos(), m_paiUnitClassMaking);
 	pStream->Read(GC.getNumBuildingClassInfos(), m_paiBuildingClassCount);
@@ -16442,6 +16449,9 @@ void CvPlayer::write(FDataStreamBase* pStream)
 	pStream->Write(GC.getNumBuildingInfos(), m_paiExtraBuildingHappiness);
 	pStream->Write(GC.getNumBuildingInfos(), m_paiExtraBuildingHealth);
 	pStream->Write(GC.getNumFeatureInfos(), m_paiFeatureHappiness);
+	// <trs.bat>
+	for (int i = 0; i < GC.getModName().getNumExtraFeatures(); i++)
+		pStream->Write(0); // </trs.bat>
 	pStream->Write(GC.getNumUnitClassInfos(), m_paiUnitClassCount);
 	pStream->Write(GC.getNumUnitClassInfos(), m_paiUnitClassMaking);
 	pStream->Write(GC.getNumBuildingClassInfos(), m_paiBuildingClassCount);

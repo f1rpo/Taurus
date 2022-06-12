@@ -24,6 +24,7 @@
 #include "CvDLLFAStarIFaceBase.h"
 #include "FAStarNode.h"
 #include "CvEventReporter.h"
+#include "ModName.h" // trs.bat
 
 #define DANGER_RANGE						(4)
 #define GREATER_FOUND_RANGE			(5)
@@ -13055,6 +13056,13 @@ void CvPlayerAI::read(FDataStreamBase* pStream)
 	pStream->Read(GC.getNumBonusInfos(), m_aiBonusValue);
 	pStream->Read(GC.getNumUnitClassInfos(), m_aiUnitClassWeights);
 	pStream->Read(GC.getNumUnitCombatInfos(), m_aiUnitCombatWeights);
+	// <trs.bat>
+	if (GC.getModName().isBATImport())
+	{
+		int iWeight;
+		for (int i = 0; i < ModName::getBATExtraUnitCombats(); i++)
+			pStream->Read(&iWeight); // discard
+	} // </trs.bat>
 	pStream->Read(MAX_PLAYERS, m_aiCloseBordersAttitudeCache);
 }
 
@@ -13128,6 +13136,9 @@ void CvPlayerAI::write(FDataStreamBase* pStream)
 	pStream->Write(GC.getNumBonusInfos(), m_aiBonusValue);
 	pStream->Write(GC.getNumUnitClassInfos(), m_aiUnitClassWeights);
 	pStream->Write(GC.getNumUnitCombatInfos(), m_aiUnitCombatWeights);
+	// <trs.bat>
+	for (int i = 0; i < GC.getModName().getNumExtraUnitCombats(); i++)
+		pStream->Write(0); // </trs.bat>
 	pStream->Write(MAX_PLAYERS, m_aiCloseBordersAttitudeCache);
 }
 

@@ -271,6 +271,7 @@ void CyGamePythonInterface()
 		.def("saveGame", &CyGame::saveGame, "void saveGame(string filename)")
 		.def("takeJPEGScreenShot", &CyGame::takeJPEGScreenShot, "bool takeJPEGScreenShot(string filename)")
 // BUG - MapFinder - end
+		.def("exportSaveGame", &CyGame::exportSaveGame, "void ()") // trs.modname
 
 // BUG - EXE/DLL Paths - start
 		.def("getDLLPath", &CyGame::getDLLPath, "string getDLLPath()")

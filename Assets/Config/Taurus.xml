@@ -13,7 +13,7 @@
 			<list	id="PlotIndicatorSize" key="Plot Indicator Size"
 					type="int" default="0" listType="string"
 					dirtyBit="GlobeLayer">
-				<change module="TaurusCore" function="updatePlotIndicatorSize"/>
+				<change module="Taurus" function="updatePlotIndicatorSize"/>
 				<choice id="Auto"/> <choice id="BtS"/>
 				<choice id="25"/> <choice id="30"/> <choice id="35"/>
 				<choice id="40"/> <choice id="45"/> <choice id="50"/> <choice id="55"/>
@@ -21,14 +21,21 @@
 			</list>
 			<list   id="OffScreenUnitSizeMult" key="Off Screen Unit Size Mult"
 					type="int" default="3" listType="string">
-				<change module="TaurusCore" function="updatePlotIndicatorSize"/>
+				<change module="Taurus" function="updatePlotIndicatorSize"/>
 				<choice id="0.8"/> <choice id="1.0"/> <choice id="1.2"/> <choice id="1.4"/>
 				<choice id="1.6"/> <choice id="1.8"/> <choice id="2.0"/> <choice id="2.2"/>
 				<choice id="Disable"/>
 			</list>
 			<!-- trs.balloon: end -->
 
+			<!-- trs.modname -->
+			<option id="SaveModName" key="Save Mod Name"
+					type="boolean" default="True"/>
+
 		</section>
 	</options>
+
+	<!-- trs.modname (Ctrl-Alt is taken by Group Save) -->
+	<shortcut key="Ctrl Shift S" module="Taurus" function="exportSaveGame"/>
 
 </mod>

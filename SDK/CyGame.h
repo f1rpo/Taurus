@@ -279,6 +279,7 @@ public:
 	void saveGame(std::string fileName) const;
 	bool takeJPEGScreenShot(std::string fileName) const;
 // BUG - MapFinder - end
+	void exportSaveGame(); // trs.modname
 
 // BUG - EXE/DLL Paths - start
 	std::string getDLLPath() const;

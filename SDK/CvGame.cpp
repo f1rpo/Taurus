@@ -24,6 +24,8 @@
 #include <set>
 #include "CvEventReporter.h"
 #include "CvMessageControl.h"
+#include "ModName.h" // trs.bat
+#include "SelfMod.h" // trs.lma
 
 // interface uses
 #include "CvDLLInterfaceIFaceBase.h"
@@ -7802,6 +7804,9 @@ uint CvGame::getNumReplayMessages() const
 
 void CvGame::read(FDataStreamBase* pStream)
 {
+	// trs.lma: Re-enable the Locked Assets check once we're past it
+	smc::BtS_EXE.patchLockedAssetsCheck(true);
+
 	int iI;
 
 	reset(NO_HANDICAP);
@@ -7870,6 +7875,16 @@ void CvGame::read(FDataStreamBase* pStream)
 	pStream->Read(MAX_TEAMS, m_aiTeamScore);
 
 	pStream->Read(GC.getNumUnitInfos(), m_paiUnitCreatedCount);
+	// <trs.bat>
+	if (GC.getModName().isBATImport())
+	{
+		int iCreated;
+		for (int i = 0; i < ModName::getBATExtraUnits(); i++)
+		{
+			pStream->Read(&iCreated);
+			m_paiUnitCreatedCount[ModName::replBATUnit(i)] += iCreated;
+		}
+	} // </trs.bat>
 	pStream->Read(GC.getNumUnitClassInfos(), m_paiUnitClassCreatedCount);
 	pStream->Read(GC.getNumBuildingClassInfos(), m_paiBuildingClassCreatedCount);
 	pStream->Read(GC.getNumProjectInfos(), m_paiProjectCreatedCount);
@@ -8085,6 +8100,9 @@ void CvGame::write(FDataStreamBase* pStream)
 	pStream->Write(MAX_TEAMS, m_aiTeamScore);
 
 	pStream->Write(GC.getNumUnitInfos(), m_paiUnitCreatedCount);
+	// <trs.bat>
+	for (int i = 0; i < GC.getModName().getNumExtraUnits(); i++)
+		pStream->Write(0); // </trs.bat>
 	pStream->Write(GC.getNumUnitClassInfos(), m_paiUnitClassCreatedCount);
 	pStream->Write(GC.getNumBuildingClassInfos(), m_paiBuildingClassCreatedCount);
 	pStream->Write(GC.getNumProjectInfos(), m_paiProjectCreatedCount);
@@ -8197,6 +8215,14 @@ void CvGame::writeReplay(FDataStreamBase& stream, PlayerTypes ePlayer)
 void CvGame::saveReplay(PlayerTypes ePlayer)
 {
 	gDLL->getEngineIFace()->SaveReplay(ePlayer);
+}
+
+// trs.modname:
+void CvGame::exportSaveGame()
+{
+	CvPopupInfo* pInfo = new CvPopupInfo(BUTTONPOPUP_EXPORT_SAVE);
+	if (pInfo != NULL)
+		GET_PLAYER(getActivePlayer()).addPopup(pInfo, true);
 }
 
 

@@ -134,6 +134,7 @@
     <ClCompile Include="..\CyUnitInterface1.cpp" />
     <ClCompile Include="..\FAssert.cpp" />
     <ClCompile Include="..\FDialogTemplate.cpp" />
+    <ClCompile Include="..\ModName.cpp" />
     <ClCompile Include="..\SelfMod.cpp" />
     <ClCompile Include="..\_precompile.cpp" />
   </ItemGroup>
@@ -234,11 +235,14 @@
     <ClInclude Include="..\FProfiler.h" />
     <ClInclude Include="..\FVariableSystem.h" />
     <ClInclude Include="..\LinkedList.h" />
+    <ClInclude Include="..\ModName.h" />
+    <ClInclude Include="..\ModNameChecker.h" />
     <ClInclude Include="..\SelfMod.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\FVariableSystem.inl" />
     <None Include="..\interfaceDirtyBits.inl" />
+    <None Include="CvGameCoreDLL.def" />
     <None Include="Makefile" />
     <None Include="Makefile.project" />
     <None Include="Makefile.settings" />

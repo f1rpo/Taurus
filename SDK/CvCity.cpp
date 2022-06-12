@@ -19,6 +19,7 @@
 #include "CyArgsList.h"
 #include "FProfiler.h"
 #include "CvGameTextMgr.h"
+#include "ModName.h" // trs.bat
 
 // interfaces used
 #include "CvDLLEngineIFaceBase.h"
@@ -13373,9 +13374,19 @@ void CvCity::read(FDataStreamBase* pStream)
 	pStream->Read(GC.getNumBuildingInfos(), m_paiBuildingOriginalOwner);
 	pStream->Read(GC.getNumBuildingInfos(), m_paiBuildingOriginalTime);
 	pStream->Read(GC.getNumUnitInfos(), m_paiUnitProduction);
+	/*	<trs.bat> I think the BAT extra units exist only on the map,
+		so city data about producing them can just be discarded. */
+	int const iExtraUnits = (GC.getModName().isBATImport() ?
+			ModName::getBATExtraUnits() : 0);
+	int iBATData=-1;
+	for (int i = 0; i < iExtraUnits; i++)
+		pStream->Read(&iBATData); // </trs.bat>
 	pStream->Read(GC.getNumUnitInfos(), m_paiUnitProductionTime);
+	for (int i = 0; i < iExtraUnits; i++) pStream->Read(&iBATData); // trs.bat
 	pStream->Read(GC.getNumUnitInfos(), m_paiGreatPeopleUnitRate);
+	for (int i = 0; i < iExtraUnits; i++) pStream->Read(&iBATData); // trs.bat
 	pStream->Read(GC.getNumUnitInfos(), m_paiGreatPeopleUnitProgress);
+	for (int i = 0; i < iExtraUnits; i++) pStream->Read(&iBATData); // trs.bat
 	pStream->Read(GC.getNumSpecialistInfos(), m_paiSpecialistCount);
 	pStream->Read(GC.getNumSpecialistInfos(), m_paiMaxSpecialistCount);
 	pStream->Read(GC.getNumSpecialistInfos(), m_paiForceSpecialistCount);
@@ -13384,6 +13395,12 @@ void CvCity::read(FDataStreamBase* pStream)
 	pStream->Read(GC.getNumReligionInfos(), m_paiReligionInfluence);
 	pStream->Read(GC.getNumReligionInfos(), m_paiStateReligionHappiness);
 	pStream->Read(GC.getNumUnitCombatInfos(), m_paiUnitCombatFreeExperience);
+	// <trs.bat>
+	if (GC.getModName().isBATImport())
+	{
+		for (int i = 0; i < ModName::getBATExtraUnitCombats(); i++)
+			pStream->Read(&iBATData);
+	} // </trs.bat>
 	pStream->Read(GC.getNumPromotionInfos(), m_paiFreePromotionCount);
 	pStream->Read(GC.getNumBuildingInfos(), m_paiNumRealBuilding);
 	pStream->Read(GC.getNumBuildingInfos(), m_paiNumFreeBuilding);
@@ -13611,9 +13628,16 @@ void CvCity::write(FDataStreamBase* pStream)
 	pStream->Write(GC.getNumBuildingInfos(), m_paiBuildingOriginalOwner);
 	pStream->Write(GC.getNumBuildingInfos(), m_paiBuildingOriginalTime);
 	pStream->Write(GC.getNumUnitInfos(), m_paiUnitProduction);
+	// <trs.bat>
+	int const iExtraUnits = GC.getModName().getNumExtraUnits();
+	for (int i = 0; i < iExtraUnits; i++)
+		pStream->Write(0); // </trs.bat>
 	pStream->Write(GC.getNumUnitInfos(), m_paiUnitProductionTime);
+	for (int i = 0; i < iExtraUnits; i++) pStream->Write(0); // trs.bat
 	pStream->Write(GC.getNumUnitInfos(), m_paiGreatPeopleUnitRate);
+	for (int i = 0; i < iExtraUnits; i++) pStream->Write(0); // trs.bat
 	pStream->Write(GC.getNumUnitInfos(), m_paiGreatPeopleUnitProgress);
+	for (int i = 0; i < iExtraUnits; i++) pStream->Write(0); // trs.bat
 	pStream->Write(GC.getNumSpecialistInfos(), m_paiSpecialistCount);
 	pStream->Write(GC.getNumSpecialistInfos(), m_paiMaxSpecialistCount);
 	pStream->Write(GC.getNumSpecialistInfos(), m_paiForceSpecialistCount);
@@ -13622,6 +13646,9 @@ void CvCity::write(FDataStreamBase* pStream)
 	pStream->Write(GC.getNumReligionInfos(), m_paiReligionInfluence);
 	pStream->Write(GC.getNumReligionInfos(), m_paiStateReligionHappiness);
 	pStream->Write(GC.getNumUnitCombatInfos(), m_paiUnitCombatFreeExperience);
+	// <trs.bat>
+	for (int i = 0; i < GC.getModName().getNumExtraUnitCombats(); i++)
+		pStream->Write(0); // </trs.bat>
 	pStream->Write(GC.getNumPromotionInfos(), m_paiFreePromotionCount);
 	pStream->Write(GC.getNumBuildingInfos(), m_paiNumRealBuilding);
 	pStream->Write(GC.getNumBuildingInfos(), m_paiNumFreeBuilding);

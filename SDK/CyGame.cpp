@@ -1199,6 +1199,12 @@ bool CyGame::takeJPEGScreenShot(std::string fileName) const
 }
 // BUG - MapFinder - end
 
+// trs.modname:
+void CyGame::exportSaveGame()
+{
+	m_pGame->exportSaveGame();
+}
+
 // BUG - EXE/DLL Paths - start
 std::string CyGame::getDLLPath() const
 {

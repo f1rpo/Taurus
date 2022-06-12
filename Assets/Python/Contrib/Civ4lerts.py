@@ -835,6 +835,9 @@ class RefusesToTalk(AbstractStatefulAlert):
 		
 	def onDealCanceled(self, argsList):
 		eOfferPlayer, eTargetPlayer, pTrade = argsList
+		# trs.fix: Workaround to avoid out of bounds access in DLL when loading
+		# a savegame from within a game
+		if eOfferPlayer == -1 or eTargetPlayer == -1: return
 		self.checkIfIsAnyOrHasMetAllTeams(PlayerUtil.getPlayerTeamID(eOfferPlayer), PlayerUtil.getPlayerTeamID(eTargetPlayer))
 		
 	def onEmbargoAccepted(self, argsList):
@@ -938,7 +941,10 @@ class WorstEnemy(AbstractStatefulAlert):
 				if eOldEnemy != -1 and not gc.getTeam(eOldEnemy).isAlive():
 					eOldEnemy = -1
 					enemies[eTeam] = -1
-				if eActiveTeam != eNewEnemy and not activeTeam.isHasMet(eNewEnemy):
+				# trs.fix: Or workaround? Problem might be AttitudeUtil
+				# and player-cycling (Alt+Z).
+				if (eNewEnemy != -1 and
+						eActiveTeam != eNewEnemy and not activeTeam.isHasMet(eNewEnemy)):
 					eNewEnemy = -1
 				if eOldEnemy != eNewEnemy:
 					enemies[eTeam] = eNewEnemy

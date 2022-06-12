@@ -2,6 +2,11 @@
 #include "CvEventReporter.h"
 #include "CvDllPythonEvents.h"
 #include "CvInitCore.h"
+// <trs.modname>
+#include "ModName.h"
+#include "BugMod.h"
+#include "CvBugOptions.h"
+// </trs.modname>
 
 //
 // static, singleton accessor
@@ -474,6 +479,17 @@ void CvEventReporter::vassalState(TeamTypes eMaster, TeamTypes eVassal, bool bVa
 
 void CvEventReporter::preSave()
 {
+	// <trs.modname>
+	if (!getBugOptionBOOL("Taurus__SaveModName"))
+	{
+		GC.getModName().setExtModName(GC.getDefineSTRING("REPLACEMENT_MOD_NAME"));
+	#if BULL_MOD_SAVE_MASK
+		FAssertMsg(gDLL->getModName() != NULL,
+				"Shouldn't claim that no mod loaded when saves not compatible with BtS");
+	#endif
+	}
+	GC.getModName().setSaving(true);
+	// </trs.modname>
 	m_kPythonEventMgr.preSave();
 }
 
@@ -547,5 +563,9 @@ void CvEventReporter::readStatistics(FDataStreamBase* pStream)
 void CvEventReporter::writeStatistics(FDataStreamBase* pStream)
 {
 	m_kStatistics.write(pStream);
+	// <trs.modname>
+	GC.getModName().setSaving(false);
+	GC.getModName().resetExt();
+	// </trs.modname>
 }
 

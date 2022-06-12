@@ -20,14 +20,12 @@
 #include "FVariableSystem.h"
 #include "CvInitCore.h"
 
-// BUG - DLL Info - start
-#include "BugMod.h"
-// BUG - DLL Info - end
-
-// BUG - BUG Info - start
-#include "CvBugOptions.h"
-// BUG - BUG Info - end
-
+#include "BugMod.h" // BUG - DLL Info
+#include "CvBugOptions.h" // BUG - BUG Info
+// <trs.modname>
+#include "ModName.h"
+#include "SelfMod.h"
+// </trs.modname>
 // BUFFY - DLL Info - start
 #ifdef _BUFFY
 #include "Buffy.h"
@@ -140,6 +138,7 @@ m_borderFinder(NULL),
 m_areaFinder(NULL),
 m_plotGroupFinder(NULL),
 m_pDLL(NULL),
+m_pModName(NULL), // trs.modname
 m_aiPlotDirectionX(NULL),
 m_aiPlotDirectionY(NULL),
 m_aiPlotCardinalDirectionX(NULL),
@@ -167,6 +166,7 @@ m_iMAX_PLOT_LIST_ROWS(0),
 m_iUNIT_MULTISELECT_MAX(0),
 m_iPERCENT_ANGER_DIVISOR(0),
 m_iEVENT_MESSAGE_TIME(0),
+m_iEVENT_MESSAGE_STAGGER_TIME(0), // trs.debug
 m_iROUTE_FEATURE_GROWTH_MODIFIER(0),
 m_iFEATURE_GROWTH_MODIFIER(0),
 m_iMIN_CITY_RANGE(0),
@@ -233,6 +233,7 @@ m_paMainMenus(NULL)
 
 CvGlobals::~CvGlobals()
 {
+	SAFE_DELETE(m_pModName); // trs.modname
 }
 
 //
@@ -2607,6 +2608,7 @@ void CvGlobals::cacheGlobals()
 	m_iUNIT_MULTISELECT_MAX = getDefineINT("UNIT_MULTISELECT_MAX");
 	m_iPERCENT_ANGER_DIVISOR = getDefineINT("PERCENT_ANGER_DIVISOR");
 	m_iEVENT_MESSAGE_TIME = getDefineINT("EVENT_MESSAGE_TIME");
+	m_iEVENT_MESSAGE_STAGGER_TIME = getDefineINT("EVENT_MESSAGE_STAGGER_TIME"); // trs.debug
 	m_iROUTE_FEATURE_GROWTH_MODIFIER = getDefineINT("ROUTE_FEATURE_GROWTH_MODIFIER");
 	m_iFEATURE_GROWTH_MODIFIER = getDefineINT("FEATURE_GROWTH_MODIFIER");
 	m_iMIN_CITY_RANGE = getDefineINT("MIN_CITY_RANGE");
@@ -2669,6 +2671,25 @@ void CvGlobals::cacheGlobals()
 	m_iUSE_ON_UPDATE_CALLBACK = getDefineINT("USE_ON_UPDATE_CALLBACK");
 	m_iUSE_ON_UNIT_CREATED_CALLBACK = getDefineINT("USE_ON_UNIT_CREATED_CALLBACK");
 	m_iUSE_ON_UNIT_LOST_CALLBACK = getDefineINT("USE_ON_UNIT_LOST_CALLBACK");
+}
+
+// trs.modname: Separate function for external calls
+int CvGlobals::getDefineINTExternal(char const* szName) const
+{
+	// <trs.debug> The EXE polls this while idle; harmless - but annoying.
+	if (szName == reinterpret_cast<char*>(0x00c9c868))
+		return getEVENT_MESSAGE_STAGGER_TIME(); // </trs.debug>
+	if (szName == reinterpret_cast<char*>(0x00c93dc4) && // "SAVE_VERSION"
+		isModNameKnown() &&
+		(GC.getInitCore().isLoadGameType() ||
+		(getInitCore().getActivePlayer() != NO_PLAYER && !getModName().isSaving())) &&
+		(getDefineBOOL("LOAD_BTS_SAVEGAMES") ||
+		!cstring::empty(getDefineSTRING("COMPATIBLE_MOD_NAME_PREFIXES")) ||
+		getModName().isNameCheckOverrideKey()))
+	{
+		smc::BtS_EXE.patchModNameCheck(&getModName());
+	}
+	return getDefineINT(szName);
 }
 
 int CvGlobals::getDefineINT( const char * szName ) const
@@ -3127,7 +3148,16 @@ int CvGlobals::getCITY_HOME_PLOT()
 
 void CvGlobals::setDLLIFace(CvDLLUtilityIFaceBase* pDll)
 {
+	bool bChanged = (pDll != m_pDLL && pDll != NULL); // trs.modname
 	m_pDLL = pDll;
+	// <trs.modname>
+	if (bChanged)
+	{
+		SAFE_DELETE(m_pModName);
+		m_pModName = new ModName(
+				pDll->getModName(true),
+				pDll->getModName(false));
+	} // </trs.modname>
 }
 
 void CvGlobals::setDLLProfiler(FProfiler* prof)
@@ -3563,10 +3593,10 @@ int CvGlobals::getNumGlobeLayers() const { return NUM_GLOBE_LAYER_TYPES; }
 
 
 //
-// non-inline versions
+// non-inline versions (trs. Renamed the first two.)
 //
-CvMap& CvGlobals::getMap() { return *m_map; }
-CvGameAI& CvGlobals::getGame() { return *m_game; }
+CvMap& CvGlobals::getMapExternal() { return *m_map; }
+CvGameAI& CvGlobals::getGameExternal() { return *m_game; }
 CvGameAI *CvGlobals::getGamePointer(){ return m_game; }
 
 int CvGlobals::getMaxCivPlayers() const
