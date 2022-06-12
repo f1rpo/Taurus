@@ -428,12 +428,11 @@ protected:
 				0x55,		0x57,
 			//	CALL-rel32	signed displacement
 				0xE8,		0x00, 0x00, 0x00, 0x00,
-			//	POP EDI		POP EBP		(cdecl convention: caller cleans up args)
-				0x5F,		0x5D,
-				0x90 // NOP (filler)
+			//	ADD		ESP 8			(cdecl convention: caller cleans up args)
+				0x83, 0xC4, 0x08,
 		};
 		uint const uiCodeBytes = ARRAYSIZE(aCodeBytes);
-		// Instruction pointer is already at the first NOP
+		// Instruction pointer is already at the ADD ESP 8
 		uint uiEIP = uiStartAddress + uiCodeBytes - 3;
 		int iDisplacement = static_cast<int>(reinterpret_cast<uint>(m_pHook));
 		iDisplacement -= static_cast<int>(uiEIP);
