@@ -63,6 +63,7 @@ class CvHallOfFameScreen:
 		self.DROPDOWN_SPACING_Y = 50
 								
 		self.nWidgetCount = 0
+		self.infoList = [] # trs.fix (from K-Mod)
 				
 		self.bAllowReplay = False
 		
@@ -243,7 +244,12 @@ class CvHallOfFameScreen:
 	def drawContents(self):
 				
 		screen = self.getScreen()
-		
+		# <trs.fix> (from K-Mod) Delete old widgets
+		for i in range(len(self.infoList)):
+			szButtonName = self.REPLAY_BUTTON_ID + str(i)
+			screen.deleteWidget(szButtonName)
+		screen.deleteWidget(self.TABLE_ID)
+		# # </trs.fix>
 		screen.addTableControlGFC(self.TABLE_ID, 10, 2, 2 * self.DROPDOWN_SPACING_Y + self.DROPDOWN_Y, 1018, 545, True, True, 16, 16, TableStyles.TABLE_STYLE_STANDARD);
 		screen.enableSelect(self.TABLE_ID, False)
 		screen.enableSort(self.TABLE_ID)
