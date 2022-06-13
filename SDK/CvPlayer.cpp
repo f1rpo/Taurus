@@ -14,7 +14,6 @@
 #include "CvGameCoreUtils.h"
 #include "CvArtFileMgr.h"
 #include "CvDiploParameters.h"
-#include "CvInitCore.h"
 #include "CyArgsList.h"
 #include "CvInfos.h"
 #include "CvPopupInfo.h"

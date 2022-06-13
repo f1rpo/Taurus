@@ -1,6 +1,5 @@
 #include "CvGameCoreDLL.h"
 #include "CvGame.h"
-#include "CvInitCore.h"
 #include "CyPlot.h"
 #include "CyArgsList.h"
 #include "CvPopupInfo.h"

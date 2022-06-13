@@ -13,7 +13,6 @@
 #include "CyArgsList.h"
 #include "CvPopupReturn.h"
 #include "CvInfos.h"
-#include "CvInitCore.h"
 #include "CvGameTextMgr.h"
 #include "CvDLLPythonIFaceBase.h"
 #include "CvDLLInterfaceIFaceBase.h"

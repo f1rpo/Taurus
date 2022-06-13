@@ -12,7 +12,6 @@
 #include "CvTeamAI.h"
 #include "CvGameCoreUtils.h"
 #include "CvDiploParameters.h"
-#include "CvInitCore.h"
 #include "CyArgsList.h"
 #include "CvDLLInterfaceIFaceBase.h"
 #include "CvDLLEntityIFaceBase.h"

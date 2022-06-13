@@ -10,7 +10,6 @@
 #include "CvRandom.h"
 #include "CvTeamAI.h"
 #include "CvGlobals.h"
-#include "CvInitCore.h"
 #include "CvMapGenerator.h"
 #include "CvArtFileMgr.h"
 #include "CvDiploParameters.h"

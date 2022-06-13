@@ -1,7 +1,6 @@
 #include "CvGameCoreDLL.h"
 #include "CvEventReporter.h"
 #include "CvDllPythonEvents.h"
-#include "CvInitCore.h"
 // <trs.modname>
 #include "ModName.h"
 #include "BugMod.h"

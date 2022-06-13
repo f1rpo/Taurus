@@ -8,7 +8,6 @@
 #include "CvReplayMessage.h"
 #include "CvGameTextMgr.h"
 #include "CvDLLInterfaceIFaceBase.h"
-#include "CvInitCore.h"
 
 int CvReplayInfo::REPLAY_VERSION = 4;
 

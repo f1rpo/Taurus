@@ -18,7 +18,6 @@
 #include "CvGameTextMgr.h"
 #include "FProfiler.h"
 #include "FVariableSystem.h"
-#include "CvInitCore.h"
 
 #include "BugMod.h" // BUG - DLL Info
 #include "CvBugOptions.h" // BUG - BUG Info

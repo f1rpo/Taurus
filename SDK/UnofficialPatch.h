@@ -8,8 +8,6 @@
 #ifndef UNOFFICIAL_PATCH_H
 #define UNOFFICIAL_PATCH_H
 
-#include "CvInitCore.h" // Tbd.: Should move this into PCH eventually
-
 inline bool isEnableUP16() { return !GC.getInitCore().getMultiplayer(); }
 
 #endif
