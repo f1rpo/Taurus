@@ -2335,13 +2335,12 @@ const wchar* CvPlayer::getName(uint uiForm) const
 const wchar* CvPlayer::getNameKey() const
 {
 	if (GC.getInitCore().getLeaderNameKey(getID()).empty() || (GC.getGameINLINE().isMPOption(MPOPTION_ANONYMOUS) && isAlive()))
-	{
-		return GC.getLeaderHeadInfo(getLeaderType()).getTextKeyWide();
+	{	/*	trs.fix-load (from AdvCiv): Crash here while loading a savegame.
+			Can perhaps only happen when the debugger slows the DLL down. */
+		if (getLeaderType() != NO_LEADER)
+			return GC.getLeaderHeadInfo(getLeaderType()).getTextKeyWide();
 	}
-	else
-	{
-		return GC.getInitCore().getLeaderNameKey(getID());
-	}
+	return GC.getInitCore().getLeaderNameKey(getID());
 }
 
 

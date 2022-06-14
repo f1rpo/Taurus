@@ -54,11 +54,12 @@ public:
 	DllExport void closeInactiveSlots();
 	DllExport void reopenInactiveSlots();
 
-	void resetGame();
+	void resetGame(/* trs.fix-load: */ bool bBeforeRead = false);
 	DllExport void resetGame(CvInitCore * pSource, bool bClear = true, bool bSaveGameType = false);
-	DllExport void resetPlayers();
+	DllExport void resetPlayers() /* <trs.fix-load> */ { resetPlayers(false); }
+	void resetPlayers(bool bBeforeRead); // </trs.fix-load>
 	DllExport void resetPlayers(CvInitCore * pSource, bool bClear = true, bool bSaveSlotInfo = false);
-	void resetPlayer(PlayerTypes eID);
+	void resetPlayer(PlayerTypes eID, /* trs.fix-load: */ bool bBeforeRead = false);
 	DllExport void resetPlayer(PlayerTypes eID, CvInitCore * pSource, bool bClear = true, bool bSaveSlotInfo = false);
 
 	// **************************
@@ -283,8 +284,8 @@ protected:
 	void clearCustomMapOptions();
 	void refreshCustomMapOptions();
 
-	void clearVictories();
-	void refreshVictories();
+	/*void clearVictories();
+	void refreshVictories();*/ // trs.safety
 
 	// ***
 	// CORE GAME INIT DATA

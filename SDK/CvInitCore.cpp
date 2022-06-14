@@ -126,7 +126,8 @@ void CvInitCore::init(GameMode eMode)
 void CvInitCore::uninit()
 {
 	clearCustomMapOptions();
-	clearVictories();
+	SAFE_DELETE_ARRAY(m_abVictories);
+	m_iNumVictories = 0;
 }
 
 
@@ -500,7 +501,7 @@ void CvInitCore::reopenInactiveSlots()
 	}
 }
 
-void CvInitCore::resetGame()
+void CvInitCore::resetGame(/* trs.fix-load: */ bool bBeforeRead)
 {
 	// Descriptive strings about game and map
 	m_eType = GAME_NONE;
@@ -510,22 +511,36 @@ void CvInitCore::resetGame()
 	m_szMapScriptName.clear();
 
 	m_bWBMapNoPlayers = false;
-
-	// Standard game parameters
-	m_eWorldSize = NO_WORLDSIZE;											// STANDARD_ option?
-	m_eClimate = (ClimateTypes)GC.getDefineINT("STANDARD_CLIMATE");			// NO_ option?
-	m_eSeaLevel = (SeaLevelTypes)GC.getDefineINT("STANDARD_SEALEVEL");		// NO_ option?
-	m_eEra = (EraTypes)GC.getDefineINT("STANDARD_ERA");						// NO_ option?
-	m_eGameSpeed = (GameSpeedTypes)GC.getDefineINT("STANDARD_GAMESPEED");	// NO_ option?
-	m_eTurnTimer = (TurnTimerTypes)GC.getDefineINT("STANDARD_TURNTIMER");	// NO_ option?
-	m_eCalendar = (CalendarTypes)GC.getDefineINT("STANDARD_CALENDAR");		// NO_ option?
-
+	if (!bBeforeRead) // trs.fix-load (but doesn't really matter)
+	{	// Standard game parameters
+		m_eWorldSize = NO_WORLDSIZE;											// STANDARD_ option?
+		m_eClimate = (ClimateTypes)GC.getDefineINT("STANDARD_CLIMATE");			// NO_ option?
+		m_eSeaLevel = (SeaLevelTypes)GC.getDefineINT("STANDARD_SEALEVEL");		// NO_ option?
+		m_eEra = (EraTypes)GC.getDefineINT("STANDARD_ERA");						// NO_ option?
+		m_eGameSpeed = (GameSpeedTypes)GC.getDefineINT("STANDARD_GAMESPEED");	// NO_ option?
+		m_eTurnTimer = (TurnTimerTypes)GC.getDefineINT("STANDARD_TURNTIMER");	// NO_ option?
+		m_eCalendar = (CalendarTypes)GC.getDefineINT("STANDARD_CALENDAR");		// NO_ option?
+	}
 	// Map-specific custom parameters
 	clearCustomMapOptions();
+	m_iNumHiddenCustomMapOptions = 0; // trs.safety
 
 	// Data-defined victory conditions
-	refreshVictories();
-
+	SAFE_DELETE_ARRAY(m_abVictories);
+	if (!bBeforeRead) // trs.fix-load
+	{
+		//refreshVictories();
+		// trs.safety: Easier to get trs.fix-load right w/o this function
+		m_iNumVictories = GC.getNumVictoryInfos();
+		if (m_iNumVictories > 0)
+		{
+			m_abVictories = new bool[m_iNumVictories];
+			for (int i = 0; i < m_iNumVictories; ++i)
+			{
+				m_abVictories[i] = true;
+			}
+		}
+	}
 
 	// Standard game options
 	int i;
@@ -537,6 +552,9 @@ void CvInitCore::resetGame()
 	{
 		m_abMPOptions[i] = false;
 	}
+	// <trs.fix-load>
+	if (bBeforeRead)
+		return; // </trs.fix-load>
 	m_bStatReporting = false;
 
 	for (i = 0; i < NUM_FORCECONTROL_TYPES; ++i)
@@ -601,16 +619,20 @@ void CvInitCore::resetGame(CvInitCore * pSource, bool bClear, bool bSaveGameType
 		// Map-specific custom parameters
 		setCustomMapOptions(pSource->getNumCustomMapOptions(), pSource->getCustomMapOptions());
 		m_iNumHiddenCustomMapOptions = pSource->getNumHiddenCustomMapOptions();
-		setVictories(pSource->getNumVictories(), pSource->getVictories());
+		//setVictories(pSource->getNumVictories(), pSource->getVictories());
+		// <trs.safety> Avoid calling that obscure setVictories function unnecessarily
+		for (int i = 0; i < GC.getNumVictoryInfos(); i++)
+		{
+			setVictory((VictoryTypes)i, pSource->getVictory((VictoryTypes)i));
+		} // </trs.safety>
 
 		// Standard game options
-		int i;
-		for (i = 0; i < NUM_GAMEOPTION_TYPES; ++i)
+		for (int i = 0; i < NUM_GAMEOPTION_TYPES; ++i)
 		{
 			setOption((GameOptionTypes)i, pSource->getOption((GameOptionTypes)i));
 		}
 
-		for (i = 0; i < NUM_MPOPTION_TYPES; ++i)
+		for (int i = 0; i < NUM_MPOPTION_TYPES; ++i)
 		{
 			setMPOption((MultiplayerOptionTypes)i, pSource->getMPOption((MultiplayerOptionTypes)i));
 		}
@@ -632,11 +654,11 @@ void CvInitCore::resetGame(CvInitCore * pSource, bool bClear, bool bSaveGameType
 	}
 }
 
-void CvInitCore::resetPlayers()
+void CvInitCore::resetPlayers(/* trs.fix-load: */ bool bBeforeRead)
 {
 	for (int i = 0; i < MAX_PLAYERS; ++i)
 	{
-		resetPlayer((PlayerTypes)i);
+		resetPlayer((PlayerTypes)i, /* trs.fix-load: */ bBeforeRead);
 	}
 }
 
@@ -648,7 +670,8 @@ void CvInitCore::resetPlayers(CvInitCore * pSource, bool bClear, bool bSaveSlotI
 	}
 }
 
-void CvInitCore::resetPlayer(PlayerTypes eID)
+void CvInitCore::resetPlayer(PlayerTypes eID,
+	bool bBeforeRead) // trs.fix-load
 {
 	FASSERT_BOUNDS(0, MAX_PLAYERS, eID, "CvInitCore::resetPlayer");
 
@@ -683,6 +706,13 @@ void CvInitCore::resetPlayer(PlayerTypes eID)
 		// Civ flags
 		m_abPlayableCiv[eID] = false;
 		m_abMinorNationCiv[eID] = false;
+		// <trs.fix-load> (from AdvCiv)
+		if (bBeforeRead)
+		{	// Avoid crash when loading from within a game
+			if (GET_PLAYER(eID).isEverAlive())
+				GET_PLAYER(eID).reset(eID);
+			return;
+		} // </trs.fix-load>
 
 		// Unsaved player data
 		m_aiNetID[eID] = -1;
@@ -742,6 +772,10 @@ void CvInitCore::resetPlayer(PlayerTypes eID, CvInitCore * pSource, bool bClear,
 				setLeaderName(eID, pSource->getLeaderName(eID));
 				setSlotStatus(eID, pSource->getSlotStatus(eID));
 				setSlotClaim(eID, pSource->getSlotClaim(eID));
+				/*	<trs.load-fix> (from AdvCiv) Reset players while loading
+					from within a game to avoid crash */
+				if (pSource->getSavedGame() && GET_PLAYER(eID).isEverAlive())
+					GET_PLAYER(eID).reset(eID); // </trs.load-fix>
 			}
 		}
 	}
@@ -999,28 +1033,6 @@ void CvInitCore::refreshCustomMapOptions()
 	}
 }
 
-
-void CvInitCore::clearVictories()
-{
-	SAFE_DELETE_ARRAY(m_abVictories);
-	m_iNumVictories = 0;
-}
-
-void CvInitCore::refreshVictories()
-{
-	clearVictories();
-
-	m_iNumVictories = GC.getNumVictoryInfos();
-	if (m_iNumVictories > 0)
-	{
-		m_abVictories = new bool[m_iNumVictories];
-		for (int i = 0; i < m_iNumVictories; ++i)
-		{
-			m_abVictories[i] = true;
-		}
-	}
-}
-
 void CvInitCore::setCustomMapOptions(int iNumCustomMapOptions, const CustomMapOptionTypes * aeCustomMapOptions)
 {
 	clearCustomMapOptions();
@@ -1062,7 +1074,8 @@ void CvInitCore::setCustomMapOption(int iOptionID, CustomMapOptionTypes eCustomM
 
 void CvInitCore::setVictories(int iNumVictories, const bool * abVictories)
 {
-	clearVictories();
+	SAFE_DELETE_ARRAY(m_abVictories);
+	m_iNumVictories = 0;
 	if (iNumVictories)
 	{
 		FAssertMsg(abVictories, "Victory Num/Pointer mismatch in CvInitCore::setVictories");
@@ -1919,6 +1932,12 @@ void CvInitCore::resetAdvancedStartPoints()
 
 void CvInitCore::read(FDataStreamBase* pStream)
 {
+	/*	<trs.fix-load> (from AdvCiv) The EXE doesn't reset this class before
+		calling read. Need to free all dynamic memory and clear everything that
+		doesn't get fully replaced with data from pStream. */
+	resetGame(true);
+	resetPlayers(true);
+	// </trs.fix-load>
 	uint uiSaveFlag=0;
 	pStream->Read(&uiSaveFlag);		// flags for expansion (see SaveBits)
 	// <trs.modname>
@@ -1952,7 +1971,7 @@ void CvInitCore::read(FDataStreamBase* pStream)
 	pStream->Read((int*)&m_eTurnTimer);
 	pStream->Read((int*)&m_eCalendar);
 
-	SAFE_DELETE_ARRAY(m_aeCustomMapOptions);
+	//SAFE_DELETE_ARRAY(m_aeCustomMapOptions); // trs.fix-load: Now handled by resetGame
 	pStream->Read(&m_iNumCustomMapOptions);
 	pStream->Read(&m_iNumHiddenCustomMapOptions);
 	if (m_iNumCustomMapOptions > 0)
@@ -1961,7 +1980,7 @@ void CvInitCore::read(FDataStreamBase* pStream)
 		pStream->Read(m_iNumCustomMapOptions, (int*)m_aeCustomMapOptions);
 	}
 
-	SAFE_DELETE_ARRAY(m_abVictories);
+	//SAFE_DELETE_ARRAY(m_abVictories); // trs.fix-load: Now handled by resetGame
 	pStream->Read(&m_iNumVictories);
 	if (m_iNumVictories > 0)
 	{
@@ -2080,7 +2099,29 @@ void CvInitCore::write(FDataStreamBase* pStream)
 	pStream->Write(uiSaveFlag);
 
 	// GAME DATA
-	pStream->Write(m_eType);
+	//pStream->Write(m_eType);
+	/*	<trs.load-fix> (from AdvCiv) Make sure that resetPlayer will be able to
+		tell that a game is being loaded when reloading this savegame. */
+	GameType eWriteGameType = m_eType;
+	switch (eWriteGameType)
+	{
+	case GAME_SP_NEW:
+	case GAME_SP_SCENARIO:
+		eWriteGameType = GAME_SP_LOAD;
+		break;
+	case GAME_MP_NEW:
+	case GAME_MP_SCENARIO:
+		eWriteGameType = GAME_MP_LOAD;
+		break;
+	case GAME_HOTSEAT_NEW:
+	case GAME_HOTSEAT_SCENARIO:
+		eWriteGameType = GAME_HOTSEAT_LOAD;
+		break;
+	case GAME_PBEM_NEW:
+	case GAME_PBEM_SCENARIO:
+		eWriteGameType = GAME_PBEM_LOAD;
+	}
+	pStream->Write(eWriteGameType); // </trs.fix-load>
 	pStream->WriteString(m_szGameName);
 	pStream->WriteString(m_szGamePassword);
 	// <trs.lma> Don't export pw generated for locking assets
