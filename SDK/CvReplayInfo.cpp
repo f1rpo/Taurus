@@ -337,102 +337,45 @@ void CvReplayInfo::clearReplayMessageMap()
 	m_listReplayMessages.clear();
 }
 
+// trs.refactor: To get rid of duplicate code in the functions below
+bool CvReplayInfo::isReplayMsgValid(uint i) const
+{
+	return (i < m_listReplayMessages.size() && m_listReplayMessages[i] != NULL);
+}
+
 int CvReplayInfo::getReplayMessageTurn(uint i) const
 {
-	if (i >= m_listReplayMessages.size())
-	{
-		return (-1);
-	}
-	const CvReplayMessage* pMessage =  m_listReplayMessages[i];
-	if (NULL == pMessage)
-	{
-		return (-1);
-	}
-	return pMessage->getTurn();
+	return (isReplayMsgValid(i) ? m_listReplayMessages[i]->getTurn() : -1);
 }
 
 ReplayMessageTypes CvReplayInfo::getReplayMessageType(uint i) const
 {
-	if (i >= m_listReplayMessages.size())
-	{
-		return (NO_REPLAY_MESSAGE);
-	}
-	const CvReplayMessage* pMessage =  m_listReplayMessages[i];
-	if (NULL == pMessage)
-	{
-		return (NO_REPLAY_MESSAGE);
-	}
-	return pMessage->getType();
+	return (isReplayMsgValid(i) ? m_listReplayMessages[i]->getType() : NO_REPLAY_MESSAGE);
 }
 
 int CvReplayInfo::getReplayMessagePlotX(uint i) const
 {
-	if (i >= m_listReplayMessages.size())
-	{
-		return (-1);
-	}
-	const CvReplayMessage* pMessage =  m_listReplayMessages[i];
-	if (NULL == pMessage)
-	{
-		return (-1);
-	}
-	return pMessage->getPlotX();
+	return (isReplayMsgValid(i) ? m_listReplayMessages[i]->getPlotX() : -1);
 }
 
 int CvReplayInfo::getReplayMessagePlotY(uint i) const
 {
-	if (i >= m_listReplayMessages.size())
-	{
-		return (-1);
-	}
-	const CvReplayMessage* pMessage =  m_listReplayMessages[i];
-	if (NULL == pMessage)
-	{
-		return (-1);
-	}
-	return pMessage->getPlotY();
+	return (isReplayMsgValid(i) ? m_listReplayMessages[i]->getPlotY() : -1);
 }
 
 PlayerTypes CvReplayInfo::getReplayMessagePlayer(uint i) const
 {
-	if (i >= m_listReplayMessages.size())
-	{
-		return (NO_PLAYER);
-	}
-	const CvReplayMessage* pMessage =  m_listReplayMessages[i];
-	if (NULL == pMessage)
-	{
-		return (NO_PLAYER);
-	}
-	return pMessage->getPlayer();
+	return (isReplayMsgValid(i) ? m_listReplayMessages[i]->getPlayer() : NO_PLAYER);
 }
 
 LPCWSTR CvReplayInfo::getReplayMessageText(uint i) const
 {
-	if (i >= m_listReplayMessages.size())
-	{
-		return (NULL);
-	}
-	const CvReplayMessage* pMessage =  m_listReplayMessages[i];
-	if (NULL == pMessage)
-	{
-		return (NULL);
-	}
-	return pMessage->getText().GetCString();
+	return (isReplayMsgValid(i) ? m_listReplayMessages[i]->getText().c_str() : NULL);
 }
 
 ColorTypes CvReplayInfo::getReplayMessageColor(uint i) const
 {
-	if (i >= m_listReplayMessages.size())
-	{
-		return (NO_COLOR);
-	}
-	const CvReplayMessage* pMessage =  m_listReplayMessages[i];
-	if (NULL == pMessage)
-	{
-		return (NO_COLOR);
-	}
-	return pMessage->getColor();
+	return (isReplayMsgValid(i) ? m_listReplayMessages[i]->getColor() : NO_COLOR);
 }
 
 
