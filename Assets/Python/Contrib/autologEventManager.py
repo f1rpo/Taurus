@@ -300,12 +300,15 @@ class AutoLogEvent(AbstractAutoLogEvent):
 #				return 1
 
 			'Check if ALT + T was hit == testing!'
+			# trs. Disable this b/c BULL's CvColorInfo has no getXmlVal function.
+			'''
 			if (theKey == int(InputTypes.KB_T)
 			and self.eventMgr.bAlt):
 				for i in range(0, 126):   #range(0,1000000):
 					ci = gc.getColorInfo(i)
 					ci2 = "XML Val %i %s" % (i, ci.getXmlVal())
 					print ci2
+			'''
 
 
 	def onLoadGame(self, argsList):
@@ -413,7 +416,9 @@ class AutoLogEvent(AbstractAutoLogEvent):
 					message = BugUtil.getText("TXT_KEY_AUTOLOG_WHIP_APPLIED", (iCity.getName(), ))
 					Logger.writeLog(message, vColor="Red")
 
-				if iCurrentConstrictCounter > self.CityConscriptCounter[i]:
+				if (iCurrentConstrictCounter > self.CityConscriptCounter[i]
+						# trs.fix (from MNAI-U): Check that there is a conscript unit available
+						and iCity.getConscriptUnit() != -1):
 					message = BugUtil.getText("TXT_KEY_AUTOLOG_CONSCRIPT", (gc.getUnitInfo(iCity.getConscriptUnit()).getDescription(), iCity.getName()))
 					Logger.writeLog(message, vColor="Red")
 
@@ -450,7 +455,8 @@ class AutoLogEvent(AbstractAutoLogEvent):
 	def onFirstContact(self, argsList):
 		if (AutologOpt.isLogContact()):
 			iTeamX,iHasMetTeamY = argsList
-			if (iTeamX == 0
+			# trs.fix: Was iTeamX==0
+			if (iTeamX == CyGame().getActiveTeam()
 			and gc.getGame().getGameTurn() > 0):
 
 				sMsgArray = []
@@ -692,11 +698,16 @@ class AutoLogEvent(AbstractAutoLogEvent):
 		if (AutologOpt.isLogTechnology()):
 			iTechType, iPlayer = argsList
 			if iPlayer == CyGame().getActivePlayer():
+				'''
 				researchProgress = gc.getTeam(gc.getPlayer(iPlayer).getTeam()).getResearchProgress(gc.getPlayer(iPlayer).getCurrentResearch())
 				overflowResearch = (gc.getPlayer(iPlayer).getOverflowResearch() * gc.getPlayer(iPlayer).calculateResearchModifier(gc.getPlayer(iPlayer).getCurrentResearch()))/100
 				researchCost = gc.getTeam(gc.getPlayer(iPlayer).getTeam()).getResearchCost(gc.getPlayer(iPlayer).getCurrentResearch())
 				researchRate = gc.getPlayer(iPlayer).calculateResearchRate(-1)
 				zTurns = (researchCost - researchProgress - overflowResearch) / researchRate + 1
+				'''
+				# trs.fix (from AdvCiv, inspired by MNAI-U): The above seems to
+				# reinvent the wheel, badly. Might divide by 0.
+				zTurns = gc.getPlayer(iPlayer).getResearchTurnsLeft(gc.getPlayer(iPlayer).getCurrentResearch(), True)
 				message = BugUtil.getText("TXT_KEY_AUTOLOG_RESEARCH_BEGUN", (PyInfo.TechnologyInfo(iTechType).getDescription(), zTurns))
 				Logger.writeLog(message, vColor="Green")
 
@@ -705,7 +716,8 @@ class AutoLogEvent(AbstractAutoLogEvent):
 			iReligion, iFounder = argsList
 			player = PyPlayer(iFounder)
 			iCityId = gc.getGame().getHolyCity(iReligion).getID()
-			if (player.getTeamID() == 0):
+			# trs.fix: was ==0
+			if (player.getTeamID() == CyGame().getActiveTeam()):
 				messageEnd = gc.getPlayer(iFounder).getCity(iCityId).getName()
 			else:
 				messageEnd = BugUtil.getPlainText("TXT_KEY_AUTOLOG_DISTANT_LAND")
@@ -741,7 +753,8 @@ class AutoLogEvent(AbstractAutoLogEvent):
 			iCorporation, iFounder = argsList
 			player = PyPlayer(iFounder)
 			iCityId = gc.getGame().getHeadquarters(iCorporation).getID()
-			if (player.getTeamID() == 0):
+			# trs.fix: was ==0
+			if (player.getTeamID() == CyGame().getActiveTeam()):
 				messageEnd = gc.getPlayer(iFounder).getCity(iCityId).getName()
 			else:
 				messageEnd = BugUtil.getPlainText("TXT_KEY_AUTOLOG_DISTANT_LAND")
@@ -788,14 +801,18 @@ class AutoLogEvent(AbstractAutoLogEvent):
 
 	def onChangeWar(self, argsList):
 		bIsWar = argsList[0]
-		iPlayer = argsList[1]
+		iTeam = argsList[1] # trs.fix: was iPlayer
 		iRivalTeam = argsList[2]
+		# <trs.fix> (from AdvCiv) Relevant when a colonial vassal is created
+		if iTeam == gc.getBARBARIAN_TEAM():
+			return # </trs.fix>
 
 		if (gc.getGame().isFinalInitialized()
 		and AutologOpt.isLogWar()):
 
 #			Civ1 declares war on Civ2
-			iCiv1 = iPlayer
+			#iCiv1 = iPlayer
+			iCiv1 = gc.getTeam(iTeam).getLeaderID() # trs.fix
 			iCiv2 = gc.getTeam(iRivalTeam).getLeaderID()
 			zsCiv1 = gc.getPlayer(iCiv1).getName() + " (" + gc.getPlayer(iCiv1).getCivilizationShortDescription(0) + ")"
 			zsCiv2 = gc.getPlayer(iCiv2).getName() + " (" + gc.getPlayer(iCiv2).getCivilizationShortDescription(0) + ")"
