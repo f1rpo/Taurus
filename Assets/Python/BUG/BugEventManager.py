@@ -456,13 +456,23 @@ class BugEventManager(CvEventManager.CvEventManager):
 		Handles onKbdEvent by firing the keystroke's handler if it has one registered.
 		"""
 		eventType, key, mx, my, px, py = argsList
-		if eventType == self.EventKeyDown:
-			if not InputUtil.isModifier(key):
-				stroke = InputUtil.Keystroke(key, self.bAlt, self.bCtrl, self.bShift)
-				if stroke in self.shortcuts:
-					BugUtil.debug("BugEventManager - calling handler for shortcut %s", stroke)
-					self.shortcuts[stroke](argsList)
-					return 1
+		if eventType == self.EventKeyDown and not InputUtil.isModifier(key):
+			# <trs.safety> (from AdvCiv): Causes the EXE to crash
+			theKey = int(key)
+			if not self.bShift and self.bCtrl and self.bAlt and theKey == int(InputTypes.KB_R):
+				BugUtil.warn("Note (Taurus): Reloading of Art Defines (Ctrl+Alt+R) is disabled")
+				return 1 # Can't use this key combo for anything else
+			# </trs.safety>
+			stroke = InputUtil.Keystroke(key, self.bAlt, self.bCtrl, self.bShift)
+			if stroke in self.shortcuts:
+				BugUtil.debug("BugEventManager - calling handler for shortcut %s", stroke)
+				self.shortcuts[stroke](argsList)
+				return 1
+			# <trs.cheats> By overriding onKbdEvent, BugEventManager has bypassed
+			# some cheats implemented in CvEventManager. Let's remedy that.
+			if gc.getGame().isDebugMode():
+				CvEventManager.CvEventManager.onKbdEvent(self, argsList)
+			# </trs.cheats>
 		return 0
 	
 
