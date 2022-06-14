@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!-- trs. Config for all options added by the Taurus mod.
 	 (Can still split this up later if it becomes cluttered.) -->
-<mod id="Taurus" module="TaurusCore"
+<mod id="Taurus"
 	 name="Taurus" author="f1rpo" version="1.0" date="19/05/2022">
  
 	<options id="Taurus" file="Taurus.ini">
