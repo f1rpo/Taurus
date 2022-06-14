@@ -8,10 +8,53 @@
 #include "CvReplayMessage.h"
 #include "CvGameTextMgr.h"
 #include "CvDLLInterfaceIFaceBase.h"
+// <trs.replayname>
+#include "ModName.h"
+#include "CvBugOptions.h"
+#include "BugMod.h"
+// </trs.replayname>
 
-int CvReplayInfo::REPLAY_VERSION = 4;
+int CvReplayInfo::REPLAY_VERSION = 4
+		// <trs.replayname>
+		/*	So that we can always identify Taurus replays,
+			even if the mod name hasn't been saved. */
+		| TAURUS_SAVE_FORMAT;
+
+namespace
+{
+	bool shouldWriteModName()
+	{
+		// OK if BUG not yet initialized; will get another call later on.
+		if (!isBug() || getBugOptionBOOL("Taurus__ModNameInReplays"))
+			return true;
+		/*	This is just to make modders aware that BtS won't be able to read
+			their replays */
+		if ((GC.getNumPlayerColorInfos() > 44 && GC.getNumColorInfos() > 127) ||
+			GC.getNumWorldInfos() > 6 || GC.getNumVictoryInfos() > 7 ||
+			GC.getNumHandicapInfos() > 9 || GC.getNumGameSpeedInfos() > 4)
+		{
+			FErrorMsg("Writing mod name to replay b/c not compatible with BtS");
+			return true;
+		}
+		return false;
+	}
+}
+
+CvReplayInfo::Data::Data() :
+	iNormalizedScore(0),
+	iVersionRead(-1)
+{} // </trs.replayname>
+
+/*	trs.safety (from AdvCiv): Needs to have a copy-constructor b/c of its
+	Python counterpart, but I don't think it'll actually get called.
+	Won't want to copy m_pcMinimapPixels. */
+CvReplayInfo::CvReplayInfo(CvReplayInfo const&) : m(*new Data)
+{
+	FErrorMsg("No copy-constructor implemented for CvReplayInfo");
+}
 
 CvReplayInfo::CvReplayInfo() :
+	m(*new Data), // trs.replayname
 	m_iActivePlayer(0),
 	m_eDifficulty(NO_HANDICAP),
 	m_eWorldSize(NO_WORLDSIZE),
@@ -25,9 +68,9 @@ CvReplayInfo::CvReplayInfo() :
 	m_iMapHeight(0),
 	m_iMapWidth(0),
 	m_pcMinimapPixels(NULL),
-	m_iNormalizedScore(0),
 	m_bMultiplayer(false),
-	m_iStartYear(0)
+	m_iStartYear(0),
+	m_eCalendar(NO_CALENDAR) // trs.safety
 {
 	m_nMinimapSize = ((GC.getDefineINT("MINIMAP_RENDER_SIZE") * GC.getDefineINT("MINIMAP_RENDER_SIZE")) / 2); 
 }
@@ -40,6 +83,7 @@ CvReplayInfo::~CvReplayInfo()
 		SAFE_DELETE(m_listReplayMessages[i]);
 	}
 	SAFE_DELETE(m_pcMinimapPixels);
+	delete &m; // trs.replayname
 }
 
 void CvReplayInfo::createInfo(PlayerTypes ePlayer)
@@ -95,7 +139,7 @@ void CvReplayInfo::createInfo(PlayerTypes ePlayer)
 			m_eVictoryType = NO_VICTORY;
 		}
 
-		m_iNormalizedScore = player.calculateScore(true, player.getTeam() == GC.getGameINLINE().getWinner());
+		m.iNormalizedScore = player.calculateScore(true, player.getTeam() == GC.getGameINLINE().getWinner());
 	}
 
 	m_bMultiplayer = game.isGameMultiPlayer();
@@ -141,7 +185,8 @@ void CvReplayInfo::createInfo(PlayerTypes ePlayer)
 		}
 	}
 
-	m_listReplayMessages.clear();
+	//m_listReplayMessages.clear();
+	FAssert(m_listReplayMessages.empty()); // trs.safety
 	for (uint i = 0; i < game.getNumReplayMessages(); i++)
 	{
 		std::map<PlayerTypes, int>::iterator it = mapPlayers.find(game.getReplayMessagePlayer(i));
@@ -179,7 +224,8 @@ void CvReplayInfo::createInfo(PlayerTypes ePlayer)
 	if (ptexture)
 		memcpy((void*)m_pcMinimapPixels, ptexture, m_nMinimapSize);
 
-	m_szModName = gDLL->getModName();
+	if (shouldWriteModName()) // trs.replayname
+		m_szModName = gDLL->getModName();
 }
 
 int CvReplayInfo::getNumPlayers() const
@@ -469,7 +515,7 @@ int CvReplayInfo::getFinalAgriculture() const
 
 int CvReplayInfo::getNormalizedScore() const
 {
-	return m_iNormalizedScore;
+	return m.iNormalizedScore;
 }
 
 int CvReplayInfo::getMapHeight() const
@@ -489,9 +535,25 @@ const unsigned char* CvReplayInfo::getMinimapPixels() const
 
 const char* CvReplayInfo::getModName() const
 {
+	// <trs.replayname>
+	static int iReplayLoadMode = GC.getDefineINT("HOF_LIST_OTHER_REPLAYS"); // (ad-hoc cache)
+	if (iReplayLoadMode >= 3 || m.iVersionRead == REPLAY_VERSION || m.iVersionRead < 0 ||
+		(iReplayLoadMode >= 1 && m_szModName.empty()) ||
+		(iReplayLoadMode >= 2 && GC.getModName().isCompatible(m_szModName.c_str(), "")))
+	{	// Pretend to the EXE that this is a replay that we've created
+		return GC.getModName().getFullPath(); // (gDLL->getModName() would go out of scope)
+	} // </trs.replayname>
 	return m_szModName;
 }
 
+// trs.safety:
+namespace
+{
+	bool isInBounds(int iValue, int iLower, int iUpper)
+	{
+		return (iValue >= iLower && iValue < iUpper);
+	}
+}
 
 bool CvReplayInfo::read(FDataStreamBase& stream)
 {
@@ -499,26 +561,42 @@ bool CvReplayInfo::read(FDataStreamBase& stream)
 	int iNumTypes;
 	bool bSuccess = true;
 
+	/*	trs.safety (note): This won't handle interrupts (unless we compile
+		with /EHa). Hence the isInBounds checks below (not tagged w/ comments). */
 	try
 	{
 		int iVersion;
 		stream.Read(&iVersion);
 		if (iVersion < 2)
-		{
 			return false;
-		}
-
+		// <trs.replayname>
+		m.iVersionRead = iVersion;
+		/*	If a mod uses a different replay format, then we may not be able to
+			parse that. However, we can parse the AdvCiv format, and which other
+			mod uses a different format? */
+		/*{
+			int iDataVersion = iVersion & ~TAURUS_SAVE_FORMAT;
+			if (iDataVersion > 4)
+				return false; 
+		}*/ // </trs.replayname>
 		stream.Read(&m_iActivePlayer);
+		if (!isInBounds(m_iActivePlayer, 0, 128)) return false;
 
 		stream.Read(&iType);
 		m_eDifficulty = (HandicapTypes)iType;
+		if (!isInBounds(m_eDifficulty, 0, 2 * GC.getNumHandicapInfos())) return false;
 		stream.ReadString(m_szLeaderName);
+		if (!isInBounds(m_szLeaderName.length(), 0, 256)) return false;
 		stream.ReadString(m_szCivDescription);
+		if (!isInBounds(m_szCivDescription.length(), 0, 256)) return false;
 		stream.ReadString(m_szShortCivDescription);
+		if (!isInBounds(m_szShortCivDescription.length(), 0, 256)) return false;
 		stream.ReadString(m_szCivAdjective);
+		if (!isInBounds(m_szCivAdjective.length(), 0, 256)) return false;
 		if (iVersion > 3)
 		{
 			stream.ReadString(m_szMapScriptName);
+			if (!isInBounds(m_szMapScriptName.length(), 0, 256)) return false;
 		}
 		else
 		{
@@ -526,29 +604,41 @@ bool CvReplayInfo::read(FDataStreamBase& stream)
 		}
 		stream.Read(&iType);
 		m_eWorldSize = (WorldSizeTypes)iType;
+		if (!isInBounds(m_eWorldSize, 0, 2 * GC.getNumWorldInfos())) return false;
 		stream.Read(&iType);
 		m_eClimate = (ClimateTypes)iType;
+		if (!isInBounds(m_eClimate, 0, 2 * GC.getNumClimateInfos())) return false;
 		stream.Read(&iType);
 		m_eSeaLevel = (SeaLevelTypes)iType;
+		// (trs.replayname: Sea level is unused, so mods may repurpose it. AdvCiv does.)
+		//if (!isInBounds(m_eSeaLevel, 0, 2 * GC.getNumSeaLevelInfos())) return false;
 		stream.Read(&iType);
 		m_eEra = (EraTypes)iType;
+		if (!isInBounds(m_eEra, 0, 2 * GC.getNumWorldInfos())) return false;
 		stream.Read(&iType);
 		m_eGameSpeed = (GameSpeedTypes)iType;
+		if (!isInBounds(m_eGameSpeed, 0, 2 * GC.getNumGameSpeedInfos())) return false;
 		stream.Read(&iNumTypes);
+		if (!isInBounds(iNumTypes, 0, 2 * NUM_GAMEOPTION_TYPES)) return false;
 		for (int i = 0; i < iNumTypes; i++)
 		{
 			stream.Read(&iType);
+			if (!isInBounds(iType, 0, 2 * NUM_GAMEOPTION_TYPES)) return false;
 			m_listGameOptions.push_back((GameOptionTypes)iType);
 		}
 		stream.Read(&iNumTypes);
+		if (!isInBounds(iNumTypes, 0, 2 * GC.getNumVictoryInfos())) return false;
 		for (int i = 0; i < iNumTypes; i++)
 		{
 			stream.Read(&iType);
+			if (!isInBounds(iType, 0, 2 * GC.getNumVictoryInfos())) return false;
 			m_listVictoryTypes.push_back((VictoryTypes)iType);
 		}
 		stream.Read(&iType);
 		m_eVictoryType = (VictoryTypes)iType;
+		if (!isInBounds(m_eVictoryType, -1, 2 * GC.getNumVictoryInfos())) return false;
 		stream.Read(&iNumTypes);
+		if (!isInBounds(iNumTypes, 0, 64000)) return false;
 		for (int i = 0; i < iNumTypes; i++)
 		{
 			CvReplayMessage* pMessage = new CvReplayMessage(0);
@@ -559,22 +649,32 @@ bool CvReplayInfo::read(FDataStreamBase& stream)
 			m_listReplayMessages.push_back(pMessage);
 		}
 		stream.Read(&m_iInitialTurn);
+		if (!isInBounds(m_iInitialTurn, 0, 1500)) return false;
 		stream.Read(&m_iStartYear);
+		if (!isInBounds(m_iStartYear, -15000, 150000)) return false;
 		stream.Read(&m_iFinalTurn);
+		if (!isInBounds(m_iInitialTurn, 0, 15000)) return false;
 		stream.ReadString(m_szFinalDate);
+		if (!isInBounds(m_szFinalDate.length(), 4, 64)) return false;
 		stream.Read(&iType);
 		m_eCalendar = (CalendarTypes)iType;
-		stream.Read(&m_iNormalizedScore);
+		if (!isInBounds(m_eCalendar, 0, 2 * GC.getNumCalendarInfos())) return false;
+		stream.Read(&m.iNormalizedScore);
+		if (!isInBounds(m.iNormalizedScore, -15000, 1500000)) return false;
 		stream.Read(&iNumTypes);
+		if (!isInBounds(iNumTypes, 1, 128)) return false;
 		for (int i = 0; i < iNumTypes; i++)
 		{
 			PlayerInfo info;
 			stream.Read(&iType);
 			info.m_eLeader = (LeaderHeadTypes)iType;
+			if (!isInBounds(info.m_eLeader, 0, 2 * GC.getNumLeaderHeadInfos())) return false;
 			stream.Read(&iType);
 			info.m_eColor = (ColorTypes)iType;
+			if (!isInBounds(info.m_eColor, 0, 2 * GC.getNumColorInfos())) return false;
 			int jNumTypes;
 			stream.Read(&jNumTypes);
+			if (!isInBounds(jNumTypes, 0, 15000)) return false;
 			for (int j = 0; j < jNumTypes; j++)
 			{
 				TurnData data;
@@ -587,7 +687,9 @@ bool CvReplayInfo::read(FDataStreamBase& stream)
 			m_listPlayerScoreHistory.push_back(info);
 		}
 		stream.Read(&m_iMapWidth);
+		if (!isInBounds(m_iMapWidth, 1, 1000)) return false;
 		stream.Read(&m_iMapHeight);
+		if (!isInBounds(m_iMapHeight, 1, 1000)) return false;
 		SAFE_DELETE(m_pcMinimapPixels);
 		m_pcMinimapPixels = new unsigned char[m_nMinimapSize];
 		stream.Read(m_nMinimapSize, m_pcMinimapPixels);
@@ -644,7 +746,7 @@ void CvReplayInfo::write(FDataStreamBase& stream)
 	stream.Write(m_iFinalTurn);
 	stream.WriteString(m_szFinalDate);
 	stream.Write((int)m_eCalendar);
-	stream.Write(m_iNormalizedScore);
+	stream.Write(m.iNormalizedScore);
 	stream.Write((int)m_listPlayerScoreHistory.size());
 	for (uint i = 0; i < m_listPlayerScoreHistory.size(); i++)
 	{

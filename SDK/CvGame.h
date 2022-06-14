@@ -13,6 +13,7 @@ class CvPlot;
 class CvCity;
 class CvReplayMessage;
 class CvReplayInfo;
+class CvHallOfFameInfo; // trs.clearhof
 
 typedef std::vector<const CvReplayMessage*> ReplayMessageList;
 
@@ -476,6 +477,7 @@ public:
 	CvReplayInfo* getReplayInfo() const;
 	DllExport void setReplayInfo(CvReplayInfo* pReplay);
 	void saveReplay(PlayerTypes ePlayer);
+	void setHallOfFame(CvHallOfFameInfo* pHallOfFame); // trs.clearhof
 
 	void exportSaveGame(); // trs.modname (Exposed to Python)
 
@@ -648,6 +650,7 @@ protected:
 
 	ReplayMessageList m_listReplayMessages; 
 	CvReplayInfo* m_pReplayInfo;
+	CvHallOfFameInfo* m_pHallOfFame; // trs.clearhof
 
 	int m_iNumSessions;
 

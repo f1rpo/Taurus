@@ -68,6 +68,27 @@
 		 save versions don't match.) -->
 	<!-- trs.modname: end -->
 
+	<!-- trs.replayname:
+		 If set to 0, the Taurus Hall of Fame screen lists only replays of
+		 Taurus games. (Such replays can be correctly identified even when the
+		 "Mod Name in Replays" option on the System tab of the mod
+		 options screen has been disabled.)
+		 If set to 1, the Taurus Hall of Fame screen also lists replays of
+		 BtS games played without mods.
+		 If set to 2, the Taurus Hall of Fame screen also lists replays of
+		 games played with any mod covered by COMPATIBLE_MOD_NAME_PREFIXES
+		 (see above).
+		 If set to 3, the Taurus Hall of Fame screen lists all replays found
+		 in the Replays folder (My Games\Beyond the Sword\Replays).
+		 If a replay contains unusual text or player colors, those colors are
+		 replaced with the colors available. Error handling code may discard
+		 replays with highly unusual game data (e.g. Caveman2Cosmos replays
+		 might get filtered out). -->
+	<Define>
+		<DefineName>HOF_LIST_OTHER_REPLAYS</DefineName>
+		<iDefineIntVal>2</iDefineIntVal>
+	</Define>
+
 	<!-- trs.lma:
 		 0 means that the check for the Lock Modified Assets (LMA) game option
 		 in the EXE is disabled for all savegames. LMA will then still disable

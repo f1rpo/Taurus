@@ -21,12 +21,12 @@ class BugSystemOptionsTab(BugOptionsTab.BugOptionsTab):
 		panel = self.createMainPanel(screen)
 		column = self.addOneColumnLayout(screen, panel)
 
-		# trs.modname: Center column added to save vertical space
+		# trs: Center column added, position of OptionsButton and OptionsKey swapped.
 		left, center, right = self.addThreeColumnLayout(screen, column, "Bottom", False)
+		self.addCheckbox(screen, left, "MainInterface__OptionsButton")
 		self.addCheckbox(screen, left, "MainInterface__OptionsKey")
-		# trs.modname: Was in left coulmn
-		self.addCheckbox(screen, center, "MainInterface__OptionsButton")
-		self.addCheckbox(screen, left, "Taurus__SaveModName") # trs.modname
+		self.addCheckbox(screen, center, "Taurus__SaveModName") # trs.modname
+		self.addCheckbox(screen, center, "Taurus__ModNameInReplays") # trs.replayname
 		screen.setLayoutFlag(right, "LAYOUT_RIGHT")
 		screen.setLayoutFlag(right, "LAYOUT_SIZE_HPREFERREDEXPANDING")
 		self.addLabel(screen, right, "Version", 

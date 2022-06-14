@@ -31,6 +31,9 @@
 			<!-- trs.modname -->
 			<option id="SaveModName" key="Save Mod Name"
 					type="boolean" default="True"/>
+			<!-- trs.replayname -->
+			<option id="ModNameInReplays" key="Mod Name In Replays"
+					type="boolean" default="True"/>
 
 		</section>
 	</options>

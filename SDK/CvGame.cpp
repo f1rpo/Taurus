@@ -14,6 +14,7 @@
 #include "CvArtFileMgr.h"
 #include "CvDiploParameters.h"
 #include "CvReplayMessage.h"
+#include "CvHallOfFameInfo.h" // trs.clearhof
 #include "CyArgsList.h"
 #include "CvInfos.h"
 #include "CvPopupInfo.h"
@@ -66,6 +67,7 @@ CvGame::CvGame()
 	m_paHeadquarters = NULL;
 
 	m_pReplayInfo = NULL;
+	m_pHallOfFame = NULL; // trs.clearhof
 
 	m_aiShrineBuilding = NULL;
 	m_aiShrineReligion = NULL;
@@ -443,7 +445,10 @@ void CvGame::reset(HandicapTypes eHandicap, bool bConstructorCall)
 	//--------------------------------
 	// Uninit class
 	uninit();
-
+	// <trs.clearhof> (from AdvCiv) Don't keep HoF in memory indefinitely
+	if (m_pHallOfFame != NULL)
+		m_pHallOfFame->uninit();
+	// </trs.clearhof>
 	m_iElapsedGameTurns = 0;
 	m_iStartTurn = 0;
 	m_iStartYear = 0;
@@ -8217,6 +8222,12 @@ void CvGame::writeReplay(FDataStreamBase& stream, PlayerTypes ePlayer)
 void CvGame::saveReplay(PlayerTypes ePlayer)
 {
 	gDLL->getEngineIFace()->SaveReplay(ePlayer);
+}
+
+// trs.clearhof:
+void CvGame::setHallOfFame(CvHallOfFameInfo* pHallOfFame)
+{
+	m_pHallOfFame = pHallOfFame;
 }
 
 // trs.modname:

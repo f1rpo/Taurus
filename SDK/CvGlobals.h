@@ -238,7 +238,7 @@ public:
 
 	DllExport int getNumColorInfos();
 	std::vector<CvColorInfo*>& getColorInfo();
-	DllExport CvColorInfo& getColorInfo(ColorTypes e);
+	DllExport CvColorInfo& getColorInfo(ColorTypes eColor);
 
 	DllExport int getNumPlayerColorInfos();
 	std::vector<CvPlayerColorInfo*>& getPlayerColorInfo();
@@ -893,6 +893,7 @@ public:
 	DllExport int getNumGraphicLevels() const;
 	DllExport int getNumGlobeLayers() const;
 
+	void setHoFScreenUp(bool b); // trs.replayname
 // BUG - DLL Info - start
 	bool isBull() const;
 	int getBullApiVersion() const;
@@ -933,6 +934,7 @@ protected:
 	bool m_bZoomOut;
 	bool m_bZoomIn;
 	bool m_bLoadGameFromFile;
+	bool m_bHoFScreenUp; // trs.replayname
 
 	FMPIManager * m_pFMPMgr;
 

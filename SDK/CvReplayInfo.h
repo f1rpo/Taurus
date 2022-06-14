@@ -10,7 +10,9 @@ class CvReplayMessage;
 // (trs. Removed all unused DllExports from members of this class.)
 class CvReplayInfo
 {
+	CvReplayInfo& operator=(CvReplayInfo const&); // trs.safety (private)
 public:
+	CvReplayInfo(CvReplayInfo const&); // trs.safety
 	DllExport CvReplayInfo();
 	virtual ~CvReplayInfo();
 
@@ -74,6 +76,7 @@ public:
 protected:
 	bool isValidPlayer(int i) const;
 	bool isValidTurn(int i) const;
+	bool isReplayMsgValid(uint i) const; // trs.refactor
 
 	static int REPLAY_VERSION;
 
@@ -103,8 +106,17 @@ protected:
 	int m_iStartYear;
 	CvWString m_szFinalDate;
 	CalendarTypes m_eCalendar;
-	int m_iNormalizedScore;
-
+	//int m_iNormalizedScore;
+	/*	<trs.replayname> Add data members w/o increasing class size.
+		Size mustn't change b/c the EXE will instantiate this class. */
+	struct Data
+	{
+		Data();
+		int iNormalizedScore; // (moved into Data to make room for Data& m)
+		int iVersionRead;
+	};
+	Data& m;
+	// </trs.replayname>
 	struct TurnData
 	{
 		int m_iScore;
@@ -131,5 +143,7 @@ protected:
 
 	CvString m_szModName;
 };
+
+BOOST_STATIC_ASSERT(sizeof(CvReplayInfo) == 336); // trs.safety
 
 #endif

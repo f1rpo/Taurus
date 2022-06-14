@@ -47,4 +47,17 @@
 	</TEXT>
 	<!-- trs.modname: end -->
 
+	<!-- trs.replayname: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__MODNAMEINREPLAYS_TEXT</Tag>
+		<English>Mod Name in Replays</English>
+		<German>Mod-Name in Replays</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__MODNAMEINREPLAYS_HOVER</Tag>
+		<English>When checked, the name of the mod's folder (e.g. "Taurus") is written into your replay files, which excludes them from the Hall of Fame screen when BtS is run without mods. (As for showing replays created by BtS or other mods on the Taurus Hall of Fame screen, see [COLOR_BUILDING_TEXT]HOF_LIST_OTHER_REPLAYS[COLOR_REVERT] in [COLOR_BUILDING_TEXT]Assets\XML\GlobalDefinesAlt.xml[COLOR_REVERT].)</English>
+		<German>Speichert den Ordner-Namen des Mods (z.B. "Taurus") in [COLOR_BUILDING_TEXT]Civ4BeyondSwordReplay[COLOR_REVERT]-Dateien (Wiederholungen). Dies verhindert, dass die BtS-Ruhmeshalle Taurus-Replays aufführt, wenn kein Mod geladen ist. (Was die Anzeige von BtS-Replays und Replays anderer Mods in der Taurus-Ruhmeshalle angeht, siehe [COLOR_BUILDING_TEXT]HOF_LIST_OTHER_REPLAYS[COLOR_REVERT] in [COLOR_BUILDING_TEXT]Assets\XML\GlobalDefinesAlt.xml[COLOR_REVERT].)</German>
+	</TEXT>
+	<!-- trs.replayname: end -->
+
 </Civ4GameText>

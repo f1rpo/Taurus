@@ -113,6 +113,7 @@ m_iNewPlayers(0),
 m_bZoomOut(false),
 m_bZoomIn(false),
 m_bLoadGameFromFile(false),
+m_bHoFScreenUp(false), // trs.replayname
 m_pFMPMgr(NULL),
 m_asyncRand(NULL),
 m_interface(NULL),
@@ -793,11 +794,19 @@ std::vector<CvColorInfo*>& CvGlobals::getColorInfo()
 	return m_paColorInfo;
 }
 
-CvColorInfo& CvGlobals::getColorInfo(ColorTypes e)
+CvColorInfo& CvGlobals::getColorInfo(ColorTypes eColor)
 {
-	FAssert(e > -1);
-	FAssert(e < GC.getNumColorInfos());
-	return *(m_paColorInfo[e]);
+	FAssert(eColor >= 0);
+	//FAssert(eColor < GC.getNumColorInfos());
+	/*	<trs.replayname> (from AdvCiv) So that we can handle replays of mods
+		that have extra colors */
+	if (eColor >= getNumColorInfos())
+	{
+		FAssert(m_bHoFScreenUp || eColor < getNumColorInfos());
+		// +7: Skip colors from COLOR_CLEAR to COLOR_LIGHT_GREY
+		eColor = (ColorTypes)((eColor + 7) % getNumColorInfos());
+	} // </trs.replayname>
+	return *(m_paColorInfo[eColor]);
 }
 
 
@@ -3624,6 +3633,12 @@ void CvGlobals::setBorderFinder(FAStar* pVal) { m_borderFinder = pVal; }
 void CvGlobals::setAreaFinder(FAStar* pVal) { m_areaFinder = pVal; }
 void CvGlobals::setPlotGroupFinder(FAStar* pVal) { m_plotGroupFinder = pVal; }
 CvDLLUtilityIFaceBase* CvGlobals::getDLLIFaceNonInl() { return m_pDLL; }
+
+// trs.replayname:
+void CvGlobals::setHoFScreenUp(bool b)
+{
+	m_bHoFScreenUp = b;
+}
 
 // BUG - DLL Info - start
 bool CvGlobals::isBull() const { return true; }

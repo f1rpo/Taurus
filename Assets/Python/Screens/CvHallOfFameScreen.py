@@ -278,9 +278,14 @@ class CvHallOfFameScreen:
 		for i in range(self.hallOfFame.getNumGames()):
 			replayInfo = self.hallOfFame.getReplayInfo(i)
 			if self.isDisplayed(replayInfo):
+				# trs.replayname (from AdvCiv): For handling replays of other mods
+				szUnknown = localText.getText("TXT_KEY_UNKNOWN", ())
 				szVictory = u""
 				if replayInfo.getVictoryType() <= 0:
 					szVictory = localText.getText("TXT_KEY_NONE", ())
+				# <trs.replayname>
+				elif replayInfo.getVictoryType() >= gc.getNumVictoryInfos():
+					szVictory = szUnknown # </trs.replayname>
 				else:
 					szVictory = gc.getVictoryInfo(replayInfo.getVictoryType()).getDescription()
 # BUG - Win/Loss Info - start
@@ -298,19 +303,42 @@ class CvHallOfFameScreen:
 					iValue = replayInfo.getFinalTurn()
 				elif self.iSortBy == SORT_BY_GAME_SCORE:
 					iValue = -replayInfo.getFinalScore()
-
+				# <trs.replayname>
+				iHandicap = replayInfo.getDifficulty()
+				if iHandicap >= 0 and iHandicap < gc.getNumHandicapInfos():
+					szHandicap = gc.getHandicapInfo(iHandicap).getDescription()
+				else:
+					szHandicap = szUnknown
+				iWorldSize = replayInfo.getWorldSize()
+				if iWorldSize >= 0 and iWorldSize < gc.getNumWorldInfos():
+					szWorldSize = gc.getWorldInfo(iWorldSize).getDescription()
+				else:
+					szWorldSize = szUnknown
+				iStartEra = replayInfo.getEra()
+				if iStartEra >= 0 and iStartEra < gc.getNumEraInfos():
+					szStartEra = gc.getEraInfo(iStartEra).getDescription()
+				else:
+					szStartEra = szUnknown
+				iSpeed = replayInfo.getGameSpeed()
+				if iSpeed >= 0 and iSpeed < gc.getNumGameSpeedInfos():
+					szSpeed = gc.getGameSpeedInfo(iSpeed).getDescription()
+				else:
+					szSpeed = szUnknown
+				# </trs.replayname>
 				self.infoList[iItem] = (iValue,
 						localText.getText("TXT_KEY_LEADER_CIV_DESCRIPTION", (replayInfo.getLeaderName(), replayInfo.getShortCivDescription())),
 						replayInfo.getNormalizedScore(),
 						replayInfo.getFinalDate(),
 						replayInfo.getFinalScore(), 
 						szVictory,
-						gc.getHandicapInfo(replayInfo.getDifficulty()).getDescription(),
-						gc.getWorldInfo(replayInfo.getWorldSize()).getDescription(),
-#						gc.getClimateInfo(replayInfo.getClimate()).getDescription(),
-#						gc.getSeaLevelInfo(replayInfo.getSeaLevel()).getDescription(),
-						gc.getEraInfo(replayInfo.getEra()).getDescription(),
-						gc.getGameSpeedInfo(replayInfo.getGameSpeed()).getDescription(),
+						# <trs.replayname>
+						szHandicap,
+						szWorldSize,
+# Note: These two have always been disabled
+# gc.getClimateInfo(replayInfo.getClimate()).getDescription(),
+# gc.getSeaLevelInfo(replayInfo.getSeaLevel()).getDescription(),
+						szStartEra,
+						szSpeed, # </trs.replayname>
 						i)
 				iItem += 1
 		self.infoList.sort()
@@ -357,8 +385,8 @@ class CvHallOfFameScreen:
 		count = 0
 		while msgNum >= 0:
 			msg = replay.getReplayMessageText(msgNum)
-			if count > 100:
-				BugUtil.debug("no victory message in first 100; skipping")
+			if count > 25: # trs.replayname: Was 100; let's save some time.
+				BugUtil.debug("no victory message found; skipping")
 				break
 			matches = reWinText.match(msg)
 			if matches:
