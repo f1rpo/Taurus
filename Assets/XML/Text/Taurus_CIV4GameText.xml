@@ -15,4 +15,21 @@
 	</TEXT>
 	<!-- trs.modname: end -->
 
+	<!-- trs.hofwarn (from AdvCiv): start -->
+	<TEXT>
+		<Tag>TXT_KEY_HOF_WARN</Tag>
+		<English>Known issue: If replay buttons at the bottom of the screen don't work, it can help to shorten the list through the menus.</English>
+		<German>Bekanntes Problem: Falls die Schaltflächen am unteren Ende des Bildschirms nicht funktionieren, kann es helfen, über die Menüs einen Filter einzustellen, so dass weniger Einträge angezeigt werden.</German>
+	</TEXT>
+	<!-- (Based on TXT_KEY_REPLAY_SCREEN_TITLE) -->
+	<TEXT>
+		<Tag>TXT_KEY_HOF_SHOW_REPLAY</Tag>
+		<English>Show Replay</English>
+		<French>Montrer film</French>
+		<German>Wiederholung abspielen</German>
+		<Italian>Mostra replay</Italian>
+		<Spanish>Mostrar repetición</Spanish>
+	</TEXT>
+	<!-- trs.hofwarn: end -->
+
 </Civ4GameText>

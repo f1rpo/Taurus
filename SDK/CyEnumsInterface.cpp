@@ -421,6 +421,8 @@ void CyEnumsPythonInterface()
 		.value("WIDGET_LEADERHEAD_RELATIONS", WIDGET_LEADERHEAD_RELATIONS)
 // BUG - Leaderhead Relations - end
 
+		.value("WIDGET_SHOW_REPLAY", WIDGET_SHOW_REPLAY) // trs.hofwarn
+
 		.value("NUM_WIDGET_TYPES", NUM_WIDGET_TYPES)
 		;
 

@@ -573,6 +573,8 @@ enum WidgetTypes					// Exposed to Python
 	WIDGET_LEADERHEAD_RELATIONS,
 // BUG - Leaderhead Relations - end
 
+	WIDGET_SHOW_REPLAY, // trs.hofwarn
+
 #ifdef _USRDLL
 	NUM_WIDGET_TYPES
 #endif

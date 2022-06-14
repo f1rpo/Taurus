@@ -318,8 +318,16 @@ class CvHallOfFameScreen:
 		for i in range(len(self.infoList)):
 		
 			szButtonName = self.REPLAY_BUTTON_ID + str(i)
+			# <trs.hofwarn> (from AdvCiv) So that the DLL can warn about the (unfixed) bug
+			# that prevents replays at the bottom of the list from being opened.
+			data1 = 0
+			if i > 22:
+				data1 = 1 # </trs.hofwarn>
 			screen.setButtonGFC(szButtonName, self.infoList[i][1], "",
-				0, 0, 10, 10, WidgetTypes.WIDGET_GENERAL, -1, -1, ButtonStyles.BUTTON_STYLE_STANDARD)
+					0, 0, 10, 10,
+					#WidgetTypes.WIDGET_GENERAL, -1, -1,
+					WidgetTypes.WIDGET_SHOW_REPLAY, data1, -1, # trs.hofwarn
+					ButtonStyles.BUTTON_STYLE_STANDARD)
 		
 			screen.appendTableRow(self.TABLE_ID)
 			screen.setTableText(self.TABLE_ID, 1, i, self.infoList[i][1], "", WidgetTypes.WIDGET_GENERAL, -1, -1, CvUtil.FONT_LEFT_JUSTIFY)
