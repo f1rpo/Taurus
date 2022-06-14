@@ -12990,7 +12990,7 @@ bool CvUnit::shouldShowFoundBorders() const
 
 void CvUnit::cheat(bool bCtrl, bool bAlt, bool bShift)
 {
-	if (gDLL->getChtLvl() > 0)
+	if (GC.getGame().isDebugMode()) // trs.cheats: was getChtLvl
 	{
 		if (bCtrl)
 		{

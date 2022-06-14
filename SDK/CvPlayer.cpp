@@ -21793,7 +21793,7 @@ void CvPlayer::getCultureLayerColors(std::vector<NiColorA>& aColors, std::vector
 
 void CvPlayer::cheat(bool bCtrl, bool bAlt, bool bShift)
 {
-	if (gDLL->getChtLvl() > 0)
+	if (GC.getGame().isDebugMode()) // trs.cheats: was getChtLvl
 	{
 		GET_TEAM(getTeam()).setHasTech(getCurrentResearch(), true, getID(), true, false);
 	}

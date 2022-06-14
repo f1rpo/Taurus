@@ -592,7 +592,7 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szString, const CvUnit* pUnit, 
 			szString.append(szTempBuffer);
 		}
 	}
-    if (bAlt && (gDLL->getChtLvl() > 0))
+    if (bAlt && GC.getGame().isDebugMode()) // trs.cheats: was getChtLvl
     {
 		CvSelectionGroup* eGroup = pUnit->getGroup();
 		if (eGroup != NULL)
@@ -1192,7 +1192,7 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szString, const CvUnit* pUnit, 
 			szString.append(pUnit->getUnitInfo().getHelp());
 		}
 
-        if (bShift && (gDLL->getChtLvl() > 0))
+        if (bShift && GC.getGame().isDebugMode()) // trs.cheats: was getChtLvl
         {
             szTempBuffer.Format(L"\nUnitAI Type = %s.", GC.getUnitAIInfo(pUnit->AI_getUnitAIType()).getDescription());
             szString.append(szTempBuffer);
@@ -1210,7 +1210,7 @@ void CvGameTextMgr::setPlotListHelp(CvWStringBuffer &szString, CvPlot* pPlot, bo
 	int numPromotionInfos = GC.getNumPromotionInfos();
 	
 	// if cheatmode and ctrl, display grouping info instead
-	if ((gDLL->getChtLvl() > 0) && gDLL->ctrlKey())
+	if (GC.getGame().isDebugMode() && gDLL->ctrlKey()) // trs.cheats: was getChtLvl
 	{
 		if (pPlot->isVisible(GC.getGameINLINE().getActiveTeam(), GC.getGameINLINE().isDebugMode()))
 		{
@@ -3685,7 +3685,7 @@ It is fine for a human player mouse-over (which is what it is used for).
 /** ADVANCED COMBAT ODDS                      3/11/09                           PieceOfMind      */
 /** END                                                                         v2.0             */
 /*************************************************************************************************/
-			if ((gDLL->getChtLvl() > 0))
+			if (GC.getGame().isDebugMode()) // trs.cheats: was getChtLvl
 			{
 				szTempBuffer.Format(L"\nStack Compare Value = %d",
 					gDLL->getInterfaceIFace()->getSelectionList()->AI_compareStacks(pPlot, false));
@@ -3762,7 +3762,7 @@ void CvGameTextMgr::setPlotHelp(CvWStringBuffer& szString, CvPlot* pPlot)
 	bAlt = gDLL->altKey();
 	bCtrl = gDLL->ctrlKey();
 	
-	if (bCtrl && (gDLL->getChtLvl() > 0))
+	if (bCtrl && GC.getGame().isDebugMode()) // trs.cheats: was getChtLvl
 	{
 		if (bShift && pPlot->headUnitNode() != NULL)
 		{
@@ -3855,7 +3855,7 @@ void CvGameTextMgr::setPlotHelp(CvWStringBuffer& szString, CvPlot* pPlot)
 		}
 		return;	
 	}
-	else if (bShift && !bAlt && (gDLL->getChtLvl() > 0))
+	else if (bShift && !bAlt && GC.getGame().isDebugMode()) // trs.cheats: was getChtLvl
 	{
 		szString.append(GC.getTerrainInfo(pPlot->getTerrainType()).getDescription());
 
@@ -3987,7 +3987,7 @@ void CvGameTextMgr::setPlotHelp(CvWStringBuffer& szString, CvPlot* pPlot)
 			}			
 		}
 	}
-	else if (!bShift && bAlt && (gDLL->getChtLvl() > 0))
+	else if (!bShift && bAlt && GC.getGame().isDebugMode()) // trs.cheats: was getChtLvl
 	{
 	    if (pPlot->isOwned())
 	    {
@@ -4228,7 +4228,7 @@ void CvGameTextMgr::setPlotHelp(CvWStringBuffer& szString, CvPlot* pPlot)
             }
         }
 	}
-	else if (bShift && bAlt && (gDLL->getChtLvl() > 0))
+	else if (bShift && bAlt && GC.getGame().isDebugMode()) // trs.cheats: was getChtLvl
 	{
 		CvCity*	pCity = pPlot->getWorkingCity();
 		if (pCity != NULL)
@@ -7241,7 +7241,7 @@ void CvGameTextMgr::setTechTradeHelp(CvWStringBuffer &szBuffer, TechTypes eTech,
 	
 	// show debug info if cheat level > 0 and alt down
 	bool bAlt = gDLL->altKey();
-    if (bAlt && (gDLL->getChtLvl() > 0))
+    if (bAlt && GC.getGame().isDebugMode()) // trs.cheats: was getChtLvl
     {
 		szBuffer.clear();
 		
@@ -8929,7 +8929,7 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szBuffer, UnitTypes eUnit, bool
 	
 	if (pCity != NULL)
 	{
-		if ((gDLL->getChtLvl() > 0) && gDLL->ctrlKey())
+		if (GC.getGame().isDebugMode() && gDLL->ctrlKey()) // trs.cheats: was getChtLvl
 		{
 			szBuffer.append(NEWLINE);
 			for (int iUnitAI = 0; iUnitAI < NUM_UNITAI_TYPES; iUnitAI++)
@@ -10316,7 +10316,7 @@ void CvGameTextMgr::setBuildingHelpActual(CvWStringBuffer &szBuffer, BuildingTyp
 			}
 		}
 		
-		if ((gDLL->getChtLvl() > 0) && gDLL->ctrlKey() && (pCity != NULL))
+		if (GC.getGame().isDebugMode() && gDLL->ctrlKey() && (pCity != NULL)) // trs.cheats: was getChtLvl
 		{
 			int iBuildingValue = pCity->AI_buildingValue(eBuilding);
 			szBuffer.append(CvWString::format(L"\nAI Building Value = %d", iBuildingValue));
