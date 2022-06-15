@@ -157,6 +157,7 @@ public:
 	CvInitCore const& getInitCore() const { return *m_initCore; } // trs.modname
 	DllExport CvInitCore& getLoadedInitCore();
 	DllExport CvInitCore& getIniInitCore();
+	bool isCheatCodeEntered() const { return m_bChipotle; } // trs.lma
 	DllExport CvMessageCodeTranslator& getMessageCodes();
 	DllExport CvStatsReporter& getStatsReporter();
 	DllExport CvStatsReporter* getStatsReporterPtr();
@@ -926,6 +927,7 @@ protected:
 	bool m_bRandLogging;
 	bool m_bSynchLogging;
 	bool m_bOverwriteLogs;
+	bool m_bChipotle; // trs.lma
 	NiPoint3  m_pt3CameraDir;
 	int m_iNewPlayers;
 

@@ -2057,12 +2057,14 @@ void CvInitCore::read(FDataStreamBase* pStream)
 		but, at least for RESPECT_LOCKED_ASSETS=1 (i.e. the EXE applies the
 		check only to Taurus saves), we don't want the option to be carried
 		over when we save a previously imported save.) */
-	if (!bTaurusSave && GC.getDefineINT("RESPECT_LOCKED_ASSETS") < 2)
+	if (!bTaurusSave && getOption(GAMEOPTION_LOCK_MODS) &&
+		GC.getDefineINT("RESPECT_LOCKED_ASSETS") < 2)
 	{
+		FAssert(!getGameMultiplayer()); // Locked Assets shouldn't be possible in MP
+		/*	(We also want to clear the admin pw, but doing so at this point causes
+			a crash in the EXE; we'll do it in CvGame::updateTestEndTurn, when
+			initialization is complete.) */
 		setOption(GAMEOPTION_LOCK_MODS, false);
-		/*	Lock Assets also generates a (32-character) admin password.
-			Let's keep this consistent with the game option. */
-		m_szAdminPassword = "";
 	} // </trs.lma>
 	pStream->Read(NUM_MPOPTION_TYPES, m_abMPOptions);
 

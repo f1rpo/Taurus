@@ -106,6 +106,7 @@ m_bGraphicsInitialized(false),
 m_bLogging(false),
 m_bRandLogging(false),
 m_bOverwriteLogs(false),
+m_bChipotle(false), // trs.lma
 m_bSynchLogging(false),
 m_bDLLProfiler(false),
 m_pkMainMenu(NULL),
@@ -2679,6 +2680,11 @@ void CvGlobals::cacheGlobals()
 	m_iUSE_ON_UPDATE_CALLBACK = getDefineINT("USE_ON_UPDATE_CALLBACK");
 	m_iUSE_ON_UNIT_CREATED_CALLBACK = getDefineINT("USE_ON_UNIT_CREATED_CALLBACK");
 	m_iUSE_ON_UNIT_LOST_CALLBACK = getDefineINT("USE_ON_UNIT_LOST_CALLBACK");
+
+	/*	trs.lma: The EXE will set this to 0 when loading a savegame with
+		Locked Assets. At that point, we won't know whether the cheat code
+		has been entered - unless we store that info ourselves. */
+	m_bChipotle = (m_bChipotle || m_pDLL->getChtLvl() > 0);
 }
 
 // trs.modname: Separate function for external calls

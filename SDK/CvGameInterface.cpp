@@ -646,6 +646,17 @@ void CvGame::updateSelectionList()
 
 void CvGame::updateTestEndTurn()
 {
+	// <trs.lma> Can't do this right away in CvInitCore::read (crashes the EXE)
+	if (!isOption(GAMEOPTION_LOCK_MODS) && GC.isCheatCodeEntered() &&
+		!isGameMultiPlayer() && !GC.getInitCore().getAdminPassword().empty())
+	{
+		GC.getInitCore().setAdminPassword("");
+		// Un-zero the cheat level
+		gDLL->setChtLvl(1);
+		// The EXE checks m_szAdminPassword, CvGame::isGameMultiPlayer.
+		FAssert(gDLL->getChtLvl() > 0);
+	} // </trs.lma>
+
 	bool bAny;
 
 	bAny = ((gDLL->getInterfaceIFace()->getHeadSelectedUnit() != NULL) && !(GET_PLAYER(getActivePlayer()).isOption(PLAYEROPTION_NO_UNIT_CYCLING)));
