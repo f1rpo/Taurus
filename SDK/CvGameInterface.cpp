@@ -1684,7 +1684,8 @@ bool CvGame::canDoControl(ControlTypes eControl) const
 		break;
 
 	case CONTROL_WORLD_BUILDER:
-		if (!(isGameMultiPlayer()) && GC.getInitCore().getAdminPassword().empty() && !gDLL->getInterfaceIFace()->isInAdvancedStart())
+		//if (!(isGameMultiPlayer()) && GC.getInitCore().getAdminPassword().empty() && !gDLL->getInterfaceIFace()->isInAdvancedStart())
+		if (isDebugToolsAllowed(true)) // trs.cheats
 		{
 			return true;
 		}
@@ -2121,7 +2122,10 @@ void CvGame::doControl(ControlTypes eControl)
 	case CONTROL_WORLD_BUILDER:
 		if (GC.getInitCore().getAdminPassword().empty())
 		{
+			// trs.cheats: Work around MP check in the EXE
+			m_bFeignSP = isHotSeat();
 			gDLL->getInterfaceIFace()->setWorldBuilder(!(gDLL->GetWorldBuilderMode()));
+			m_bFeignSP = false; // trs.cheats
 		}
 		else
 		{

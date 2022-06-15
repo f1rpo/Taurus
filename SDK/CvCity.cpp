@@ -157,7 +157,8 @@ void CvCity::init(int iID, PlayerTypes eOwner, int iX, int iY, bool bBumpUnits, 
 	// Log this event
 	if (GC.getLogging())
 	{
-		if (gDLL->getChtLvl() > 0)
+		if (//gDLL->getChtLvl() > 0
+			GC.isLogging()) // trs.cheats (Staging Room will warn about logging in MP)
 		{
 			TCHAR szOut[1024];
 			sprintf(szOut, "Player %d City %d built at %d:%d\n", eOwner, iID, iX, iY);

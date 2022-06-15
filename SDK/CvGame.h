@@ -270,6 +270,7 @@ public:
 	DllExport bool isDebugMode() const;																			// Exposed to Python
 	DllExport void toggleDebugMode();																				// Exposed to Python
 	DllExport void updateDebugModeCache();
+	bool isDebugToolsAllowed(bool bWB = false) const; // trs.cheats
 
 	DllExport int getPitbossTurnTime() const;																			// Exposed to Python
 	DllExport void setPitbossTurnTime(int iHours);																			// Exposed to Python
@@ -594,6 +595,7 @@ protected:
 	bool m_bCircumnavigated;
 	bool m_bDebugMode;
 	bool m_bDebugModeCache;
+	bool m_bFeignSP; // trs.cheats
 	bool m_bFinalInitialized;
 	bool m_bPbemTurnSent;
 	bool m_bHotPbemBetweenTurns;

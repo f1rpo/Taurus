@@ -116,4 +116,11 @@
         <iDefineIntVal>1</iDefineIntVal>
     </Define>
 
+	<!-- trs.cheats: If set to 1, Debug mode, WorldBuilder and developer tools
+		 can be used in Hot Seat multiplayer games. -->
+	<Define>
+		<DefineName>ALLOW_DEV_TOOLS_IN_HOTSEAT</DefineName>
+        <iDefineIntVal>0</iDefineIntVal>
+    </Define>
+
 </Civ4Defines>

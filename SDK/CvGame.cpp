@@ -479,6 +479,7 @@ void CvGame::reset(HandicapTypes eHandicap, bool bConstructorCall)
 	m_bCircumnavigated = false;
 	m_bDebugMode = false;
 	m_bDebugModeCache = false;
+	m_bFeignSP = false; // trs.cheats
 	m_bFinalInitialized = false;
 	m_bPbemTurnSent = false;
 	m_bHotPbemBetweenTurns = false;
@@ -3267,7 +3268,9 @@ bool CvGame::isNetworkMultiPlayer() const
 
 
 bool CvGame::isGameMultiPlayer() const																 
-{
+{	// <trs.cheats>
+	if (m_bFeignSP)
+		return false; // </trs.cheats>
 	return (isNetworkMultiPlayer() || isPbem() || isHotSeat());
 }
 
@@ -4372,6 +4375,9 @@ bool CvGame::isDebugMode() const
 
 void CvGame::toggleDebugMode()
 {
+	// <trs.cheats>
+	if (!m_bDebugMode && !isDebugToolsAllowed())
+		return; // </trs.cheats>
 	m_bDebugMode = ((m_bDebugMode) ? false : true);
 	updateDebugModeCache();
 
@@ -4403,14 +4409,27 @@ void CvGame::toggleDebugMode()
 
 void CvGame::updateDebugModeCache()
 {
-	if ((gDLL->getChtLvl() > 0) || (gDLL->GetWorldBuilderMode()))
-	{
+	//if ((gDLL->getChtLvl() > 0) || (gDLL->GetWorldBuilderMode()))
+	if (isDebugToolsAllowed()) // trs.cheats
 		m_bDebugModeCache = m_bDebugMode;
-	}
-	else
-	{
-		m_bDebugModeCache = false;
-	}
+	else m_bDebugModeCache = false;
+}
+
+/*	trs.cheats (from AdvCiv):
+	(bWB=true means that only access to the WorldBuilder is checked) */
+bool CvGame::isDebugToolsAllowed(bool bWB) const
+{
+	if (gDLL->getInterfaceIFace()->isInAdvancedStart())
+		return false;
+	if (gDLL->GetWorldBuilderMode())
+		return true;
+	if (isHotSeat() && GC.getDefineBOOL("ALLOW_DEV_TOOLS_IN_HOTSEAT"))
+		return true;
+	if (isGameMultiPlayer())
+		return false;
+	if (bWB)
+		return GC.getInitCore().getAdminPassword().empty();
+	return (gDLL->getChtLvl() > 0);
 }
 
 int CvGame::getPitbossTurnTime() const

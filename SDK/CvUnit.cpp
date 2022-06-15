@@ -9299,7 +9299,8 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 	// OOS!! Temporary for Out-of-Sync madness debugging...
 	if (GC.getLogging())
 	{
-		if (gDLL->getChtLvl() > 0)
+		//if (gDLL->getChtLvl() > 0)
+		if (GC.isLogging()) // trs.cheats
 		{
 			char szOut[1024];
 			sprintf(szOut, "Player %d Unit %d (%S's %S) moving from %d:%d to %d:%d\n", getOwnerINLINE(), getID(), GET_PLAYER(getOwnerINLINE()).getNameKey(), getName().GetCString(), getX_INLINE(), getY_INLINE(), iX, iY);
@@ -10918,7 +10919,8 @@ void CvUnit::setCombatUnit(CvUnit* pCombatUnit, bool bAttacking)
 		{
 			if (GC.getLogging())
 			{
-				if (gDLL->getChtLvl() > 0)
+				//if (gDLL->getChtLvl() > 0)
+				if (GC.isLogging()) // trs.cheats
 				{
 					// Log info about this combat...
 					char szOut[1024];

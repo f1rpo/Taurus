@@ -200,6 +200,7 @@ public:
 	DllExport bool& getRandLogging();
 	DllExport bool& getSynchLogging();
 	DllExport bool& overwriteLogs();
+	bool isLogging() const { return m_bLogging; } // trs.cheats (const getter)
 
 	DllExport int* getPlotDirectionX();
 	DllExport int* getPlotDirectionY();

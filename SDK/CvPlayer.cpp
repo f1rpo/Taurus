@@ -9897,7 +9897,8 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 		{
 			if (GC.getLogging())
 			{
-				if (gDLL->getChtLvl() > 0)
+				//if (gDLL->getChtLvl() > 0)
+				if (GC.isLogging()) // trs.cheats
 				{
 					TCHAR szOut[1024];
 					sprintf(szOut, "Player %d Turn ON\n", getID());
@@ -9979,7 +9980,8 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 		{
 			if (GC.getLogging())
 			{
-				if (gDLL->getChtLvl() > 0)
+				//if (gDLL->getChtLvl() > 0)
+				if (GC.isLogging()) // trs.cheats
 				{
 					TCHAR szOut[1024];
 					sprintf(szOut, "Player %d Turn OFF\n", getID());

@@ -41,4 +41,7 @@
 	<!-- trs.modname (Ctrl-Alt is taken by Group Save) -->
 	<shortcut key="Ctrl Shift S" module="Taurus" function="exportSaveGame"/>
 
+	<!-- trs.cheats -->
+	<shortcut key="Ctrl Z" module="Taurus" function="toggleDebugMode"/>
+
 </mod>
