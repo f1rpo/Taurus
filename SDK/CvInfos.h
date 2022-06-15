@@ -5746,12 +5746,16 @@ public:
 
 	DllExport bool getDefault() const;
 	DllExport bool getVisible() const;
+	// <trs.lma>
+	void setVisible(bool b);
+	bool getVisibleXML() const; // </trs.lma>
 
 	bool read(CvXMLLoadUtility* pXML);
 
 private:
 	bool m_bDefault;
 	bool m_bVisible;
+	bool m_bVisibleXML; // trs.lma
 };
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

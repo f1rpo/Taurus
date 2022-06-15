@@ -19808,7 +19808,8 @@ bool CvTutorialInfo::read(CvXMLLoadUtility* pXML)
 //
 CvGameOptionInfo::CvGameOptionInfo() :
 m_bDefault(false),
-m_bVisible(true)
+m_bVisible(true),
+m_bVisibleXML(true) // trs.lma
 {
 }
 
@@ -19825,6 +19826,17 @@ bool CvGameOptionInfo::getVisible() const
 { 
 	return m_bVisible;
 }
+
+// <trs.lma> (from AdvCiv)
+void CvGameOptionInfo::setVisible(bool b)
+{
+	m_bVisible = b;
+}
+
+bool CvGameOptionInfo::getVisibleXML() const
+{
+	return m_bVisibleXML;
+} // </trs.lma>
 
 bool CvGameOptionInfo::read(CvXMLLoadUtility* pXML)
 {

@@ -250,6 +250,20 @@ bool CvInitCore::getSavedGame() const
 	}
 }
 
+// trs.lma: from Civ4Col
+bool CvInitCore::getScenario() const
+{
+	switch(m_eType)
+	{
+	case GAME_SP_SCENARIO:
+	case GAME_MP_SCENARIO:
+	case GAME_HOTSEAT_SCENARIO:
+	case GAME_PBEM_SCENARIO:
+		return true;
+	}
+	return false;
+}
+
 bool CvInitCore::getPitboss() const
 {
 	return (getMode() == GAMEMODE_PITBOSS);
@@ -629,7 +643,13 @@ void CvInitCore::resetGame(CvInitCore * pSource, bool bClear, bool bSaveGameType
 		// Standard game options
 		for (int i = 0; i < NUM_GAMEOPTION_TYPES; ++i)
 		{
-			setOption((GameOptionTypes)i, pSource->getOption((GameOptionTypes)i));
+			GameOptionTypes eLoopGameOption = (GameOptionTypes)i;
+			bool b = pSource->getOption(eLoopGameOption);
+			// <trs.safety> (from Kek-Mod)
+			CvGameOptionInfo const& kLoopGameOption = GC.getGameOptionInfo(eLoopGameOption);
+			if (!kLoopGameOption.getVisible())
+				b = kLoopGameOption.getDefault(); // </trs.safety>
+			setOption(eLoopGameOption, b);
 		}
 
 		for (int i = 0; i < NUM_MPOPTION_TYPES; ++i)
@@ -1192,21 +1212,38 @@ void CvInitCore::setActivePlayer(PlayerTypes eActivePlayer)
 
 void CvInitCore::setType(GameType eType)
 {
-	if (getType() != eType)
+	if (getType() == eType)
+		return;
+	m_eType = eType;
+	/*	<trs.lma> (from AdvCiv) Hide Locked Assets from Staging Room screen.
+		And also hide some other game options that don't actually work for
+		every game type. */
+	CvGameOptionInfo& kPermWarPeace = GC.getGameOptionInfo(
+			GAMEOPTION_NO_CHANGING_WAR_PEACE);
+	if (!getScenario())
+		kPermWarPeace.setVisible(false);
+	else kPermWarPeace.setVisible(kPermWarPeace.getVisibleXML());
+	GameOptionTypes aeHideMP[] = {
+		GAMEOPTION_LOCK_MODS,
+		GAMEOPTION_NEW_RANDOM_SEED,
+	};
+	for (int i = 0; i < ARRAYSIZE(aeHideMP); i++)
 	{
-		m_eType = eType;
-
-		if(CvPlayerAI::areStaticsInitialized())
+		CvGameOptionInfo& kOption = GC.getGameOptionInfo(aeHideMP[i]);
+		if (getGameMultiplayer())
+			kOption.setVisible(false);
+		else kOption.setVisible(kOption.getVisibleXML());
+	} // </trs.lma>
+	if (CvPlayerAI::areStaticsInitialized())
+	{
+		for (int i = 0; i < MAX_PLAYERS; ++i)
 		{
-			for (int i = 0; i < MAX_PLAYERS; ++i)
-			{
-				GET_PLAYER((PlayerTypes)i).updateHuman();
-			}
+			GET_PLAYER((PlayerTypes)i).updateHuman();
 		}
-		// <trs.bat> Cleaner to reset this in a new game
-		if (GC.isModNameKnown())
-			GC.getModName().setBATImport(false); // </trs.bat>
 	}
+	// <trs.bat> Cleaner to reset this in a new game
+	if (GC.isModNameKnown())
+		GC.getModName().setBATImport(false); // </trs.bat>
 }
 
 void CvInitCore::setType(const CvWString & szType)

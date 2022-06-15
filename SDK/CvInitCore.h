@@ -42,6 +42,7 @@ public:
 	DllExport bool getNewGame() const;
 	DllExport bool getSavedGame() const;
 	DllExport bool getGameMultiplayer() const { return (getMultiplayer() || getPitboss() || getPbem() || getHotseat()); }
+	bool getScenario() const; // trs.lma
 
 	DllExport bool getPitboss() const;
 	DllExport bool getHotseat() const;
