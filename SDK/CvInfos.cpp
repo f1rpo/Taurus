@@ -41,6 +41,7 @@ CvInfoBase::~CvInfoBase()
 {
 }
 
+#ifdef _XML_FILE_CACHE
 void CvInfoBase::read(FDataStreamBase* pStream)
 {
 	reset();
@@ -64,6 +65,7 @@ void CvInfoBase::write(FDataStreamBase* pStream)
 	pStream->WriteString(m_szButton);
 	pStream->WriteString(m_szTextKey);
 }
+#endif
 
 void CvInfoBase::reset()
 {
@@ -399,6 +401,7 @@ bool CvHotkeyInfo::read(CvXMLLoadUtility* pXML)
 	return true;
 }
 
+#ifdef _XML_FILE_CACHE
 void CvHotkeyInfo::read(FDataStreamBase* pStream)
 {
 	CvInfoBase::read(pStream);
@@ -446,6 +449,7 @@ void CvHotkeyInfo::write(FDataStreamBase* pStream)
 	pStream->WriteString(m_szHotKeyAltDescriptionKey);
 	pStream->WriteString(m_szHotKeyString);
 }
+#endif
 
 int CvHotkeyInfo::getActionInfoIndex() const
 {
@@ -744,6 +748,7 @@ void CvDiplomacyResponse::setDiplomacyText(int i, CvString szText)
 	m_paszDiplomacyText[i] = szText;
 }
 
+#ifdef _XML_FILE_CACHE
 void CvDiplomacyResponse::read(FDataStreamBase* stream)
 {
 	uint uiFlag=0;
@@ -785,6 +790,7 @@ void CvDiplomacyResponse::write(FDataStreamBase* stream)
 	stream->Write(NUM_DIPLOMACYPOWER_TYPES, m_pbDiplomacyPowerTypes);
 	stream->WriteString(m_iNumDiplomacyText, m_paszDiplomacyText);
 }
+#endif
 
 bool CvDiplomacyResponse::read(CvXMLLoadUtility* pXML)
 {
@@ -1284,6 +1290,7 @@ bool CvTechInfo::isTerrainTrade(int i) const
 	return m_pbTerrainTrade ? m_pbTerrainTrade[i] : false;
 }
 
+#ifdef _XML_FILE_CACHE
 void CvTechInfo::read(FDataStreamBase* stream)
 {
 	CvInfoBase::read(stream);
@@ -1414,6 +1421,7 @@ void CvTechInfo::write(FDataStreamBase* stream)
 	stream->WriteString(m_szSound);
 	stream->WriteString(m_szSoundMP);
 }
+#endif
 
 bool CvTechInfo::read(CvXMLLoadUtility* pXML)
 {
@@ -1958,6 +1966,7 @@ bool CvPromotionInfo::getUnitCombat(int i) const
 	return m_pbUnitCombat ? m_pbUnitCombat[i] : false;
 }
 
+#ifdef _XML_FILE_CACHE
 void CvPromotionInfo::read(FDataStreamBase* stream)
 {
 	CvHotkeyInfo::read(stream);
@@ -2119,6 +2128,7 @@ void CvPromotionInfo::write(FDataStreamBase* stream)
 	stream->Write(GC.getNumFeatureInfos(), m_pbFeatureDoubleMove);
 	stream->Write(GC.getNumUnitCombatInfos(), m_pbUnitCombat);
 }
+#endif
 
 bool CvPromotionInfo::read(CvXMLLoadUtility* pXML)
 {
@@ -4194,6 +4204,7 @@ const CvArtInfoUnit* CvUnitInfo::getArtInfo(int i, EraTypes eEra, UnitArtStyleTy
 	}
 }
 
+#ifdef _XML_FILE_CACHE
 void CvUnitInfo::read(FDataStreamBase* stream)
 {
 	CvHotkeyInfo::read(stream);
@@ -4674,6 +4685,7 @@ void CvUnitInfo::write(FDataStreamBase* stream)
 
 	stream->WriteString(m_szFormationType);
 }
+#endif
 
 //
 // read from xml
@@ -5752,6 +5764,7 @@ int CvCivicInfo::getImprovementYieldChanges(int i, int j) const
 	return m_ppiImprovementYieldChanges[i][j];
 }
 
+#ifdef _XML_FILE_CACHE
 void CvCivicInfo::read(FDataStreamBase* stream)
 {
 	CvInfoBase::read(stream);
@@ -5950,6 +5963,7 @@ void CvCivicInfo::write(FDataStreamBase* stream)
 
 	stream->WriteString(m_szWeLoveTheKingKey);
 }
+#endif
 
 bool CvCivicInfo::read(CvXMLLoadUtility* pXML)
 {
@@ -6236,6 +6250,7 @@ const TCHAR* CvDiplomacyInfo::getDiplomacyText(int i, int j) const
 	return m_pResponses[i]->getDiplomacyText(j);
 }
 
+#ifdef _XML_FILE_CACHE
 void CvDiplomacyInfo::read(FDataStreamBase* stream)
 {
 	CvInfoBase::read(stream);
@@ -6274,6 +6289,7 @@ void CvDiplomacyInfo::write(FDataStreamBase* stream)
 		m_pResponses[uiIndex]->write(stream);
 	}
 }
+#endif
 
 bool CvDiplomacyInfo::read(CvXMLLoadUtility* pXML)
 {
@@ -7659,6 +7675,7 @@ const TCHAR* CvBuildingInfo::getMovie() const
 //
 // serialization
 //
+#ifdef _XML_FILE_CACHE
 void CvBuildingInfo::read(FDataStreamBase* stream)
 {
 	CvHotkeyInfo::read(stream);
@@ -8179,6 +8196,7 @@ void CvBuildingInfo::write(FDataStreamBase* stream)
 		stream->Write(NUM_YIELD_TYPES, m_ppaiBonusYieldModifier[i]);
 	}
 }
+#endif
 
 //
 // read from XML
@@ -9464,6 +9482,7 @@ void CvCivilizationInfo::setDerivativeCiv(int iCiv)
 	m_iDerivativeCiv = iCiv;
 }
 
+#ifdef _XML_FILE_CACHE
 void CvCivilizationInfo::read(FDataStreamBase* stream)
 {
 	CvInfoBase::read(stream);
@@ -9561,6 +9580,7 @@ void CvCivilizationInfo::write(FDataStreamBase* stream)
 	stream->Write(GC.getNumTechInfos(), m_pbCivilizationDisableTechs);
 	stream->WriteString(m_iNumCityNames, m_paszCityNames);
 }
+#endif
 
 bool CvCivilizationInfo::read(CvXMLLoadUtility* pXML)
 {
@@ -10383,6 +10403,7 @@ int CvHandicapInfo::isAIFreeTechs(int i) const
 	return m_pbAIFreeTechs[i];
 }
 
+#ifdef _XML_FILE_CACHE
 void CvHandicapInfo::read(FDataStreamBase* stream)
 {
 	CvInfoBase::read(stream);
@@ -10542,6 +10563,7 @@ void CvHandicapInfo::write(FDataStreamBase* stream)
 	stream->Write(GC.getNumTechInfos(), m_pbFreeTechs);
 	stream->Write(GC.getNumTechInfos(), m_pbAIFreeTechs);
 }
+#endif
 
 bool CvHandicapInfo::read(CvXMLLoadUtility* pXML)
 {
@@ -11452,6 +11474,7 @@ int CvImprovementBonusInfo::getYieldChange(int i) const
 	return m_piYieldChange ? m_piYieldChange[i] : -1;
 }
 
+#ifdef _XML_FILE_CACHE
 void CvImprovementBonusInfo::read(FDataStreamBase* stream)
 {
 	CvInfoBase::read(stream);
@@ -11487,6 +11510,7 @@ void CvImprovementBonusInfo::write(FDataStreamBase* stream)
 	
 	stream->Write(NUM_YIELD_TYPES, m_piYieldChange);
 }
+#endif
 
 //======================================================================================================
 //					CvImprovementInfo
@@ -11897,6 +11921,7 @@ void CvArtInfoImprovement::setShaderNIF(const TCHAR* szDesc)
 	m_szShaderNIF = szDesc; 
 }
 
+#ifdef _XML_FILE_CACHE
 void CvImprovementInfo::read(FDataStreamBase* stream)
 {
 	CvInfoBase::read(stream);
@@ -12074,6 +12099,8 @@ void CvImprovementInfo::write(FDataStreamBase* stream)
 		stream->Write(NUM_YIELD_TYPES, m_ppiRouteYieldChanges[i]);
 	}
 }
+#endif
+
 bool CvImprovementInfo::read(CvXMLLoadUtility* pXML)
 {
 	CvString szTextVal;
@@ -12626,6 +12653,7 @@ const TCHAR* CvBonusInfo::getButton() const
 	}
 }
 
+#ifdef _XML_FILE_CACHE
 void CvBonusInfo::read(FDataStreamBase* stream)
 {
 	CvInfoBase::read(stream);
@@ -12737,6 +12765,7 @@ void CvBonusInfo::write(FDataStreamBase* stream)
 	stream->Write(GC.getNumFeatureInfos(), m_pbFeature);
 	stream->Write(GC.getNumTerrainInfos(), m_pbFeatureTerrain);
 }
+#endif
 
 bool CvBonusInfo::read(CvXMLLoadUtility* pXML)
 {
@@ -14449,6 +14478,7 @@ const TCHAR* CvLeaderHeadInfo::getLeaderHead() const
 	}
 }
 
+#ifdef _XML_FILE_CACHE
 void CvLeaderHeadInfo::read(FDataStreamBase* stream)
 {
 	CvInfoBase::read(stream);
@@ -14686,8 +14716,8 @@ void CvLeaderHeadInfo::write(FDataStreamBase* stream)
 	stream->Write(GC.getNumEraInfos(), m_piDiploPeaceMusicScriptIds);
 	stream->Write(GC.getNumEraInfos(), m_piDiploWarIntroMusicScriptIds);
 	stream->Write(GC.getNumEraInfos(), m_piDiploWarMusicScriptIds);
-
 }
+#endif
 
 const CvArtInfoLeaderhead* CvLeaderHeadInfo::getArtInfo() const
 {
@@ -19220,6 +19250,7 @@ const TCHAR* CvDiplomacyTextInfo::getDiplomacyText(int i, int j) const
 	return m_pResponses[i].m_paszDiplomacyText[j]; 
 }
 
+#ifdef _XML_FILE_CACHE
 void CvDiplomacyTextInfo::Response::read(FDataStreamBase* stream)
 {
 	stream->Read(&m_iNumDiplomacyText);
@@ -19291,6 +19322,7 @@ void CvDiplomacyTextInfo::write(FDataStreamBase* stream)
 		m_pResponses[uiIndex].write(stream);
 	}
 }
+#endif
 
 bool CvDiplomacyTextInfo::read(CvXMLLoadUtility* pXML)
 {
@@ -20482,6 +20514,7 @@ const char* CvEventTriggerInfo::getPythonCanDoUnit() const
 	return m_szPythonCanDoUnit;
 }
 
+#ifdef _XML_FILE_CACHE
 void CvEventTriggerInfo::read(FDataStreamBase* stream)
 {
 	int iNumElements;
@@ -20839,6 +20872,7 @@ void CvEventTriggerInfo::write(FDataStreamBase* stream)
 	stream->WriteString(m_szPythonCanDoCity);
 	stream->WriteString(m_szPythonCanDoUnit);
 }
+#endif
 
 bool CvEventTriggerInfo::read(CvXMLLoadUtility* pXML)
 {
@@ -21916,6 +21950,7 @@ const wchar* CvEventInfo::getOtherPlayerPopup() const
 	return m_szOtherPlayerPopup;
 }
 
+#ifdef _XML_FILE_CACHE
 void CvEventInfo::read(FDataStreamBase* stream)
 {
 	CvInfoBase::read(stream);
@@ -22184,6 +22219,7 @@ void CvEventInfo::write(FDataStreamBase* stream)
 	stream->WriteString(m_szPythonCanDo);
 	stream->WriteString(m_szPythonHelp);
 }
+#endif
 
 bool CvEventInfo::read(CvXMLLoadUtility* pXML)
 {

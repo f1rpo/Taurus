@@ -19,8 +19,9 @@
 bool CvXMLLoadUtility::ReadGlobalDefines(const TCHAR* szXMLFileName, CvCacheObject* cache)
 {
 	bool bLoaded = false;	// used to make sure that the xml file was loaded correctly
-
+#ifdef _XML_FILE_CACHE
 	if (!gDLL->cacheRead(cache, szXMLFileName))			// src data file name
+#endif
 	{
 		// load normally
 		if (!CreateFXml())
@@ -133,7 +134,7 @@ bool CvXMLLoadUtility::ReadGlobalDefines(const TCHAR* szXMLFileName, CvCacheObje
 						break;
 					}
 				}
-
+			#ifdef _XML_FILE_CACHE
 				// write global defines info to cache
 				bool bOk = gDLL->cacheWrite(cache);
 				if (!bOk)
@@ -146,17 +147,19 @@ bool CvXMLLoadUtility::ReadGlobalDefines(const TCHAR* szXMLFileName, CvCacheObje
 				{
 					logMsg("Wrote GlobalDefines to cache");
 				}
+			#endif
 			}
 		}
 
 		// delete the pointer to the FXml variable
 		gDLL->getXMLIFace()->DestroyFXml(m_pFXml);
 	}
+#ifdef _XML_FILE_CACHE
 	else
 	{
 		logMsg("Read GobalDefines from cache");
 	}
-
+#endif
 	return true;
 }
 
@@ -177,9 +180,10 @@ bool CvXMLLoadUtility::SetGlobalDefines()
 	// use disk cache if possible.
 	// if no cache or cache is older than xml file, use xml file like normal, else read from cache
 	//
-
-	CvCacheObject* cache = gDLL->createGlobalDefinesCacheObject("GlobalDefines.dat");	// cache file name
-
+	CvCacheObject* cache = NULL;
+#ifdef _XML_FILE_CACHE
+	cache = gDLL->createGlobalDefinesCacheObject("GlobalDefines.dat");	// cache file name
+#endif
 	if (!ReadGlobalDefines("xml\\GlobalDefines.xml", cache))
 	{
 		return false;
@@ -220,8 +224,9 @@ bool CvXMLLoadUtility::SetGlobalDefines()
 		}
 	}
 
-
+#ifdef _XML_FILE_CACHE
 	gDLL->destroyCache(cache);
+#endif
 	////////////////////////////////////////////////////////////////////////
 
 	GC.cacheGlobals();
@@ -517,8 +522,10 @@ bool CvXMLLoadUtility::SetGlobalArtDefines()
 //------------------------------------------------------------------------------------------------------
 bool CvXMLLoadUtility::LoadGlobalText()
 {
+#ifdef _XML_FILE_CACHE
 	CvCacheObject* cache = gDLL->createGlobalTextCacheObject("GlobalText.dat");	// cache file name
 	if (!gDLL->cacheRead(cache))
+#endif
 	{
 		bool bLoaded = false;
 
@@ -623,7 +630,7 @@ bool CvXMLLoadUtility::LoadGlobalText()
 		}
 
 		DestroyFXml();
-
+	#ifdef _XML_FILE_CACHE
 		// write global text info to cache
 		bool bOk = gDLL->cacheWrite(cache);
 		if (!bLoaded)
@@ -636,14 +643,15 @@ bool CvXMLLoadUtility::LoadGlobalText()
 		{
 			logMsg("Wrote GlobalText to cache");
 		}
+	#endif
 	}	// didn't read from cache
+#ifdef _XML_FILE_CACHE
 	else
 	{
 		logMsg("Read GlobalText from cache");
 	}
-
 	gDLL->destroyCache(cache);
-
+#endif
 	return true;
 }
 
@@ -1499,6 +1507,7 @@ void CvXMLLoadUtility::SetDiplomacyInfo(std::vector<CvDiplomacyInfo*>& DiploInfo
 template <class T>
 void CvXMLLoadUtility::LoadGlobalClassInfo(std::vector<T*>& aInfos, const char* szFileRoot, const char* szFileDirectory, const char* szXmlPath, bool bTwoPass, CvCacheObject* (CvDLLUtilityIFaceBase::*pArgFunction) (const TCHAR*))
 {
+#ifdef _XML_FILE_CACHE
 	bool bLoaded = false;
 	bool bWriteCache = true;
 	CvCacheObject* pCache = NULL;
@@ -1518,6 +1527,9 @@ void CvXMLLoadUtility::LoadGlobalClassInfo(std::vector<T*>& aInfos, const char* 
 
 	if (!bLoaded)
 	{
+#else
+	bool // ... bLoaded =
+#endif
 		bLoaded = LoadCivXml(m_pFXml, CvString::format("xml\\%s/%s.xml", szFileDirectory, szFileRoot));
 
 		if (!bLoaded)
@@ -1551,7 +1563,7 @@ void CvXMLLoadUtility::LoadGlobalClassInfo(std::vector<T*>& aInfos, const char* 
 					}
 				}
 			}
-
+		#ifdef _XML_FILE_CACHE
 			if (NULL != pArgFunction && bWriteCache)
 			{
 				// write info to cache
@@ -1567,18 +1579,21 @@ void CvXMLLoadUtility::LoadGlobalClassInfo(std::vector<T*>& aInfos, const char* 
 					logMsg("Wrote %s to cache", szFileDirectory);
 				}
 			}
+		#endif
 		}
+	#ifdef _XML_FILE_CACHE
 	}
-
 	if (NULL != pArgFunction)
 	{
 		gDLL->destroyCache(pCache);
 	}
+	#endif
 }
 
 
 void CvXMLLoadUtility::LoadDiplomacyInfo(std::vector<CvDiplomacyInfo*>& DiploInfos, const char* szFileRoot, const char* szFileDirectory, const char* szXmlPath, CvCacheObject* (CvDLLUtilityIFaceBase::*pArgFunction) (const TCHAR*))
 {
+#ifdef _XML_FILE_CACHE
 	bool bLoaded = false;
 	bool bWriteCache = true;
 	CvCacheObject* pCache = NULL;
@@ -1597,6 +1612,9 @@ void CvXMLLoadUtility::LoadDiplomacyInfo(std::vector<CvDiplomacyInfo*>& DiploInf
 
 	if (!bLoaded)
 	{
+#else
+	bool // bLoaded = ...
+#endif
 		bLoaded = LoadCivXml(m_pFXml, CvString::format("xml\\%s/%s.xml", szFileDirectory, szFileRoot));
 
 		if (!bLoaded)
@@ -1630,7 +1648,7 @@ void CvXMLLoadUtility::LoadDiplomacyInfo(std::vector<CvDiplomacyInfo*>& DiploInf
 					}
 				}
 			}
-
+		#ifdef _XML_FILE_CACHE
 			if (NULL != pArgFunction && bWriteCache)
 			{
 				// write info to cache
@@ -1646,13 +1664,15 @@ void CvXMLLoadUtility::LoadDiplomacyInfo(std::vector<CvDiplomacyInfo*>& DiploInf
 					logMsg("Wrote %s to cache", szFileDirectory);
 				}
 			}
+		#endif
 		}
+#ifdef _XML_FILE_CACHE
 	}
-
 	if (NULL != pArgFunction)
 	{
 		gDLL->destroyCache(pCache);
 	}
+#endif
 }
 
 //
