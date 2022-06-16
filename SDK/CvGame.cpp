@@ -5713,11 +5713,15 @@ void CvGame::doTurn()
 	{
 		changeAIAutoPlay(-1);
 
-		if (getAIAutoPlay() == 0)
+		if (getAIAutoPlay() <= 0) // trs.autoplay: was ==
 		{
 			reviveActivePlayer();
 		}
 	}
+	/*	<trs.autoplay> -1 now used by Python to signal that Auto Play has
+		just ended */
+	else if (getAIAutoPlay() < 0)
+		changeAIAutoPlay(1); // </trs.autoplay>
 
 	CvEventReporter::getInstance().endGameTurn(getGameTurn());
 

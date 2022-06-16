@@ -47,10 +47,18 @@ class AbstractMoreCiv4lertsEvent(object):
 
 	def _addMessage(self, iPlayer, szString, szIcon, iFlashX, iFlashY, bOffArrow, bOnArrow, iColor):
 			#Displays an on-screen message.
+			# <trs.autoplay> No alerts during or right after Auto Play
+			if iPlayer == gc.getGame().getActivePlayer() and (
+					not gc.getPlayer(iPlayer).isHuman() or gc.getGame().getAIAutoPlay() == -1):
+				return # </trs.autoplay>
 			eventMessageTimeLong = gc.getDefineINT("EVENT_MESSAGE_TIME_LONG")
 			CyInterface().addMessage(iPlayer, True, eventMessageTimeLong,
 									 szString, None, 0, szIcon, ColorTypes(iColor),
 									 iFlashX, iFlashY, bOffArrow, bOnArrow)
+
+	# trs.autoplay:
+	def _isSilent(self):
+		return not gc.getPlayer(gc.getGame().getActivePlayer()).isHuman()
 
 class MoreCiv4lertsEvent( AbstractMoreCiv4lertsEvent):
 
@@ -136,11 +144,13 @@ class MoreCiv4lertsEvent( AbstractMoreCiv4lertsEvent):
 	def onBeginActivePlayerTurn(self, argsList):
 		"Called when the active player can start making their moves."
 		iGameTurn = argsList[0]
+		if self._isSilent(): return # trs.autoplay
 		iPlayer = gc.getGame().getActivePlayer()
 		self.CheckForAlerts(iPlayer, PyPlayer(iPlayer).getTeam(), True)
 
 	def OnCityAcquired(self, argsList):
 		owner, playerType, city, bConquest, bTrade = argsList
+		if self._isSilent(): return # trs.autoplay
 		iPlayer = city.getOwner()
 		if (not self.getCheckForDomVictory()): return
 		if (iPlayer == gc.getGame().getActivePlayer()):
@@ -148,6 +158,7 @@ class MoreCiv4lertsEvent( AbstractMoreCiv4lertsEvent):
 
 	def OnCityBuilt(self, argsList):
 		city = argsList[0]
+		if self._isSilent(): return # trs.autoplay
 		iPlayer = city.getOwner()
 		iActivePlayer = gc.getGame().getActivePlayer()
 		if (self.getCheckForDomVictory()):
@@ -169,12 +180,14 @@ class MoreCiv4lertsEvent( AbstractMoreCiv4lertsEvent):
 
 	def OnCityRazed(self, argsList):
 		city, iPlayer = argsList
+		if self._isSilent(): return # trs.autoplay
 		if (not self.getCheckForDomVictory()): return
 		if (iPlayer == gc.getGame().getActivePlayer()):
 			self.CheckForAlerts(iPlayer, PyPlayer(iPlayer).getTeam(), False)
 
 	def OnCityLost(self, argsList):
 		city = argsList[0]
+		if self._isSilent(): return # trs.autoplay
 		iPlayer = city.getOwner()
 		if (not self.getCheckForDomVictory()): return
 		if (iPlayer == gc.getGame().getActivePlayer()):

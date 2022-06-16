@@ -166,8 +166,9 @@
 
 	<!-- trs. -->
 	<load mod="Taurus"/>
-	
-	
+	<!-- trs.autoplay -->
+	<load mod="AIAutoPlay"/>
+
 	<!-- Options Screen -->
 	
 	<screen id="BUGFull">

@@ -149,11 +149,19 @@ def addMessage(iPlayer, szString, szIcon, iFlashX=-1, iFlashY=-1, bOffArrow=Fals
 	
 	Culture:  Zoom to City, Ignore
 	"""
+	# <trs.autoplay> No alerts during or right after Auto Play
+	if iPlayer == gc.getGame().getActivePlayer() and (
+			not gc.getPlayer(iPlayer).isHuman() or gc.getGame().getAIAutoPlay() == -1):
+		return # </trs.autoplay>
 	eventMessageTimeLong = gc.getDefineINT("EVENT_MESSAGE_TIME_LONG")
 	CyInterface().addMessage(iPlayer, True, eventMessageTimeLong,
 							 szString, None, InterfaceMessageTypes.MESSAGE_TYPE_INFO, 
 							 szIcon, ColorTypes(-1),
 							 iFlashX, iFlashY, bOffArrow, bOnArrow)
+
+# trs.autoplay:
+def _isSilent():
+	return not gc.getPlayer(gc.getGame().getActivePlayer()).isHuman()
 
 
 ## Base Alert Class
@@ -209,12 +217,14 @@ class AbstractCityAlertManager(AbstractStatefulAlert):
 	
 	def onCityAcquiredAndKept(self, argsList):
 		iPlayer, city = argsList
+		if _isSilent(): return # trs.autoplay
 		if (iPlayer == gc.getGame().getActivePlayer()):
 			self._resetCity(city)
 	
 	def onCityLost(self, argsList):
 		'City Lost'
 		city = argsList[0]
+		if _isSilent(): return # trs.autoplay
 		iPlayer = gc.getGame().getActivePlayer()
 		if (iPlayer == city.getOwner()):
 			self._discardCity(city)
@@ -257,6 +267,7 @@ class BeginActivePlayerTurnCityAlertManager(AbstractCityAlertManager):
 	
 	def onBeginActivePlayerTurn(self, argsList):
 		"Loops over active player's cities, telling each to perform its check."
+		if _isSilent(): return # trs.autoplay
 		self.checkAllActivePlayerCities()
 
 class EndTurnReadyCityAlertManager(AbstractCityAlertManager):
@@ -270,6 +281,7 @@ class EndTurnReadyCityAlertManager(AbstractCityAlertManager):
 	
 	def onEndTurnReady(self, argsList):
 		"Loops over active player's cities, telling each to perform its check."
+		if _isSilent(): return # trs.autoplay
 		self.checkAllActivePlayerCities()
 
 
@@ -641,18 +653,22 @@ class AbstractCanHurry(AbstractCityTestAlert):
 
 	def onCityBuildingUnit(self, argsList):
 		city, iUnit = argsList
+		if _isSilent(): return # trs.autoplay
 		self._onItemStarted(city)
 
 	def onCityBuildingBuilding(self, argsList):
 		city, iBuilding = argsList
+		if _isSilent(): return # trs.autoplay
 		self._onItemStarted(city)
 
 	def onCityBuildingProject(self, argsList):
 		city, iProject = argsList
+		if _isSilent(): return # trs.autoplay
 		self._onItemStarted(city)
 
 	def onCityBuildingProcess(self, argsList):
 		city, iProcess = argsList
+		if _isSilent(): return # trs.autoplay
 		self._onItemStarted(city)
 
 	def _onItemStarted(self, city):
@@ -740,6 +756,7 @@ class GoldTrade(AbstractStatefulAlert):
 		eventManager.addEventHandler("BeginActivePlayerTurn", self.onBeginActivePlayerTurn)
 
 	def onBeginActivePlayerTurn(self, argsList):
+		if _isSilent(): return # trs.autoplay
 		if (not Civ4lertsOpt.isShowGoldTradeAlert()):
 			return
 		playerID = PlayerUtil.getActivePlayerID()
@@ -778,6 +795,7 @@ class GoldPerTurnTrade(AbstractStatefulAlert):
 		eventManager.addEventHandler("BeginActivePlayerTurn", self.onBeginActivePlayerTurn)
 
 	def onBeginActivePlayerTurn(self, argsList):
+		if _isSilent(): return # trs.autoplay
 		if (not Civ4lertsOpt.isShowGoldPerTurnTradeAlert()):
 			return
 		playerID = PlayerUtil.getActivePlayerID()
@@ -823,18 +841,22 @@ class RefusesToTalk(AbstractStatefulAlert):
 		eventManager.addEventHandler("EmbargoAccepted", self.onEmbargoAccepted)
 
 	def onBeginActivePlayerTurn(self, argsList):
+		if _isSilent(): return # trs.autoplay
 		self.check()
 
 	def onChangeWar(self, argsList):
 		bIsWar, eTeam, eRivalTeam = argsList
+		if _isSilent(): return # trs.autoplay
 		self.checkIfIsAnyOrHasMetAllTeams(eTeam, eRivalTeam)
 		
 	def onCityRazed(self, argsList):
 		city, ePlayer = argsList
+		if _isSilent(): return # trs.autoplay
 		self.checkIfIsAnyOrHasMetAllTeams(PlayerUtil.getPlayerTeamID(city.getOwner()), PlayerUtil.getPlayerTeamID(ePlayer))
 		
 	def onDealCanceled(self, argsList):
 		eOfferPlayer, eTargetPlayer, pTrade = argsList
+		if _isSilent(): return # trs.autoplay
 		# trs.fix: Workaround to avoid out of bounds access in DLL when loading
 		# a savegame from within a game
 		if eOfferPlayer == -1 or eTargetPlayer == -1: return
@@ -842,6 +864,7 @@ class RefusesToTalk(AbstractStatefulAlert):
 		
 	def onEmbargoAccepted(self, argsList):
 		eOfferPlayer, eTargetPlayer, pTrade = argsList
+		if _isSilent(): return # trs.autoplay
 		self.checkIfIsAnyOrHasMetAllTeams(PlayerUtil.getPlayerTeamID(eOfferPlayer), PlayerUtil.getPlayerTeamID(eTargetPlayer))
 	
 	def checkIfIsAnyOrHasMetAllTeams(self, *eTeams):
@@ -895,26 +918,32 @@ class WorstEnemy(AbstractStatefulAlert):
 #		eventManager.addEventHandler("playerChangeStateReligion", self.onPlayerChangeStateReligion)
 
 	def onBeginActivePlayerTurn(self, argsList):
+		if _isSilent(): return # trs.autoplay
 		self.check()
 
 	def onFirstContact(self, argsList):
 		eTeam, eRivalTeam = argsList
+		if _isSilent(): return # trs.autoplay
 		self.checkIfIsAnyOrHasMetAllTeams(eTeam, eRivalTeam)
 
 	def onChangeWar(self, argsList):
 		bIsWar, eTeam, eRivalTeam = argsList
+		if _isSilent(): return # trs.autoplay
 		self.checkIfIsAnyOrHasMetAllTeams(eTeam, eRivalTeam)
 		
 	def onCityRazed(self, argsList):
 		city, ePlayer = argsList
+		if _isSilent(): return # trs.autoplay
 		self.checkIfIsAnyOrHasMetAllTeams(PlayerUtil.getPlayerTeamID(city.getOwner()), PlayerUtil.getPlayerTeamID(ePlayer))
 	
 	def onVassalState(self, argsList):
 		eMaster, eVassal, bVassal = argsList
+		if _isSilent(): return # trs.autoplay
 		self.checkIfIsAnyOrHasMetAllTeams(eMaster, eVassal)
 		
 	def onPlayerChangeStateReligion(self, argsList):
 		ePlayer, eNewReligion, eOldReligion = argsList
+		if _isSilent(): return # trs.autoplay
 		self.checkIfIsAnyOrHasMetAllTeams(PlayerUtil.getPlayerTeamID(ePlayer))
 	
 	def checkIfIsAnyOrHasMetAllTeams(self, *eTeams):

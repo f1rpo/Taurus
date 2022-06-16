@@ -1,8 +1,9 @@
 SOURCE_DIR = ..
 PROJECT_CFLAGS = /W3 /WX /D_MOD_AIAUTOPLAY
 # Further BULL options. Note that MOD_GWARM will break save-compatibility with BtS.
+# And may want to keep the defines here consistent with those in the VS project file.
 #/D_MOD_FRACTRADE /D_MOD_SENTRY /D_MOD_GOVWORKERS /D_MOD_SHAM_SPOILER /D_MOD_GWARM
-# ... and a Taurus option: (Seems that the XML cache is never used for mods)
+# And a Taurus option: (Seems that the XML cache is never used for mods)
 #/D_XML_FILE_CACHE
 # Allow inline expansion of functions with an inline keyword even for debug builds
 PROJECT_LIBS = ../CxImage/lib/Gdi32.Lib ../CxImage/lib/Ole32.Lib
