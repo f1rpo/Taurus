@@ -32,9 +32,13 @@
 #include "CvDLLEngineIFaceBase.h"
 #include "CvDLLPythonIFaceBase.h"
 
-// BUG - start
-#include "BugMod.h"
-// BUG - end
+#include "BugMod.h" // BUG
+// <trs.build> Moved this header
+#include "CxImage/include/ximage.h" // BUG - MapFinder
+// Get rid of definitions in imadef.h
+#undef max
+#undef min
+// </trs.build>
 
 // Public Functions...
 
@@ -9431,8 +9435,6 @@ bool CvGame::pythonIsBonusIgnoreLatitudes() const
 }
 
 // BUG - MapFinder - start
-#include "CxImage/include/ximage.h" // trs.build: Moved this header
-
 // from HOF Mod - Dianthus
 bool CvGame::takeJPEGScreenShot(std::string fileName) const
 {
