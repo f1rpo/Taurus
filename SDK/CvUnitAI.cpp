@@ -117,7 +117,8 @@ bool CvUnitAI::AI_update()
 		return false;
 	}
 
-	if (getGroup()->isAutomated())
+	if (getGroup()->isAutomated()
+		&& isHuman()) // trs.autoplay (from K-Mod)
 	{
 		switch (getGroup()->getAutomateType())
 		{
