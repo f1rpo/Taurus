@@ -14,6 +14,10 @@ def updatePlotIndicatorSize(option, value):
 def exportSaveGame(argsList):
 	gc.getGame().exportSaveGame()
 
+# trs.wcitybars:
+def updateCityBarWidth(option, value):
+	gc.getGame().setCityBarWidth(value)
+
 # trs.cheats (from AdvCiv):
 def toggleDebugMode(argsList=None): 
 	# The built-in shortcut (also Ctrl+Z) in the EXE only works if ChtLvl>0.

@@ -30,6 +30,7 @@ public:
 	void uninit();
 	void reset(int iID = 0, PlayerTypes eOwner = NO_PLAYER, int iX = 0, int iY = 0, bool bConstructorCall = false);
 	void setupGraphical();
+	void reloadEntity(); // trs.wcitybars
 
 	void kill(bool bUpdatePlotGroups);																								// Exposed to Python
 

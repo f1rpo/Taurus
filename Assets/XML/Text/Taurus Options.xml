@@ -34,6 +34,19 @@
 	</TEXT>
 	<!-- trs.balloon: end -->
 
+	<!-- trs.wcitybars: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__WIDECITYBARS_TEXT</Tag>
+		<English>Wide City Bars</English>
+		<German>Verbreitern</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__WIDECITYBARS_HOVER</Tag>
+		<English>When checked, the main map displays wider city bars. Known issue: the right half of the bar can't be moused over.</English>
+		<German>Zeigt extra-breite Fortschritts-Balken auf der Hauptkarte an. (Die rechten Hälften dieser Balken lassen sich nicht anklicken - bekanntes Problem.)</German>
+	</TEXT>
+	<!-- trs.wcitybars: end -->
+
 	<!-- trs.modname: start -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TAURUS__SAVEMODNAME_TEXT</Tag>

@@ -556,6 +556,7 @@ public:
 	DllExport bool shouldCenterMinimap() const;
 	DllExport EndTurnButtonStates getEndTurnState() const;
 
+	void setCityBarWidth(bool bWide); // trs.wcitybars (exposed to Python)
 	DllExport void handleCityScreenPlotPicked(CvCity* pCity, CvPlot* pPlot, bool bAlt, bool bShift, bool bCtrl) const;
 	DllExport void handleCityScreenPlotDoublePicked(CvCity* pCity, CvPlot* pPlot, bool bAlt, bool bShift, bool bCtrl) const;
 	DllExport void handleCityScreenPlotRightPicked(CvCity* pCity, CvPlot* pPlot, bool bAlt, bool bShift, bool bCtrl) const;

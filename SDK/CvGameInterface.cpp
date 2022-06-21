@@ -3059,6 +3059,26 @@ EndTurnButtonStates CvGame::getEndTurnState() const
 	return eNewState;
 }
 
+// trs.wcitybars (from AdvCiv):
+void CvGame::setCityBarWidth(bool bWide)
+{
+	if (ARTFILEMGR.isCityBarPathsSwapped() == bWide)
+		return;
+	ARTFILEMGR.swapCityBarPaths();
+	for (int i = 0; i < MAX_PLAYERS; i++)
+	{
+		CvPlayer const& kPlayer = GET_PLAYER((PlayerTypes)i);
+		if (!kPlayer.isAlive())
+			continue;
+		int iIter;
+		for (CvCity* pCity = kPlayer.firstCity(&iIter); pCity != NULL;
+			pCity = kPlayer.nextCity(&iIter))
+		{
+			pCity->reloadEntity();
+		}
+	}
+}
+
 void CvGame::handleCityScreenPlotPicked(CvCity* pCity, CvPlot* pPlot, bool bAlt, bool bShift, bool bCtrl) const
 {
 	FAssert(pPlot != NULL);

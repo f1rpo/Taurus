@@ -711,6 +711,16 @@ void CvCity::setupGraphical()
 	setLayoutDirty(true);
 }
 
+// trs.wcitybars: Based on CvUnit::reloadEntity
+void CvCity::reloadEntity()
+{
+	FAssert(GC.IsGraphicsInitialized());
+	removeEntity();
+	destroyEntity();
+	CvDLLEntity::createCityEntity(this);
+	setupGraphical();
+}
+
 void CvCity::kill(bool bUpdatePlotGroups)
 {
 	CvPlot* pPlot;

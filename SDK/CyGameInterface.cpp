@@ -272,6 +272,7 @@ void CyGamePythonInterface()
 		.def("takeJPEGScreenShot", &CyGame::takeJPEGScreenShot, "bool takeJPEGScreenShot(string filename)")
 // BUG - MapFinder - end
 		.def("exportSaveGame", &CyGame::exportSaveGame, "void ()") // trs.modname
+		.def("setCityBarWidth", &CyGame::setCityBarWidth, "void (bool bWide)") // trs.wcitybars
 
 // BUG - EXE/DLL Paths - start
 		.def("getDLLPath", &CyGame::getDLLPath, "string getDLLPath()")

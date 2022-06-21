@@ -5,8 +5,8 @@
 	 name="Taurus" author="f1rpo" version="1.0" date="19/05/2022">
  
 	<options id="Taurus" file="Taurus.ini">
-		<section id="Map">
 
+		<section id="Map">
 			<!-- trs.balloon: start -->
 			<!-- (Caveat: The DLL doesn't have access to these ID strings;
 				 the behavior is only based only on the order of the choices.) -->
@@ -28,14 +28,23 @@
 			</list>
 			<!-- trs.balloon: end -->
 
+			<!-- trs.wcitybars -->
+			<option id="WideCityBars" key="Wide City Bars"
+					type="boolean" default="True">
+				<change module="Taurus" function="updateCityBarWidth"/>
+			</option>
+
+		</section>
+		<section id="System">
+
 			<!-- trs.modname -->
 			<option id="SaveModName" key="Save Mod Name"
 					type="boolean" default="True"/>
 			<!-- trs.replayname -->
 			<option id="ModNameInReplays" key="Mod Name In Replays"
 					type="boolean" default="True"/>
-
 		</section>
+
 	</options>
 
 	<!-- trs.modname (Ctrl-Alt is taken by Group Save) -->

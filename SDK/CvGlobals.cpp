@@ -3629,7 +3629,14 @@ int CvGlobals::getMaxCivPlayers() const
 }
 
 bool CvGlobals::IsGraphicsInitialized() const { return m_bGraphicsInitialized;}
-void CvGlobals::SetGraphicsInitialized(bool bVal) { m_bGraphicsInitialized = bVal;}
+void CvGlobals::SetGraphicsInitialized(bool bVal)
+{
+	m_bGraphicsInitialized = bVal;
+	// <trs.wcitybars>
+	if (IsGraphicsInitialized())
+		getGame().setCityBarWidth(getBugOptionBOOL("Taurus__WideCityBars"));
+	// </trs.wcitybars>
+}
 void CvGlobals::setInterface(CvInterface* pVal) { m_interface = pVal; }
 void CvGlobals::setDiplomacyScreen(CvDiplomacyScreen* pVal) { m_diplomacyScreen = pVal; }
 void CvGlobals::setMPDiplomacyScreen(CMPDiplomacyScreen* pVal) { m_mpDiplomacyScreen = pVal; }

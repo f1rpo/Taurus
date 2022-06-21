@@ -64,6 +64,7 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		
 	def createCityBarPanel(self, screen, panel):
 		self.addLabel(screen, panel, "CityBar", "CityBar:")
+		self.addCheckbox(screen, panel, "Taurus__WideCityBars") # trs.wcitybars
 		self.addCheckbox(screen, panel, "CityBar__AirportIcons")
 		self.addCheckbox(screen, panel, "CityBar__StarvationTurns")
 		

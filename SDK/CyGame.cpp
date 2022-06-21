@@ -1201,6 +1201,12 @@ void CyGame::exportSaveGame()
 	m_pGame->exportSaveGame();
 }
 
+// trs.wcitybars:
+void CyGame::setCityBarWidth(bool bWide)
+{
+	m_pGame->setCityBarWidth(bWide);
+}
+
 // BUG - EXE/DLL Paths - start
 std::string CyGame::getDLLPath() const
 {

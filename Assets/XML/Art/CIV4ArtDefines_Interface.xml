@@ -354,6 +354,24 @@
 			<Type>INTERFACE_CITY_BAR_REGULAR_TEXTURE</Type>
 			<Path>Art/Interface/CityBar/CityBar_Circle.tga</Path>
 		</InterfaceArtInfo>
+		<!-- trs.wcitybars: start -->
+		<!-- The DLL will swap these three paths with their narrow
+			 counterparts above when the Wide City Bars option is toggled.
+			 (Because the EXE will always use the type strings above to locate
+			 the path.) -->
+		<InterfaceArtInfo>
+			<Type>INTERFACE_WIDE_CITY_BAR_CAPITAL_GLOW</Type>
+			<Path>Art/Interface/CityBar/WideCityBar_Glow.dds</Path>
+		</InterfaceArtInfo>
+		<InterfaceArtInfo>
+			<Type>INTERFACE_WIDE_CITY_BAR_REGULAR_GLOW</Type>
+			<Path>Art/Interface/CityBar/WideCityBar_Glow_no_star.dds</Path>
+		</InterfaceArtInfo>
+		<InterfaceArtInfo>
+			<Type>INTERFACE_WIDE_CITY_BAR_MODEL</Type>
+			<Path>Art/Interface/CityBar/WideCityBar.nif</Path>
+		</InterfaceArtInfo>
+		<!-- trs.wcitybars: end -->
 		<InterfaceArtInfo>
 			<Type>INTERFACE_CITY_PANEL</Type>
 			<Path>Art/Interface/MainScreen/CityScreen/PanelBG.dds</Path>

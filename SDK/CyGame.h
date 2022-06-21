@@ -280,6 +280,7 @@ public:
 	bool takeJPEGScreenShot(std::string fileName) const;
 // BUG - MapFinder - end
 	void exportSaveGame(); // trs.modname
+	void setCityBarWidth(bool bWide); // trs.wcitybars
 
 // BUG - EXE/DLL Paths - start
 	std::string getDLLPath() const;
