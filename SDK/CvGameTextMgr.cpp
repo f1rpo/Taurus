@@ -562,7 +562,8 @@ void CvGameTextMgr::setUnitHelp(CvWStringBuffer &szString, const CvUnit* pUnit, 
 		}
 	}*/
 
-	if (GC.getGameINLINE().isDebugMode() && !bAlt && !bShift)
+	if (GC.getGameINLINE().isDebugMode() && !bAlt && //!bShift
+		bShift) // trs.cheats: Don't show extra info when no modifier key held
 	{
 		FAssertMsg(pUnit->AI_getUnitAIType() != NO_UNITAI, "pUnit's AI type expected to != NO_UNITAI");
 		szTempBuffer.Format(L" (%s)", GC.getUnitAIInfo(pUnit->AI_getUnitAIType()).getDescription());
