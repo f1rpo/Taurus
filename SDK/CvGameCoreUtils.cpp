@@ -677,6 +677,11 @@ int getCombatOdds(CvUnit* pAttacker, CvUnit* pDefender)
 	//////
 
 	iDefenderHitLimit = pDefender->maxHitPoints() - pAttacker->combatLimit();
+	/*	<trs.fix> Not enough to reach the limit, needs to be exceeded.
+		Equivalent to the ACO bugfix in CvGameTextMgr::setCombatPlotHelp
+		(see comment "A catapult that deals 25HP"...) */
+	if (iDefenderHitLimit > 0)
+		iDefenderHitLimit--; // </trs.fix>
 
 	iNeededRoundsAttacker = (std::max(0, pDefender->currHitPoints() - iDefenderHitLimit) + iDamageToDefender - 1 ) / iDamageToDefender;
 	iNeededRoundsDefender = (pAttacker->currHitPoints() + iDamageToAttacker - 1 ) / iDamageToAttacker;
