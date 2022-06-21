@@ -32,4 +32,14 @@
 	</TEXT>
 	<!-- trs.hofwarn: end -->
 
+	<!-- trs.spygold (based on TXT_KEY_ESPIONAGE_TARGET_STEAL_TREASURY) -->
+	<TEXT>
+		<Tag>TXT_KEY_ESPIONAGE_TARGET_STEAL_TREASURY_AMOUNT</Tag>
+		<English>%d1[ICON_GOLD] has been looted from our state treasury by enemy infiltrators!</English>
+		<French>%d1[ICON_GOLD] a &#233;t&#233; pill&#233;e de notre tr&#233;sor par des ennemis infiltr&#233;s !</French>
+		<German>%d1[ICON_GOLD] aus unserem Staatsschatz wurde von feindlichen Spionen erbeutet!</German>
+		<Italian>Infiltrati nemici hanno rubato %d1[ICON_GOLD] dal nostro tesoro di stato!</Italian>
+		<Spanish>&#161;Los enemigos infiltrados han saqueado %d1[ICON_GOLD] de nuestro tesoro!</Spanish>
+	</TEXT>
+
 </Civ4GameText>
