@@ -9641,6 +9641,12 @@ void CvPlayer::setCombatExperience(int iExperience)
 						}
 					}
 				}
+				// <trs.fix> for BUG - Great General Bar
+				if (getID() == GC.getGame().getActivePlayer() &&
+					getBugOptionBOOL("MainInterface__Combat_Counter"))
+				{
+					gDLL->getInterfaceIFace()->setDirty(GameData_DIRTY_BIT, true);
+				} // </trs.fix>
 			}
 		}
 	}
