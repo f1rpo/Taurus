@@ -22,11 +22,12 @@
 		<Italian>Quando è selezionato, vengono attivate le scorciatoie da tastiera e le funzionalità del Livello Strategico.</Italian>
 		<Spanish>When checked, the shortcut keys and features of the Strategy Layer are activated.</Spanish>
 	</TEXT>
+	<!-- trs. German shortened. -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_STRATEGYOVERLAY__SHOWDOTMAP_TEXT</Tag>
 		<English>Show Dot Map</English>
 		<French>Show Dot Map</French>
-		<German>Overlay-Karte anzeigen</German>
+		<German>Overlay anzeigen</German>
 		<Italian>Mostra la Mappa di posizionamento</Italian>
 		<Spanish>Show Dot Map</Spanish>
 	</TEXT>
@@ -86,11 +87,12 @@
 		<Italian>Determina la trasparenza delle Città posizionate.</Italian>
 		<Spanish>Determines the brightness of planned cities.</Spanish>
 	</TEXT>
+	<!-- trs. German shortened. -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_STRATEGYOVERLAY__DOTMAPHIGHLIGHTBRIGHTNESS_TEXT</Tag>
 		<English>Highlight Brightness</English>
 		<French>Highlight Brightness</French>
-		<German>Transparenz beim Platzieren</German>
+		<German>beim Platzieren</German>
 		<Italian>Trasparenza di selezione</Italian>
 		<Spanish>Highlight Brightness</Spanish>
 	</TEXT>

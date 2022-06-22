@@ -307,11 +307,12 @@
 		<Italian>Quando è selezionato, mostra delle icone per gli Specialisti in città (sia i Cittadini Specialisti che i Grandi Personaggi trasformati in Super-Specialisti).</Italian>
 		<Spanish>When checked, shows icons for the city's specialists (both citizens and settled great people).</Spanish>
 	</TEXT>
+	<!-- trs. German shortened. -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_CITYBAR__REVOLTCHANCE_TEXT</Tag>
 		<English>Revolt Chance</English>
 		<French>Revolt Chance</French>
-		<German>Unruhe-Wahrscheinlichkeit</German>
+		<German>Unruhe-Chance</German>
 		<Italian>Possibilità di Rivolta</Italian>
 		<Spanish>Revolt Chance</Spanish>
 	</TEXT>

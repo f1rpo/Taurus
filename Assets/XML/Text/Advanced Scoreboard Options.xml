@@ -86,11 +86,12 @@
 		<Italian>Quando è selezionato, mostra la variazione del punteggio della Civiltà rispetto al turno precedente.</Italian>
 		<Spanish>When checked, shows the change in score since the previous turn</Spanish>
 	</TEXT>
+	<!-- trs. German shortened. -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_SCORES__DELTAINCLUDECURRENT_TEXT</Tag>
 		<English>Include Current Turn</English>
 		<French>Include Current Turn</French>
-		<German>Aktuelle Runde einbeziehen</German>
+		<German>Inkl. aktuelle Runde</German>
 		<Italian>Includere turno corrente</Italian>
 		<Spanish>Include Current Turn</Spanish>
 	</TEXT>
@@ -118,11 +119,12 @@
 		<Italian>Determina come le Civiltà vengono identificate nel Pannello del Punteggio.[NEWLINE][ICON_BULLET][COLOR_HIGHLIGHT_TEXT]Leader[COLOR_REVERT] - Name of the leader or player (Victoria or EmperorFool).[NEWLINE][ICON_BULLET][COLOR_HIGHLIGHT_TEXT]Civilization[COLOR_REVERT] - Name of the civilization (England).[NEWLINE][ICON_BULLET][COLOR_HIGHLIGHT_TEXT]Description[COLOR_REVERT] - Descriptive name of the civilization (English Empire).</Italian>
 		<Spanish>Determines how civilizations are labeled on the scoreboard.[NEWLINE][ICON_BULLET][COLOR_HIGHLIGHT_TEXT]Leader[COLOR_REVERT] - Name of the leader or player (Victoria or EmperorFool).[NEWLINE][ICON_BULLET][COLOR_HIGHLIGHT_TEXT]Civilization[COLOR_REVERT] - Name of the civilization (England).[NEWLINE][ICON_BULLET][COLOR_HIGHLIGHT_TEXT]Description[COLOR_REVERT] - Descriptive name of the civilization (English Empire).</Spanish>
 	</TEXT>
+	<!-- trs. German abbreviated a little more. -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_SCORES__DISPLAYNAME_LIST</Tag>
 		<English>Leader|Civilization|Civ Description|Leader / Civ|Leader / Civ Desc</English>
 		<French>Leader|Civilization|Civ Description|Leader / Civ|Leader / Civ Desc</French>
-		<German>Oberhaupt|Zivilisation|Ziv-Beschreibung|Oberhaupt / Zivilisation|Oberhaupt / Ziv-Beschreibung</German>
+		<German>Oberhaupt|Zivilisation|Ziv-Beschreibung|Oberhaupt / Zivilisation|Oberhaupt / Ziv-Beschr.</German>
 		<Italian>Leader|Civiltà|Short Civ|Leader + Civ|Leader + Short Civ</Italian>
 		<Spanish>Leader|Civilization|Civ Description|Leader / Civ|Leader / Civ Desc</Spanish>
 	</TEXT>

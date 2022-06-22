@@ -54,11 +54,12 @@
 		<Italian>Quando è selezionato, mostra il tasso di crescita dell'oro in giallo se è negativo ma non abbastanza da mandarvi in rosso.</Italian>
 		<Spanish>When checked, displays your gold rate in yellow if it is negative but not enough to drop your treasury below zero.</Spanish>
 	</TEXT>
+	<!-- trs. German abbreviated. -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_MAININTERFACE__GPBAR_TEXT</Tag>
 		<English>Great Person</English>
 		<French>Personnages Illustres</French>
-		<German>Große Persönlichkeiten</German>
+		<German>Große Pers.</German>
 		<Italian>Grandi Personaggi</Italian>
 		<Spanish>Great Person</Spanish>
 	</TEXT>
@@ -175,11 +176,12 @@
 		<Italian>Visualizza sulle barre di avanzamento selezionate dei trattini che mostrano il progresso stimato per i turni successivi.</Italian>
 		<Spanish>When checked, displays tick marks on selected progress bars that illustrate estimated future turn progress.</Spanish>
 	</TEXT>
+	<!-- trs. German was "FOV-Einstellung merken" - too long. -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_MAININTERFACE__FIELDOFVIEW_REMEMBER_TEXT</Tag>
 		<English>Remember Field of View</English>
 		<French>Remember Field of View</French>
-		<German>FOV-Einstellung merken</German>
+		<German>Wert merken</German>
 		<Italian>Conseva il Campo visuale</Italian>
 		<Spanish>Remember Field of View</Spanish>
 	</TEXT>

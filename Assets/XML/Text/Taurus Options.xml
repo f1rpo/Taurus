@@ -98,7 +98,7 @@
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TAURUS__DEFAULTCAMDISTANCE_LIST</Tag>
 		<English>Automatic|Close|Medium|Far|XML</English>
-		<German>Auto|Nah|Mittel|Weit|XML-Wert</German>
+		<German>Auto|Nah|Mittel|Weit|XML</German>
 	</TEXT>
 	<!-- trs.camdist: end -->
 
