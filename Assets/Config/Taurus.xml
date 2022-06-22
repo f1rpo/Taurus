@@ -35,6 +35,12 @@
 			</option>
 
 		</section>
+		<section id="MainScreen">
+
+			<!-- trs.promoleads -->
+			<option id="PromotionLeadsTo" key="Promotion Leads To"
+					type="boolean" default="True"/>
+		</section>
 		<section id="System">
 
 			<!-- trs.modname -->

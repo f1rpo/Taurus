@@ -33,7 +33,7 @@ class BugGeneralOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.createActionsPanel(screen, center)
 		
 		self.createInfoPanePanel(screen, right)
-		self.addSpacer(screen, right, "General4")
+		#self.addSpacer(screen, right, "General4") # trs.promoleads: Need the space
 		self.createMiscellaneousPanel(screen, right)
 		if Buffy.isEnabled():
 			self.addSpacer(screen, right, "General5")
@@ -93,4 +93,5 @@ class BugGeneralOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addCheckbox(screen, panel, "MainInterface__MinMax_Commerce")
 		self.addCheckbox(screen, panel, "MainInterface__ProgressBarsTickMarks")
 		self.addTextDropdown(screen, panel, panel, "MainInterface__BuildIconSize", True)
+		self.addCheckbox(screen, panel, "Taurus__PromotionLeadsTo") # trs.promoleads
 		self.addCheckbox(screen, panel, "MainInterface__CityArrows")

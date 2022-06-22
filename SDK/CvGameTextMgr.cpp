@@ -6563,6 +6563,72 @@ void CvGameTextMgr::parsePromotionHelp(CvWStringBuffer &szBuffer, PromotionTypes
 		szBuffer.append(pcNewline);
 		szBuffer.append(GC.getPromotionInfo(ePromotion).getHelp());
 	}
+	// <trs.promoleads>
+	if (getBugOptionBOOL("Taurus__PromotionLeadsTo"))
+		parsePromotionLeadsToHelp(szBuffer, ePromotion, pcNewline);
+	// </trs.promoleads>
+}
+
+// trs.promoleads (fromAdvCiv):
+void CvGameTextMgr::parsePromotionLeadsToHelp(CvWStringBuffer &szBuffer, PromotionTypes ePromotion, const wchar* pcNewline)
+{
+	CvUnit const* pHeadSelectedUnit = gDLL->getInterfaceIFace()->getHeadSelectedUnit();
+	std::vector<PromotionTypes> aeReq;
+	std::vector<PromotionTypes> aeAltReq;
+	for (int i = 0; i < GC.getNumPromotionInfos(); i++)
+	{
+		PromotionTypes eLoopPromo = (PromotionTypes)i;
+		CvPromotionInfo const& kLoopPromo = GC.getPromotionInfo(eLoopPromo);
+		if (pHeadSelectedUnit != NULL && pHeadSelectedUnit->getOwnerINLINE() != NO_PLAYER)
+		{
+			// Don't show eLoopPromotion if any requirements other than ePromotion aren't met
+			CvUnit const& kUnit = *pHeadSelectedUnit;
+			if (!kUnit.isPromotionValid(eLoopPromo))
+				continue;
+			if (kUnit.isHasPromotion(eLoopPromo) || kUnit.canAcquirePromotion(eLoopPromo))
+				continue;
+			CvPlayer const& kOwner = GET_PLAYER(kUnit.getOwner());
+			if (kLoopPromo.getTechPrereq() != NO_TECH &&
+				!GET_TEAM(kOwner.getTeam()).isHasTech((TechTypes)(kLoopPromo.getTechPrereq())))
+				continue;
+			if (kLoopPromo.getStateReligionPrereq() != NO_RELIGION &&
+				kOwner.getStateReligion() != kLoopPromo.getStateReligionPrereq())
+			{
+				continue;
+			}
+		}
+		if (kLoopPromo.getPrereqPromotion() == ePromotion)
+			aeReq.push_back(eLoopPromo);
+		if (kLoopPromo.getPrereqOrPromotion1() == ePromotion ||
+			kLoopPromo.getPrereqOrPromotion2() == ePromotion)
+		{
+			aeAltReq.push_back(eLoopPromo);
+		}
+	}
+	if (!aeReq.empty())
+	{
+		szBuffer.append(pcNewline);
+		szBuffer.append(gDLL->getText("TXT_KEY_MISC_REQUIRED_FOR"));
+		bool bFirst = true;
+		for (size_t i = 0; i < aeReq.size(); i++)
+		{
+			setListHelp(szBuffer, L" ", GC.getPromotionInfo(aeReq[i]).getDescription(),
+					L", ", bFirst);
+			bFirst = false;
+		}
+	}
+	if (!aeAltReq.empty())
+	{
+		szBuffer.append(pcNewline);
+		szBuffer.append(gDLL->getText("TXT_KEY_MISC_LEADS_TO"));
+		bool bFirst = true;
+		for (size_t i = 0; i < aeAltReq.size(); i++)
+		{
+			setListHelp(szBuffer, L" ", GC.getPromotionInfo(aeAltReq[i]).getDescription(),
+					L", ", bFirst);
+			bFirst = false;
+		}
+	}
 }
 
 //	Function:			parseCivicInfo()

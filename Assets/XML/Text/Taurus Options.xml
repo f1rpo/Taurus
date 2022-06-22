@@ -73,4 +73,17 @@
 	</TEXT>
 	<!-- trs.replayname: end -->
 
+	<!-- trs.promoleads: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__PROMOTIONLEADSTO_TEXT</Tag>
+		<English>Promotion Leads-To Help</English>
+		<German>Beförderungs-Voraussetzungen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__PROMOTIONLEADSTO_HOVER</Tag>
+		<English>When checked, the hover text for a promotion button lists the promotions enabled by that promotion.</English>
+		<German>Listet im Hilfe-Text zu einer Beförderung jene andere Beförderungen auf, die durch die erste Beförderung freigeschaltet werden.</German>
+	</TEXT>
+	<!-- trs.promoleads: end -->
+
 </Civ4GameText>
