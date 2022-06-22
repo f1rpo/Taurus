@@ -82,9 +82,9 @@ credits = [
 		# <trs.doc>
 		"-",
 		"TAURUS_CREDITS|Taurus Mod",
-			"Nightinggale - GameCoreDLL Makefile",
-			"karadoc (K-Mod) - More flexible loading of translations, various bugfixes",
 			"jdog5000 - AI Auto Play",
+			"karadoc (K-Mod) - More flexible loading of translations, various bugfixes",
+			"Nightinggale - GameCoreDLL Makefile",
 			"f1rpo - the rest"
 		# </trs.doc>
 ]
