@@ -29,7 +29,8 @@ class BugPleOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addTextDropdown(screen, leftL, leftR, "PLE__Default_Group_Mode", True, "LAYOUT_LEFT")
 		self.addTextDropdown(screen, leftL, leftR, "PLE__Filter_Behavior", True, "LAYOUT_LEFT")
 
-		self.addSpacer(screen, left, "PLE_Indicators", 1)
+		# trs. To avoid a vertical scrollbar.
+		#self.addSpacer(screen, left, "PLE_Indicators", 1)
 		self.addLabel(screen, left, "PLE_Indicators")
 		self.addCheckbox(screen, left, "PLE__Wounded_Indicator")
 		self.addCheckbox(screen, left, "PLE__Lead_By_GG_Indicator")
