@@ -120,6 +120,12 @@
 		<Italian>BUFFY:</Italian>
 		<Spanish>BUFFY:</Spanish>
 	</TEXT>
+	<!-- trs.camdist -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPTLABEL_CAMERA</Tag>
+		<English>Camera:</English>
+		<German>Kamera:</German>
+	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTLABEL_MISC</Tag>
 		<English>Miscellaneous:</English>

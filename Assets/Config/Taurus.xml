@@ -47,6 +47,18 @@
 				<choice id="Adjacent"/>
 				<choice id="CityCross"/>
 			</list>
+			<!-- trs.camdist -->
+			<!-- NB: The DLL relies on this order of the choices -->
+			<list   id="DefaultCamDistance" key="Default Cam Distance" 
+					type="int" default="1" listType="string" 
+					values="Automatic|Close|Medium|Far|XML">
+				<change module="Taurus" function="updateDefaultCamDistance"/>
+				<choice id="Automatic"/>
+				<choice id="Close"/>
+				<choice id="Medium"/>
+				<choice id="Far"/>
+				<choice id="XML"/>
+			</list>
 
 		</section>
 		<section id="MainScreen">

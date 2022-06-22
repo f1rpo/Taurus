@@ -195,6 +195,7 @@ public:
 	DllExport CvInterfaceModeInfo& getInterfaceModeInfo(InterfaceModeTypes e);
 
 	DllExport NiPoint3& getPt3CameraDir();
+	void updateDefaultCamDistance(); // trs.camdist (exposed to Python)
 
 	DllExport bool& getLogging();
 	DllExport bool& getRandLogging();
@@ -693,13 +694,15 @@ public:
 
 	// ***** EXPOSED TO PYTHON *****
 	// trs.modname: (exported through .def file)
-	int getDefineINTExternal( const char* szName ) const;
-	int getDefineINT( const char * szName ) const;
-	DllExport float getDefineFLOAT( const char * szName ) const;
-	DllExport const char * getDefineSTRING( const char * szName ) const;
-	DllExport void setDefineINT( const char * szName, int iValue );
-	DllExport void setDefineFLOAT( const char * szName, float fValue );
-	DllExport void setDefineSTRING( const char * szName, const char * szValue );
+	int getDefineINTExternal(const char* szName) const;
+	int getDefineINT(const char * szName) const;
+	DllExport float getDefineFLOAT(const char * szName) const;
+	DllExport const char * getDefineSTRING(const char * szName) const;
+	// <trs.opt> Make the cache update optional
+	void setDefineINT(const char * szName, int iValue, bool bUpdateCache = true);
+	void setDefineFLOAT(const char * szName, float fValue, bool bUpdateCache = true);
+	void setDefineSTRING(const char * szName, const char * szValue, bool bUpdateCache = true);
+	// </trs.opt>
 	// trs.
 	bool getDefineBOOL(char const* szName) const
 	{
@@ -1196,6 +1199,7 @@ protected:
 	float m_fCAMERA_FAR_CLIP_Z_HEIGHT;
 	float m_fCAMERA_MAX_TRAVEL_DISTANCE;
 	float m_fCAMERA_START_DISTANCE;
+	float m_fCAMERA_START_DISTANCE_Original; // trs.camdist
 	float m_fAIR_BOMB_HEIGHT;
 	float m_fPLOT_SIZE;
 	float m_fCAMERA_SPECIAL_PITCH;

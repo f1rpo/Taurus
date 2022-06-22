@@ -35,6 +35,9 @@ void setIsBug(bool bIsBug)
 {
 	logMsg("isBug: %s", bIsBug ? "true" : "false");
 	g_bIsBug = bIsBug;
+	/*	trs.camdist: (NB: This is too late to affect the distance at the start
+		of a new game) */
+	GC.updateDefaultCamDistance();
 }
 
 

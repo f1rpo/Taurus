@@ -84,6 +84,24 @@
 	</TEXT>
 	<!-- trs.found-border: end -->
 
+	<!-- trs.camdist: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__DEFAULTCAMDISTANCE_TEXT</Tag>
+		<English>Default Dist.</English>
+		<German>Standard-Abstand</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__DEFAULTCAMDISTANCE_HOVER</Tag>
+		<English>The camera distance at the start of a new game and after loading a savegame. [BOLD]Also affects the volume of music and sound effects.[\BOLD][NEWLINE][COLOR_HIGHLIGHT_TEXT]Automatic[COLOR_REVERT] sets the default distance based on the Field-of-View value. The greater the field of view, the smaller the default distance.[NEWLINE][COLOR_HIGHLIGHT_TEXT]Close[COLOR_REVERT] is not quite as close as in BtS. This choice always applies when starting a new game right after having launched Civ - because the BUG options system isn't yet available at that point.[NEWLINE][COLOR_HIGHLIGHT_TEXT]Far[COLOR_REVERT] is near the Globe view boundary.[NEWLINE][COLOR_HIGHLIGHT_TEXT]XML[COLOR_REVERT] means that the [COLOR_BUILDING_TEXT]CAMERA_START_DISTANCE[COLOR_REVERT] loaded from XML is used. That's the same (very close) distance as in BtS unless you change the value through [COLOR_BUILDING_TEXT]GlobalDefinesAlt.xml[COLOR_REVERT].</English>
+		<German>Der Kameraabstand nach dem Erstellen oder Laden eines Spiels. [BOLD]Wirkt sich auch auf die Lautstärke von Musik und Effekten aus.[\BOLD][NEWLINE][NEWLINE][COLOR_HIGHLIGHT_TEXT]Auto[COLOR_REVERT] setzt den Abstand entsprechend dem Sichtfeld-Wert: Je größer das Sichtfeld, desto kleiner der Standardabstand.[NEWLINE][COLOR_HIGHLIGHT_TEXT]Nah[COLOR_REVERT] ist nicht ganz so nah wie in BtS. Diese Auswahl wird zwangsläufig getroffen, wenn die BUG-Einstellungen noch nicht geladen wurden, d.h. wenn direkt nach dem Starten von Civ ein neues Spiel begonnen wird.[NEWLINE][COLOR_HIGHLIGHT_TEXT]Fern[COLOR_REVERT] ist am Übergang zur Weltansicht.[NEWLINE][COLOR_HIGHLIGHT_TEXT]XML[COLOR_REVERT] heißt, dass der XML-Wert [COLOR_BUILDING_TEXT]CAMERA_START_DISTANCE[COLOR_REVERT] verwendet wird, also derselbe (ziemlich geringe) Kameraabstand wie in BtS, falls Sie den Wert nicht in [COLOR_BUILDING_TEXT]GlobalDefinesAlt.xml[COLOR_REVERT] geändert haben.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__DEFAULTCAMDISTANCE_LIST</Tag>
+		<English>Automatic|Close|Medium|Far|XML</English>
+		<German>Auto|Nah|Mittel|Weit|XML-Wert</German>
+	</TEXT>
+	<!-- trs.camdist: end -->
+
 	<!-- trs.wcitybars: start -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TAURUS__WIDECITYBARS_TEXT</Tag>

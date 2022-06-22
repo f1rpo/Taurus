@@ -203,6 +203,7 @@ m_fCAMERA_MAX_YAW(0),
 m_fCAMERA_FAR_CLIP_Z_HEIGHT(0),
 m_fCAMERA_MAX_TRAVEL_DISTANCE(0),
 m_fCAMERA_START_DISTANCE(0),
+m_fCAMERA_START_DISTANCE_Original(0), // trs.camdist
 m_fAIR_BOMB_HEIGHT(0),
 m_fPLOT_SIZE(0),
 m_fCAMERA_SPECIAL_PITCH(0),
@@ -602,6 +603,49 @@ CvInterfaceModeInfo& CvGlobals::getInterfaceModeInfo(InterfaceModeTypes e)
 NiPoint3& CvGlobals::getPt3CameraDir()
 {
 	return m_pt3CameraDir;
+}
+
+// trs.camdist (based on AdvCiv):
+// (defined by WinDef.h)
+#undef FAR
+void CvGlobals::updateDefaultCamDistance()
+{
+	PlayerTypes const eActivePlayer = GC.getGame().getActivePlayer();
+	if (eActivePlayer == NO_PLAYER || !IsGraphicsInitialized())
+		return;
+	enum DefaultCamDistChoices { AUTO, CLOSE, MEDIUM, FAR, XML };
+	DefaultCamDistChoices eChoice = (DefaultCamDistChoices)
+			getBugOptionINT("Taurus__DefaultCamDistance");
+	/*	Unfortunately, BUG hasn't been loaded when the initial camera distance
+		in a new game is set (w/o having loaded or started a game previously). */
+	if (!isBug())
+		eChoice = CLOSE;
+	float fDist;	
+	switch (eChoice)
+	{
+	case AUTO:
+	{
+		fDist = std::max(7600 - 80 * getFIELD_OF_VIEW(), 1000.f);
+		if (eActivePlayer != NO_PLAYER)
+		{
+			switch((int)GET_PLAYER(eActivePlayer).getCurrentEra())
+			{
+			case 0: fDist *= 0.88f; break;
+			case 1: fDist *= 0.94f; break;
+			case 2: break;
+			case 3: fDist *= 1.05f; break;
+			default: fDist *= 1.075f;
+			}
+		}
+		break;
+	}
+	case CLOSE: fDist = 3000; break;
+	case MEDIUM: fDist = 4000; break;
+	case FAR: fDist = 5000; break;
+	default: fDist = m_fCAMERA_START_DISTANCE_Original;
+	}
+	setDefineFLOAT("CAMERA_START_DISTANCE", fDist, false);
+	m_fCAMERA_START_DISTANCE = fDist;
 }
 
 bool& CvGlobals::getLogging()
@@ -2654,6 +2698,10 @@ void CvGlobals::cacheGlobals()
 	m_fCAMERA_FAR_CLIP_Z_HEIGHT = getDefineFLOAT("CAMERA_FAR_CLIP_Z_HEIGHT");
 	m_fCAMERA_MAX_TRAVEL_DISTANCE = getDefineFLOAT("CAMERA_MAX_TRAVEL_DISTANCE");
 	m_fCAMERA_START_DISTANCE = getDefineFLOAT("CAMERA_START_DISTANCE");
+	// <trs.camdist>
+	if (m_fCAMERA_START_DISTANCE_Original <= 0)
+		m_fCAMERA_START_DISTANCE_Original = std::max(500.f, m_fCAMERA_START_DISTANCE);
+	// </trs.camdist>
 	m_fAIR_BOMB_HEIGHT = getDefineFLOAT("AIR_BOMB_HEIGHT");
 	m_fPLOT_SIZE = getDefineFLOAT("PLOT_SIZE");
 	m_fCAMERA_SPECIAL_PITCH = getDefineFLOAT("CAMERA_SPECIAL_PITCH");
@@ -2661,7 +2709,13 @@ void CvGlobals::cacheGlobals()
 	m_fCAMERA_MIN_DISTANCE = getDefineFLOAT("CAMERA_MIN_DISTANCE");
 	m_fCAMERA_UPPER_PITCH = getDefineFLOAT("CAMERA_UPPER_PITCH");
 	m_fCAMERA_LOWER_PITCH = getDefineFLOAT("CAMERA_LOWER_PITCH");
-	m_fFIELD_OF_VIEW = getDefineFLOAT("FIELD_OF_VIEW");
+	{
+		float fOldFoV = m_fFIELD_OF_VIEW; // trs.camdist
+		m_fFIELD_OF_VIEW = getDefineFLOAT("FIELD_OF_VIEW");
+		// <trs.camdist> Adjust default camera distance (if it's set to Auto)
+		if (std::abs(fOldFoV - m_fFIELD_OF_VIEW) > 0.5f)
+			updateDefaultCamDistance(); // </trs.camdist>
+	}
 	m_fSHADOW_SCALE = getDefineFLOAT("SHADOW_SCALE");
 	m_fUNIT_MULTISELECT_DISTANCE = getDefineFLOAT("UNIT_MULTISELECT_DISTANCE");
 
@@ -2716,43 +2770,49 @@ int CvGlobals::getDefineINTExternal(char const* szName) const
 	return getDefineINT(szName);
 }
 
-int CvGlobals::getDefineINT( const char * szName ) const
+int CvGlobals::getDefineINT(const char * szName) const
 {
 	int iReturn = 0;
-	GC.getDefinesVarSystem()->GetValue( szName, iReturn );
+	GC.getDefinesVarSystem()->GetValue(szName, iReturn);
 	return iReturn;
 }
 
-float CvGlobals::getDefineFLOAT( const char * szName ) const
+float CvGlobals::getDefineFLOAT(const char * szName) const
 {
 	float fReturn = 0;
-	GC.getDefinesVarSystem()->GetValue( szName, fReturn );
+	GC.getDefinesVarSystem()->GetValue(szName, fReturn);
 	return fReturn;
 }
 
-const char * CvGlobals::getDefineSTRING( const char * szName ) const
+const char * CvGlobals::getDefineSTRING(const char * szName) const
 {
 	const char * szReturn = NULL;
-	GC.getDefinesVarSystem()->GetValue( szName, szReturn );
+	GC.getDefinesVarSystem()->GetValue(szName, szReturn);
 	return szReturn;
 }
 
-void CvGlobals::setDefineINT( const char * szName, int iValue )
+void CvGlobals::setDefineINT(const char * szName, int iValue,
+	bool bUpdateCache) // trs.opt
 {
-	GC.getDefinesVarSystem()->SetValue( szName, iValue );
-	cacheGlobals();
+	GC.getDefinesVarSystem()->SetValue(szName, iValue);
+	if (bUpdateCache) // trs.opt
+		cacheGlobals();
 }
 
-void CvGlobals::setDefineFLOAT( const char * szName, float fValue )
+void CvGlobals::setDefineFLOAT(const char * szName, float fValue,
+	bool bUpdateCache) // trs.opt
 {
-	GC.getDefinesVarSystem()->SetValue( szName, fValue );
-	cacheGlobals();
+	GC.getDefinesVarSystem()->SetValue(szName, fValue);
+	if (bUpdateCache) // trs.opt
+		cacheGlobals();
 }
 
-void CvGlobals::setDefineSTRING( const char * szName, const char * szValue )
+void CvGlobals::setDefineSTRING(const char * szName, const char * szValue,
+	bool bUpdateCache) // trs.opt
 {
-	GC.getDefinesVarSystem()->SetValue( szName, szValue );
-	cacheGlobals();
+	GC.getDefinesVarSystem()->SetValue(szName, szValue);
+	if (bUpdateCache) // trs.opt
+		cacheGlobals();
 }
 
 int CvGlobals::getMOVE_DENOMINATOR()
@@ -3632,10 +3692,12 @@ bool CvGlobals::IsGraphicsInitialized() const { return m_bGraphicsInitialized;}
 void CvGlobals::SetGraphicsInitialized(bool bVal)
 {
 	m_bGraphicsInitialized = bVal;
-	// <trs.wcitybars>
+	// <trs.>
 	if (IsGraphicsInitialized())
+	{	// trs.wcitybars:
 		getGame().setCityBarWidth(getBugOptionBOOL("Taurus__WideCityBars"));
-	// </trs.wcitybars>
+		updateDefaultCamDistance(); // trs.camdist
+	} // </trs.>
 }
 void CvGlobals::setInterface(CvInterface* pVal) { m_interface = pVal; }
 void CvGlobals::setDiplomacyScreen(CvDiplomacyScreen* pVal) { m_diplomacyScreen = pVal; }

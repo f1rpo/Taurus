@@ -317,6 +317,8 @@ public:
 	int getNUM_CITY_PLOTS() const { return GC.getNUM_CITY_PLOTS(); }
 	int getCITY_HOME_PLOT() const { return GC.getCITY_HOME_PLOT(); }
 
+	void updateDefaultCamDistance(); // trs.camdist
+
 // BUG - DLL Info - start
 	bool isBull() const { return GC.isBull(); }												// Exposed to Python
 	int getBullApiVersion() const { return GC.getBullApiVersion(); }						// Exposed to Python

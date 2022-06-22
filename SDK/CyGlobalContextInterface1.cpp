@@ -118,6 +118,8 @@ void CyGlobalContextPythonInterface1(python::class_<CyGlobalContext>& x)
 		.def("getNumActionInfos", &CyGlobalContext::getNumActionInfos, "() - Total Action Infos XML\\Units\\CIV4ActionInfos.xml")
 		.def("getActionInfo", &CyGlobalContext::getActionInfo, python::return_value_policy<python::reference_existing_object>(), "(ActionID) - CvInfo for ActionID")
 
+		.def("updateDefaultCamDistance", &CyGlobalContext::updateDefaultCamDistance, "void (void)") // trs.camdist
+
 // BUG - DLL Info - start
 		.def("isBull", &CyGlobalContext::isBull, "bool () - returns true to mark presence of BULL")
 		.def("getBullApiVersion", &CyGlobalContext::getBullApiVersion, "int () - returns BULL Python API version")

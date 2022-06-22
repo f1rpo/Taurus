@@ -10293,6 +10293,7 @@ void CvPlayer::setCurrentEra(EraTypes eNewValue)
 		if (getID() == GC.getGameINLINE().getActivePlayer())
 		{
 			gDLL->getInterfaceIFace()->setDirty(Soundtrack_DIRTY_BIT, true);
+			GC.updateDefaultCamDistance(); // trs.camdist: Can depend on era
 		}
 
 		if (isHuman() && (getCurrentEra() != GC.getGameINLINE().getStartEra()) && !GC.getGameINLINE().isNetworkMultiPlayer())

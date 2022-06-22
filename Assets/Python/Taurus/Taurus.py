@@ -10,6 +10,10 @@ gc = CyGlobalContext()
 def updatePlotIndicatorSize(option, value):
 	cyUpdatePlotIndicatorSize()
 
+# trs.camdist:
+def updateDefaultCamDistance(option, value):
+	gc.updateDefaultCamDistance()
+
 # trs.modname:
 def exportSaveGame(argsList):
 	gc.getGame().exportSaveGame()

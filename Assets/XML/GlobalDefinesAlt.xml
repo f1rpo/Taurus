@@ -12,8 +12,13 @@
 		 (As a convention, let's put any defines that override BtS upfront.)
 	-->
 
-
-	<!-- (No redefines so far) -->
+	<!-- trs.camdist: As in BtS, copied here for the user's convenience.
+		 This value only gets used when the Default Camera Distance option
+		 (Map tab of the Mod Options screen) is set to "XML". -->
+	<Define>
+		<DefineName>CAMERA_START_DISTANCE</DefineName>
+		<fDefineFloatVal>2200</fDefineFloatVal>
+	</Define>
 
 	<!--
 		Taurus defines ...
