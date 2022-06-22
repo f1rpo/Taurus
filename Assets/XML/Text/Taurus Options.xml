@@ -53,6 +53,37 @@
 	</TEXT>
 	<!-- trs.start-with-resources: end -->
 
+	<!-- trs.found-yield: start (from AdvCiv) -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__FOUNDINGYIELDS_TEXT</Tag>
+		<English>Founding Yields</English>
+		<German>Siedler-Ertragsanzeige</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__FOUNDINGYIELDS_HOVER</Tag>
+		<English>When checked, yield icons are shown on the map whenever a Settler unit is selected (like in BtS). Otherwise, yield icons are only shown when the Yield Display (above the mini map) is enabled.[NEWLINE]This option should not be toggled while a Settler unit is selected.</English>
+		<German>Zeigt (wie in BtS) Geländeerträge auf der Hauptkarte an, wenn eine Siedlereinheit ausgewählt ist. Wenn diese Option nicht angekreuzt ist, werden Geländeerträge nur dann angezeigt, wenn die Ertragsanzeige (oberhalb der Übersichtskarte) aktiviert wurde.[NEWLINE]Beim Ändern dieser Option sollte kein Siedler ausgewählt sein.</German>
+	</TEXT>
+	<!-- trs.found-yield: end -->
+
+	<!-- trs.found-border: start (from AdvCiv) -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__FOUNDINGBORDER_TEXT</Tag>
+		<English>Founding Border</English>
+		<German>Siedler-Grenzen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__FOUNDINGBORDER_HOVER</Tag>
+		<English>Whether to show borders around a selected Settler unit and, if yes, whether to show them only around [COLOR_HIGHLIGHT_TEXT]adjacent[COLOR_REVERT] tiles (inner ring, as in BtS) or around the full city radius ("big fat" [COLOR_HIGHLIGHT_TEXT]city cross[COLOR_REVERT]).</English>
+		<German>Ob um eine ausgewählte Siedlereinheit Stadtgrenzen eingeblendet werden sollen und, wenn ja, ob die Grenzen (wie in BtS) nur benachbarte Felder ([COLOR_HIGHLIGHT_TEXT]innerer Ring[COLOR_REVERT]) einschließen sollen oder den gesamten Stadtradius ([COLOR_HIGHLIGHT_TEXT]Stadtkreuz[COLOR_REVERT]).</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__FOUNDINGBORDER_LIST</Tag>
+		<English>None|Adjacent|City Cross</English>
+		<German>Keine|Innerer Ring|Stadtkreuz</German>
+	</TEXT>
+	<!-- trs.found-border: end -->
+
 	<!-- trs.wcitybars: start -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TAURUS__WIDECITYBARS_TEXT</Tag>

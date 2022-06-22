@@ -27,6 +27,18 @@
 #define PATH_STRAIGHT_WEIGHT									(1)
 
 #define PATH_DAMAGE_WEIGHT										(500)
+
+// <trs.>
+int plotDistance(CvPlot const* pFirst, CvPlot const* pSecond)
+{
+	return plotDistance(pFirst->getX(), pFirst->getY(), pSecond->getX(), pSecond->getY());
+}
+
+int stepDistance(CvPlot const* pFirst, CvPlot const* pSecond)
+{
+	return stepDistance(pFirst->getX(), pFirst->getY(), pSecond->getX(), pSecond->getY());
+} // </trs.>
+
 CvPlot* plotCity(int iX, int iY, int iIndex)
 {
 	return GC.getMapINLINE().plotINLINE((iX + GC.getCityPlotX()[iIndex]), (iY + GC.getCityPlotY()[iIndex]));

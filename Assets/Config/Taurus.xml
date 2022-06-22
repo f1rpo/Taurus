@@ -35,6 +35,18 @@
 					type="boolean" default="True">
 				<change module="Taurus" function="updateCityBarWidth"/>
 			</option>
+			<!-- trs.found-yield -->
+			<option id="FoundingYields" key="Founding Yields" 
+					type="boolean" default="True"/>
+			<!-- trs.found-border -->
+			<!-- NB: The DLL relies on this order of the choices -->
+			<list   id="FoundingBorder" key="Founding Border" 
+					type="int" default="2" listType="string" 
+					values="None|Adjacent|City Cross" dirtyBit="ColoredPlots">
+				<choice id="None"/>
+				<choice id="Adjacent"/>
+				<choice id="CityCross"/>
+			</list>
 
 		</section>
 		<section id="MainScreen">

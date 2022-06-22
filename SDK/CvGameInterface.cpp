@@ -53,6 +53,11 @@ void CvGame::updateColoredPlots()
 		return;
 	}
 
+	// <trs.found-borders>
+	pHeadSelectedUnit = gDLL->getInterfaceIFace()->getHeadSelectedUnit(); // moved up
+	if (pHeadSelectedUnit != NULL && pHeadSelectedUnit->isHuman())
+		pHeadSelectedUnit->updateFoundingBorder(); // </trs.found-borders>
+
 	// City circles when in Advanced Start
 	if (gDLL->getInterfaceIFace()->isInAdvancedStart())
 	{
@@ -98,7 +103,7 @@ void CvGame::updateColoredPlots()
 	}
 
 	pHeadSelectedCity = gDLL->getInterfaceIFace()->getHeadSelectedCity();
-	pHeadSelectedUnit = gDLL->getInterfaceIFace()->getHeadSelectedUnit();
+	//pHeadSelectedUnit = gDLL->getInterfaceIFace()->getHeadSelectedUnit(); // trs.found-borders: moved up
 
 	if (pHeadSelectedCity != NULL)
 	{
@@ -392,7 +397,9 @@ void CvGame::updateColoredPlots()
 	{
 		if (gDLL->getGraphicOption(GRAPHICOPTION_CITY_RADIUS))
 		{
-			if (gDLL->getInterfaceIFace()->canSelectionListFound())
+			//if (gDLL->getInterfaceIFace()->canSelectionListFound())
+			// trs.found-border: Only show borders when head of selection can found
+			if (pHeadSelectedUnit->isFound())
 			{
 				for (iI = 0; iI < GC.getMapINLINE().numPlotsINLINE(); iI++)
 				{

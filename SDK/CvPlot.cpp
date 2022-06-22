@@ -3759,13 +3759,13 @@ bool CvPlot::isImpassable() const
 }
 
 
-int CvPlot::getX() const
+int CvPlot::getXExternal() const // trs. Renamed from "getX".
 {
 	return m_iX;
 }
 
 
-int CvPlot::getY() const
+int CvPlot::getYExternal() const // trs. Renamed from "getY".
 {
 	return m_iY;
 }
@@ -5699,7 +5699,11 @@ void CvPlot::updateWorkingCity()
 		{
 			if (gDLL->getGraphicOption(GRAPHICOPTION_CITY_RADIUS))
 			{
-				if (gDLL->getInterfaceIFace()->canSelectionListFound())
+				//if (gDLL->getInterfaceIFace()->canSelectionListFound())
+				// <trs.found-border> Only show borders when head of selection can found
+				CvUnit* pHeadSelectedUnit = gDLL->getInterfaceIFace()->getHeadSelectedUnit();
+				if (pHeadSelectedUnit != NULL && pHeadSelectedUnit->isFound())
+					// </trs.found-border>
 				{
 					gDLL->getInterfaceIFace()->setDirty(ColoredPlots_DIRTY_BIT, true);
 				}

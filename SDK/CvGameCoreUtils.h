@@ -172,6 +172,10 @@ inline int stepDistance(int iX1, int iY1, int iX2, int iY2)													// Expos
 	return std::max(xDistance(iX1, iX2), yDistance(iY1, iY2));
 }
 
+// <trs.>
+int plotDistance(CvPlot const* pFirst, CvPlot const* pSecond);
+int stepDistance(CvPlot const* pFirst, CvPlot const* pSecond); // </trs.>
+
 inline CvPlot* plotDirection(int iX, int iY, DirectionTypes eDirection)							// Exposed to Python
 {
 	if(eDirection == NO_DIRECTION)

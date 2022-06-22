@@ -197,20 +197,24 @@ public:
 	bool isValidDomainForAction(const CvUnit& unit) const;																						// Exposed to Python
 	bool isImpassable() const;																															// Exposed to Python
 
-	DllExport int getX() const;																																				// Exposed to Python
+	int getXExternal() const; // trs. Renamed from "getX", exported through .def file.
 #ifdef _USRDLL
 	inline int getX_INLINE() const
 	{
 		return m_iX;
 	}
 #endif
-	DllExport int getY() const;																																				// Exposed to Python
+	int getYExternal() const; // trs. Renamed from "getY", exported through .def file.
 #ifdef _USRDLL
 	inline int getY_INLINE() const
 	{
 		return m_iY;
 	}
 #endif
+	// <trs.> Replacing the INLINE functions above, which are now deprecated.
+	int getX() const { return m_iX; } // (exposed to Python)
+	int getY() const { return m_iY; } // (exposed to Python)
+	// </trs.>
 	bool at(int iX, int iY) const;																																		// Exposed to Python
 // BUG - Lat/Long Coordinates - start
 	int calculateMinutes(int iPlotIndex, int iPlotCount, bool bWrap, int iDegreeMin, int iDegreeMax) const;

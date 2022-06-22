@@ -508,6 +508,10 @@ void CvUnit::kill(bool bDelay, PlayerTypes ePlayer)
 	PlayerTypes eCapturingPlayer;
 	UnitTypes eCaptureUnitType;
 
+	// <trs.found-border>
+	if (isFound() && isHuman())
+		updateFoundingBorder(true); // </trs.found-border>
+
 	pPlot = plot();
 	FAssertMsg(pPlot != NULL, "Plot is not assigned a valid value");
 
@@ -1586,6 +1590,10 @@ bool CvUnit::isActionRecommended(int iAction)
 		return false;
 	}
 
+	// <trs.found-border>
+	if (iAction == 0 && isFound())
+		updateFoundingBorder(); // </trs.found-border>
+
 	if (GET_PLAYER(getOwnerINLINE()).isOption(PLAYEROPTION_NO_UNIT_RECOMMENDATIONS))
 	{
 		return false;
@@ -1794,6 +1802,52 @@ bool CvUnit::isActionRecommended(int iAction)
 	}
 
 	return false;
+}
+
+// trs.found-border, trs.found.yield:
+void CvUnit::updateFoundingBorder(bool bForceClear) const
+{
+	if (!GC.getGame().isFinalInitialized())
+		return;
+	enum FoundingBorderModes { NONE, INNER, BFC };
+	FoundingBorderModes eMode = (FoundingBorderModes)getBugOptionINT(
+			"Taurus__FoundingBorder");
+	if (getBugOptionBOOL("Taurus__FoundingYields") && eMode == INNER)
+		return; // BtS behavior
+	gDLL->getEngineIFace()->clearAreaBorderPlots(AREA_BORDER_LAYER_FOUNDING_BORDER);
+	if (bForceClear || eMode == NONE || !isFound())
+		return;
+	for (CLLNode<IDInfo>* pNode = getGroup()->headUnitNode(); pNode != NULL;
+		pNode = getGroup()->nextUnitNode(pNode))
+	{
+		CvUnit const* pUnit = ::getUnit(pNode->m_data);
+		if (pUnit == NULL || (pUnit->IsSelected() && !pUnit->isFound()))
+			return;
+	}
+	CvPlot* pGoToPlot = gDLL->getInterfaceIFace()->getGotoPlot();
+	CvPlot* pCenter = (pGoToPlot == NULL ? plot() : pGoToPlot);
+	if (pCenter == NULL || !pCenter->isRevealed(GET_PLAYER(getOwner()).getTeam(), false) ||
+		(!atPlot(pCenter) && !canMoveInto(pCenter)) || !canFound(pCenter))
+	{
+		return;
+	}
+	ColorTypes eColor = (ColorTypes)GC.getPlayerColorInfo(
+			GET_PLAYER(getOwner()).getPlayerColor()).getColorTypePrimary();
+	NiColorA const& kColor = GC.getColorInfo(eColor).getColor();
+	int const iRadius = (eMode == INNER ? 1 : CITY_PLOTS_RADIUS);
+	for (int iDX = -iRadius; iDX <= iRadius; iDX++)
+	{
+		for (int iDY = -iRadius; iDY <= iRadius; iDY++)
+		{
+			CvPlot* pLoopPlot = ::plotXY(pCenter->getX(), pCenter->getY(), iDX, iDY);
+			if (pLoopPlot != NULL && plotDistance(pLoopPlot, pCenter) <= iRadius)
+			{
+				gDLL->getEngineIFace()->fillAreaBorderPlot(
+						pLoopPlot->getX(), pLoopPlot->getY(),
+						kColor, AREA_BORDER_LAYER_FOUNDING_BORDER);
+			}
+		}
+	}
 }
 
 
@@ -13008,7 +13062,11 @@ bool CvUnit::shouldShowEnemyGlow(TeamTypes eForTeam) const
 
 bool CvUnit::shouldShowFoundBorders() const
 {
-	return isFound();
+	//return isFound();
+	// <trs.found-yield>
+	if (getBugOptionBOOL("Taurus__FoundingYields", false))
+		return isFound();
+	return false; // </trs.found-yield>
 }
 
 

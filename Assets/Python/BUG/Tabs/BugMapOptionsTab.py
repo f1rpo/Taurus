@@ -63,6 +63,8 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		# </trs.balloon>
 		# trs.start-with-resources:
 		self.addCheckbox(screen, panel, "Taurus__StartWithResourceDisplay")
+		self.addCheckbox(screen, panel, "Taurus__FoundingYields") # trs.found-yield
+		self.addTextDropdown(screen, panel, panel, "Taurus__FoundingBorder") # trs.found.border
 		
 	def createCityBarPanel(self, screen, panel):
 		self.addLabel(screen, panel, "CityBar", "CityBar:")

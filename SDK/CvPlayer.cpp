@@ -2148,6 +2148,9 @@ CvSelectionGroup* CvPlayer::cycleSelectionGroups(CvUnit* pUnit, bool bForward, b
 
 	if (pUnit != NULL)
 	{
+		// <trs.found-border>
+		if (pUnit->isFound())
+			pUnit->updateFoundingBorder(true); // </trs.found-border>
 		while (pSelectionGroupNode != NULL)
 		{
 			if (getSelectionGroup(pSelectionGroupNode->m_data) == pUnit->getGroup())
