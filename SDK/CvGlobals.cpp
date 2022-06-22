@@ -241,6 +241,8 @@ m_iUSE_ON_UNIT_LOST_CALLBACK(0),
 m_paHints(NULL),
 m_paMainMenus(NULL)
 {
+	// trs.camspeed:
+	m_ffCAMERA_SCROLL_SPEED_Original.first = m_ffCAMERA_SCROLL_SPEED_Original.second = 0;
 }
 
 CvGlobals::~CvGlobals()
@@ -646,6 +648,27 @@ void CvGlobals::updateDefaultCamDistance()
 	}
 	setDefineFLOAT("CAMERA_START_DISTANCE", fDist, false);
 	m_fCAMERA_START_DISTANCE = fDist;
+}
+
+// trs.camspeed:
+void CvGlobals::updateCamScrollSpeed()
+{
+	enum CamScrollSpeedChoices { VERY_SLOW, SLOW, MEDIUM, FAST, VERY_FAST };
+	std::pair<float,float> ffSpeed;
+	switch ((CamScrollSpeedChoices)getBugOptionINT("Taurus__CamScrollSpeed"))
+	{
+	case VERY_SLOW:
+		ffSpeed = std::make_pair(100.f, 1000.f);
+		break;
+	case SLOW: ffSpeed = std::make_pair(200.f, 1400.f); break;
+	/*	Not increasing the min speed much b/c that'll make it difficult to
+		position the camera at a precise location */
+	case FAST: ffSpeed = std::make_pair(2800.f, 325.f); break;
+	case VERY_FAST: ffSpeed = std::make_pair(4000.f, 450.f); break;
+	default: ffSpeed = m_ffCAMERA_SCROLL_SPEED_Original;
+	}
+	setDefineFLOAT("CAMERA_MIN_SCROLL_SPEED", ffSpeed.first, false);
+	setDefineFLOAT("CAMERA_MAX_SCROLL_SPEED", ffSpeed.second, false);
 }
 
 bool& CvGlobals::getLogging()
@@ -2702,6 +2725,12 @@ void CvGlobals::cacheGlobals()
 	if (m_fCAMERA_START_DISTANCE_Original <= 0)
 		m_fCAMERA_START_DISTANCE_Original = std::max(500.f, m_fCAMERA_START_DISTANCE);
 	// </trs.camdist>
+	// <trs.camspeed>
+	if (m_ffCAMERA_SCROLL_SPEED_Original.first <= 0)
+	{
+		m_ffCAMERA_SCROLL_SPEED_Original.first = getDefineFLOAT("CAMERA_MIN_SCROLL_SPEED");
+		m_ffCAMERA_SCROLL_SPEED_Original.second = getDefineFLOAT("CAMERA_MAX_SCROLL_SPEED");
+	} // </trs.camspeed>
 	m_fAIR_BOMB_HEIGHT = getDefineFLOAT("AIR_BOMB_HEIGHT");
 	m_fPLOT_SIZE = getDefineFLOAT("PLOT_SIZE");
 	m_fCAMERA_SPECIAL_PITCH = getDefineFLOAT("CAMERA_SPECIAL_PITCH");

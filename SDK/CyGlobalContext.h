@@ -318,6 +318,7 @@ public:
 	int getCITY_HOME_PLOT() const { return GC.getCITY_HOME_PLOT(); }
 
 	void updateDefaultCamDistance(); // trs.camdist
+	void updateCamScrollSpeed(); // trs.camspeed
 
 // BUG - DLL Info - start
 	bool isBull() const { return GC.isBull(); }												// Exposed to Python

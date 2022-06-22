@@ -639,3 +639,9 @@ void CyGlobalContext::updateDefaultCamDistance()
 {
 	GC.updateDefaultCamDistance();
 }
+
+// trs.camspeed:
+void CyGlobalContext::updateCamScrollSpeed()
+{
+	GC.updateCamScrollSpeed();
+}

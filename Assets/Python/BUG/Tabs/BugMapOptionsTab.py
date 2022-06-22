@@ -26,7 +26,9 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.createOtherLayersPanel(screen, leftR) # trs. New panel.
 		self.createCityBarPanel(screen, center)
 		self.createTileHoverPanel(screen, center)
-		self.createCameraPanel(screen, right) # trs.camdist
+		# <trs>
+		self.createCameraPanel(screen, right)
+		self.addSpacer(screen, right, "BetweenCameraAndMisc") # </trs.>
 		self.createMiscellaneousPanel(screen, right)
 		
 		screen.attachHSeparator(column, column + "Sep1")
@@ -80,17 +82,20 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addCheckbox(screen, panel, "MiscHover__PartialBuilds")
 		self.addCheckbox(screen, panel, "MiscHover__LatLongCoords")
 
-	# trs.camdist:
+	# trs.
 	def createCameraPanel(self, screen, panel):
 		self.addLabel(screen, panel, "Camera", "Camera:")
 		# FoV options moved from Misc. panel ...
 		self.addCheckbox(screen, panel, "MainInterface__FieldOfView")
 		self.addCheckbox(screen, panel, "MainInterface__FieldOfView_Remember", True)
+		# trs.camdist:
 		self.addTextDropdown(screen, panel, panel, "Taurus__DefaultCamDistance")
+		# trs.camspeed:
+		self.addTextDropdown(screen, panel, panel, "Taurus__CamScrollSpeed")
 		
 	def createMiscellaneousPanel(self, screen, panel):
 		self.addLabel(screen, panel, "Misc", "Misc:")
-		# (trs.camdist: FoV options moved into a separate panel)
+		# (trs. FoV options moved into a separate panel.)
 		self.addCheckbox(screen, panel, "EventSigns__Enabled")
 		# (trs. Remove-feature effects moved to General tab,
 		# harmless Barbarians to Alerts tab.)

@@ -119,6 +119,7 @@ void CyGlobalContextPythonInterface1(python::class_<CyGlobalContext>& x)
 		.def("getActionInfo", &CyGlobalContext::getActionInfo, python::return_value_policy<python::reference_existing_object>(), "(ActionID) - CvInfo for ActionID")
 
 		.def("updateDefaultCamDistance", &CyGlobalContext::updateDefaultCamDistance, "void (void)") // trs.camdist
+		.def("updateCamScrollSpeed", &CyGlobalContext::updateCamScrollSpeed, "void (void)") // trs.camspeed
 
 // BUG - DLL Info - start
 		.def("isBull", &CyGlobalContext::isBull, "bool () - returns true to mark presence of BULL")

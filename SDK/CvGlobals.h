@@ -196,6 +196,7 @@ public:
 
 	DllExport NiPoint3& getPt3CameraDir();
 	void updateDefaultCamDistance(); // trs.camdist (exposed to Python)
+	void updateCamScrollSpeed(); // trs.camspeed (exposed to Python)
 
 	DllExport bool& getLogging();
 	DllExport bool& getRandLogging();
@@ -1200,6 +1201,7 @@ protected:
 	float m_fCAMERA_MAX_TRAVEL_DISTANCE;
 	float m_fCAMERA_START_DISTANCE;
 	float m_fCAMERA_START_DISTANCE_Original; // trs.camdist
+	std::pair<float,float> m_ffCAMERA_SCROLL_SPEED_Original; // trs.camspeed
 	float m_fAIR_BOMB_HEIGHT;
 	float m_fPLOT_SIZE;
 	float m_fCAMERA_SPECIAL_PITCH;

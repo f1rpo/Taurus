@@ -48,7 +48,6 @@
 				<choice id="CityCross"/>
 			</list>
 			<!-- trs.camdist -->
-			<!-- NB: The DLL relies on this order of the choices -->
 			<list   id="DefaultCamDistance" key="Default Cam Distance" 
 					type="int" default="1" listType="string" 
 					values="Automatic|Close|Medium|Far|XML">
@@ -58,6 +57,17 @@
 				<choice id="Medium"/>
 				<choice id="Far"/>
 				<choice id="XML"/>
+			</list>
+			<!-- trs.camspeed -->
+			<list   id="CamScrollSpeed" key="Cam Scroll Speed" 
+					type="int" default="2" listType="string" 
+					values="Very Slow|Slow|Medium|Fast|Very Fast">
+				<change module="Taurus" function="updateCamScrollSpeed"/>
+				<choice id="VerySlow"/>
+				<choice id="Slow"/>
+				<choice id="Medium"/>
+				<choice id="Fast"/>
+				<choice id="VeryFast"/>
 			</list>
 
 		</section>

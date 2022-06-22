@@ -102,6 +102,25 @@
 	</TEXT>
 	<!-- trs.camdist: end -->
 
+	<!-- trs.camspeed: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__CAMSCROLLSPEED_TEXT</Tag>
+		<English>Scroll Speed</English>
+		<German>Scroll-Tempo</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__CAMSCROLLSPEED_HOVER</Tag>
+		<English>Speed of camera movement when moving the cursor to an edge of the screen or pressing an arrow key. [COLOR_HIGHLIGHT_TEXT]Medium[COLOR_REVERT] is the same speed as in BtS unless you've changed the variables [COLOR_BUILDING_TEXT]CAMERA_MIN_SCROLL_SPEED[COLOR_REVERT] or [COLOR_BUILDING_TEXT]CAMERA_MAX_SCROLL_SPEED[COLOR_REVERT] in [COLOR_BUILDING_TEXT]GlobalDefinesAlt.xml[COLOR_REVERT].</English>
+		<German>Geschwindigkeit, mit der sich die Kamera in eine Himmelsrichtungen bewegt, wenn der Mauszeiger sich am Bildschirmrand befindet oder eine Pfeil-Taste gedrückt wird. [COLOR_HIGHLIGHT_TEXT]Mittel[COLOR_REVERT] bedeutet, dass die Variablen [COLOR_BUILDING_TEXT]CAMERA_MIN_SCROLL_SPEED[COLOR_REVERT] und [COLOR_BUILDING_TEXT]CAMERA_MAX_SCROLL_SPEED[COLOR_REVERT] aus [COLOR_BUILDING_TEXT]GlobalDefinesAlt.xml[COLOR_REVERT] geladen werden. Normalerweise stehen dort die mittel-schnellen BtS-Werte.</German>
+	</TEXT>
+	<!-- (No room for German "Langsam") -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__CAMSCROLLSPEED_LIST</Tag>
+		<English>Very Slow|Slow|Medium|Fast|Very Fast</English>
+		<German>1|2|3 (Mittel)|4|5</German>
+	</TEXT>
+	<!-- trs.camspeed: end -->
+
 	<!-- trs.wcitybars: start -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TAURUS__WIDECITYBARS_TEXT</Tag>

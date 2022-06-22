@@ -38,6 +38,7 @@ void setIsBug(bool bIsBug)
 	/*	trs.camdist: (NB: This is too late to affect the distance at the start
 		of a new game) */
 	GC.updateDefaultCamDistance();
+	GC.updateCamScrollSpeed(); // trs.camspeed
 }
 
 

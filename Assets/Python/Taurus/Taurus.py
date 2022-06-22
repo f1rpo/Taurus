@@ -14,6 +14,10 @@ def updatePlotIndicatorSize(option, value):
 def updateDefaultCamDistance(option, value):
 	gc.updateDefaultCamDistance()
 
+# trs.camSpeed:
+def updateCamScrollSpeed(option, value):
+	gc.updateCamScrollSpeed()
+
 # trs.modname:
 def exportSaveGame(argsList):
 	gc.getGame().exportSaveGame()

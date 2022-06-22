@@ -19,6 +19,20 @@
 		<DefineName>CAMERA_START_DISTANCE</DefineName>
 		<fDefineFloatVal>2200</fDefineFloatVal>
 	</Define>
+	<!-- trs.camspeed: start -->
+	<!-- Same deal as above - these are as in BtS and get used when the
+		 Camera Scroll Speed option is set to "XML".
+		 While scrolling, the camera acelerates from the MIN speed value
+		 to the MAX within a second or so. -->
+	<Define>
+		<DefineName>CAMERA_MIN_SCROLL_SPEED</DefineName>
+		<fDefineFloatVal>300</fDefineFloatVal>
+	</Define>
+	<Define>
+		<DefineName>CAMERA_MAX_SCROLL_SPEED</DefineName>
+		<fDefineFloatVal>1800</fDefineFloatVal>
+	</Define>
+	<!-- trs.camspeed: end -->
 
 	<!--
 		Taurus defines ...
