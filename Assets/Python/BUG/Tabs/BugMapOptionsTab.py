@@ -92,9 +92,8 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addLabel(screen, panel, "Misc", "Misc:")
 		# (trs.camdist: FoV options moved into a separate panel)
 		self.addCheckbox(screen, panel, "EventSigns__Enabled")
-		self.addCheckbox(screen, panel, "Actions__IgnoreHarmlessBarbarians")
-		self.addCheckbox(screen, panel, "MiscHover__RemoveFeatureHealthEffects")
-		self.addCheckbox(screen, panel, "MiscHover__RemoveFeatureHealthEffectsCountOtherTiles", True)
+		# (trs. Remove-feature effects moved to General tab,
+		# harmless Barbarians to Alerts tab.)
 		
 	def createCityTileStatusPanel(self, screen, panel):
 		left, center, right = self.addThreeColumnLayout(screen, panel, "CityPlotsEnabled", True)

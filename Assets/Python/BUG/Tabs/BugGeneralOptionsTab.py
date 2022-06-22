@@ -29,7 +29,7 @@ class BugGeneralOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.createLeaderheadPanel(screen, left)
 		
 		self.createAutoSavePanel(screen, center)
-		self.addSpacer(screen, center, "General3")
+		#self.addSpacer(screen, center, "General3") # trs. Need to fill this space.
 		self.createActionsPanel(screen, center)
 		
 		self.createInfoPanePanel(screen, right)
@@ -66,6 +66,10 @@ class BugGeneralOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addCheckbox(screen, panel, "Actions__SentryHealingOnlyNeutral", True)
 		self.addCheckbox(screen, panel, "Actions__PreChopForests")
 		self.addCheckbox(screen, panel, "Actions__PreChopImprovements")
+		# <trs.> Moved from the Map tab.
+		self.addCheckbox(screen, panel, "MiscHover__RemoveFeatureHealthEffects")
+		self.addCheckbox(screen, panel, "MiscHover__RemoveFeatureHealthEffectsCountOtherTiles", True)
+		# </trs.>
 		
 	def createTechSplashPanel(self, screen, panel):
 		self.addLabel(screen, panel, "TechWindow", "Tech Splash Screen:")
