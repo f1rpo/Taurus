@@ -27,7 +27,9 @@
 				<choice id="Disable"/>
 			</list>
 			<!-- trs.balloon: end -->
-
+			<!-- trs.start-with-resources -->
+			<option id="StartWithResourceDisplay" key="Start With Resource Display" 
+					type="boolean" default="True" />
 			<!-- trs.wcitybars -->
 			<option id="WideCityBars" key="Wide City Bars"
 					type="boolean" default="True">

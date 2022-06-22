@@ -34,6 +34,25 @@
 	</TEXT>
 	<!-- trs.balloon: end -->
 
+	<!-- trs.start-with-resources: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__STARTWITHRESOURCEDISPLAY_TEXT</Tag>
+		<English>Start with Resource Display</English>
+		<French>Symboles de ressources au début du jeu</French>
+		<German>Ressourcenanzeige bei Spielstart</German>
+		<Italian>Mostra risorse all'inizio del gioco</Italian>
+		<Spanish>Muestra recursos al inicio del juego</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__STARTWITHRESOURCEDISPLAY_HOVER</Tag>
+		<English>When checked, the Resource Display (balloon icons) is enabled at the start of every new game.</English>
+		<French>Active l'affichage des ressources au début du jeu.</French>
+		<German>Aktiviert die Ressourcenanzeige zu Spielbeginn.</German>
+		<Italian>Abilita la segnalazione delle risorse all'inizio del gioco.</Italian>
+		<Spanish>Activa las marcas de recursos al inicio del juego.</Spanish>
+	</TEXT>
+	<!-- trs.start-with-resources: end -->
+
 	<!-- trs.wcitybars: start -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TAURUS__WIDECITYBARS_TEXT</Tag>

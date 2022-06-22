@@ -26,6 +26,7 @@
 #include "CvMessageControl.h"
 #include "ModName.h" // trs.bat
 #include "SelfMod.h" // trs.lma
+#include "CvBugOptions.h" // trs.start-with-resources
 
 // interface uses
 #include "CvDLLInterfaceIFaceBase.h"
@@ -2100,6 +2101,10 @@ void CvGame::update()
 		if (getTurnSlice() == 0)
 		{
 			gDLL->getEngineIFace()->AutoSave(true);
+			// <trs.start-with-resources>
+			gDLL->getEngineIFace()->setResourceLayer(getBugOptionBOOL(
+					"Taurus__StartWithResourceDisplay"));
+			// </trs.start-with-resources>
 		}
 
 		if (getNumGameTurnActive() == 0)

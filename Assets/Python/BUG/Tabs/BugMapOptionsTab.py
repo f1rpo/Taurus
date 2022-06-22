@@ -61,6 +61,8 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addTextDropdown(screen, panel, panel, "Taurus__PlotIndicatorSize")
 		self.addTextDropdown(screen, panel, panel, "Taurus__OffScreenUnitSizeMult")
 		# </trs.balloon>
+		# trs.start-with-resources:
+		self.addCheckbox(screen, panel, "Taurus__StartWithResourceDisplay")
 		
 	def createCityBarPanel(self, screen, panel):
 		self.addLabel(screen, panel, "CityBar", "CityBar:")
