@@ -7,6 +7,7 @@
 #include "CvDLLUtilityIFaceBase.h"
 #include "CvGameAI.h"
 #include "CvGameCoreUtils.h"
+#include "CvDLLInterfaceIFaceBase.h" // trs. (for setting Score_DIRTY_BIT)
 
 // BUG - Save Format - start
 #include "BugMod.h"
@@ -1318,6 +1319,8 @@ void CvInitCore::setLeaderName(PlayerTypes eID, const CvWString & szLeaderName)
 		gDLL->stripSpecialCharacters(szName);
 
 		m_aszLeaderName[eID] = szName;
+		// trs.fix (from AdvCiv):
+		gDLL->getInterfaceIFace()->setDirty(Score_DIRTY_BIT, true);
 	}
 }
 
@@ -1359,6 +1362,8 @@ void CvInitCore::setCivDescription(PlayerTypes eID, const CvWString & szCivDescr
 		CvWString szName = szCivDescription;
 		gDLL->stripSpecialCharacters(szName);
 		m_aszCivDescription[eID] = szName;
+		// trs.fix:
+		gDLL->getInterfaceIFace()->setDirty(Score_DIRTY_BIT, true);
 	}
 }
 
@@ -1401,6 +1406,8 @@ void CvInitCore::setCivShortDesc(PlayerTypes eID, const CvWString & szCivShortDe
 		CvWString szName = szCivShortDesc;
 		gDLL->stripSpecialCharacters(szName);
 		m_aszCivShortDesc[eID] = szName;
+		// trs.fix:
+		gDLL->getInterfaceIFace()->setDirty(Score_DIRTY_BIT, true);
 	}
 }
 
