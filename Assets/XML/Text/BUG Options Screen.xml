@@ -80,13 +80,12 @@
 		<Italian>Leaderheads:</Italian>
 		<Spanish>Leaderheads:</Spanish>
 	</TEXT>
+	<!-- (trs.savtab: TXT_KEY_BUG_OPTLABEL_AUTOSAVE moved down) -->
+	<!-- trs.noflash -->
 	<TEXT>
-		<Tag>TXT_KEY_BUG_OPTLABEL_AUTOSAVE</Tag>
-		<English>AutoSave:</English>
-		<French>AutoSave:</French>
-		<German>Automatisches Speichern:</German>
-		<Italian>Salvataggio automatico:</Italian>
-		<Spanish>AutoSave:</Spanish>
+		<Tag>TXT_KEY_BUG_OPTLABEL_FLASHHINTS</Tag>
+		<English>Flashing Hints:</English>
+		<German>Blinkende Hinweise:</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTLABEL_ACTIONS</Tag>
@@ -142,6 +141,31 @@
 		<Italian>Il file 'BUG Mod.ini' non è stato trovato</Italian>
 		<Spanish>Cannot Find INI File</Spanish>
 	</TEXT>
+
+	<!-- trs.savtab: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPTTAB_SAVES</Tag>
+		<English>Saves</English>
+		<German>Spielstände</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPTLABEL_COMPAT</Tag>
+		<English>Compatibility:</English>
+		<German>Kompatibilität:</German>
+	</TEXT>
+	<!-- trs.savmsg -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPTLABEL_SAVEMSG</Tag>
+		<English>Feedback:</English>
+		<German>Rückmeldung:</German>
+	</TEXT>
+	<!-- Moved from General tab, renamed from "AutoSaves". -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPTLABEL_AUTOSAVE</Tag>
+		<English>Start/ End Saves:</English>
+		<German>Start-/ End-Spielstand:</German>
+	</TEXT>
+	<!-- trs.savtab: end -->
 	
 	<!-- Map Tab -->
 	
@@ -586,13 +610,18 @@
 	
 	<!-- Logging Tab -->
 	
-	<TEXT>
+	<!--TEXT>
 		<Tag>TXT_KEY_BUG_OPTTAB_AUTOLOG</Tag>
 		<English>Logging</English>
 		<French>Log</French>
 		<German>Protokollierung</German>
 		<Italian>Registro</Italian>
 		<Spanish>Logging</Spanish>
+	</TEXT-->
+	<!-- trs. Renamed b/c there's also a logging option on the System tab. -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPTTAB_AUTOLOG</Tag>
+		<English>AutoLog</English>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTLABEL_AUTOLOG_BUILDS</Tag>

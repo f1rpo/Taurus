@@ -21,16 +21,27 @@ class BugGeneralOptionsTab(BugOptionsTab.BugOptionsTab):
 		column = self.addOneColumnLayout(screen, panel)
 		
 		left, center, right = self.addThreeColumnLayout(screen, column, "Top", True)
-		
-		self.createGreatPersonGeneralPanel(screen, left)
-		self.addSpacer(screen, left, "General1")
-		self.createTechSplashPanel(screen, left)
-		self.addSpacer(screen, left, "General2")
-		self.createLeaderheadPanel(screen, left)
-		
-		self.createAutoSavePanel(screen, center)
-		#self.addSpacer(screen, center, "General3") # trs. Need to fill this space.
-		self.createActionsPanel(screen, center)
+
+		# <trs.noflash>
+		# Moved from System tab
+		self.addCheckbox(screen, left, "MainInterface__OptionsButton")
+		self.createFlashHintsPanel(screen, left)
+		# left and center swapped
+		self.createActionsPanel(screen, left)
+		# </trs.noflash>
+
+		# trs.noflash: now center
+		self.createGreatPersonGeneralPanel(screen, center)
+		self.addSpacer(screen, center, "General1")
+		self.createTechSplashPanel(screen, center)
+		self.addSpacer(screen, center, "General2")
+		self.createLeaderheadPanel(screen, center)
+
+		# trs.savtab: Moved to Saves tab
+		#self.createAutoSavePanel(screen, center)
+		#self.addSpacer(screen, center, "General3")
+		# trs.noflash: now left (see above)
+		#self.createActionsPanel(screen, center)
 		
 		self.createInfoPanePanel(screen, right)
 		#self.addSpacer(screen, right, "General4") # trs.promoleads: Need the space
@@ -51,13 +62,16 @@ class BugGeneralOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addCheckbox(screen, panel, "MiscHover__LeaderheadHiddenAttitude")
 		self.addCheckbox(screen, panel, "MiscHover__LeaderheadWorstEnemy")
 		self.addCheckbox(screen, panel, "MiscHover__LeaderheadDefensivePacts")
-		
-	def createAutoSavePanel(self, screen, panel):
-		self.addLabel(screen, panel, "AutoSave", "AutoSave:")
-		self.addCheckbox(screen, panel, "AutoSave__CreateStartSave")
-		self.addCheckbox(screen, panel, "AutoSave__CreateEndSave")
-		self.addCheckbox(screen, panel, "AutoSave__CreateExitSave")
-		self.addCheckbox(screen, panel, "AutoSave__UsePlayerName")
+
+	# trs.savtab: Moved to Saves tab
+	#def createAutoSavePanel(self, screen, panel): ...
+
+	# trs.noflash:
+	def createFlashHintsPanel(self, screen, panel):
+		self.addLabel(screen, panel, "FlashHints")
+		# Moved from System tab
+		self.addCheckbox(screen, panel, "MainInterface__OptionsKey")
+		# tbd.
 		
 	def createActionsPanel(self, screen, panel):
 		self.addLabel(screen, panel, "Actions", "Actions:")

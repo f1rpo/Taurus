@@ -33,9 +33,10 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		
 		screen.attachHSeparator(column, column + "Sep1")
 		self.createCityTileStatusPanel(screen, column)
-		
-		screen.attachHSeparator(column, column + "Sep2")
-		self.createMapFinderPanel(screen, column)
+
+		# trs.savtab: Moved to Saves tab
+		#screen.attachHSeparator(column, column + "Sep2")
+		#self.createMapFinderPanel(screen, column)
 		
 	def createStrategyLayerPanel(self, screen, panel):
 		self.addLabel(screen, panel, "StrategyOverlay", "Strategy Layer:")
@@ -117,22 +118,6 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addCheckbox(screen, three, "CityBar__NotWorkingImprovablePlot")
 		self.addCheckbox(screen, four, "CityBar__NotWorkingImprovableBonusPlot")
 		self.addCheckbox(screen, five, "CityBar__NotWorkingUnimprovablePlot")
-		
-	def createMapFinderPanel(self, screen, panel):
-		left, right = self.addTwoColumnLayout(screen, panel, "MapFinderEnabled", True)
-		self.addLabel(screen, left, "MapFinder", "MapFinder:")
-		self.addCheckbox(screen, right, "MapFinder__Enabled")
-		
-		self.addTextEdit(screen, panel, panel, "MapFinder__Path")
-		self.addTextEdit(screen, panel, panel, "MapFinder__SavePath")
-		
-		left, right = self.addTwoColumnLayout(screen, panel, "MapFinderOptions", True)
-		leftL, leftR = self.addTwoColumnLayout(screen, left, "MapFinderDelays")
-		self.addFloatDropdown(screen, leftL, leftR, "MapFinder__RegenerationDelay")
-		self.addFloatDropdown(screen, leftL, leftR, "MapFinder__SkipDelay")
-		self.addFloatDropdown(screen, leftL, leftR, "MapFinder__SaveDelay")
-		
-		rightL, rightR = self.addTwoColumnLayout(screen, right, "MapFinderLimits")
-		self.addTextEdit(screen, rightL, rightR, "MapFinder__RuleFile")
-		self.addTextEdit(screen, rightL, rightR, "MapFinder__RegenerationLimit")
-		self.addTextEdit(screen, rightL, rightR, "MapFinder__SaveLimit")
+
+	# trs.savtab: Moved to Saves tab
+	#def createMapFinderPanel(self, screen, panel): ...

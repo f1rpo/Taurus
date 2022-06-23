@@ -14,7 +14,7 @@
 
 	<!-- trs.camdist: As in BtS, copied here for the user's convenience.
 		 This value only gets used when the Default Camera Distance option
-		 (Map tab of the Mod Options screen) is set to "XML". -->
+		 (Map tab of the mod options screen) is set to "XML". -->
 	<Define>
 		<DefineName>CAMERA_START_DISTANCE</DefineName>
 		<fDefineFloatVal>2200</fDefineFloatVal>
@@ -49,8 +49,8 @@
 
 	<!-- trs.modname: start -->
 	<!-- This string (to be typed w/o quotation marks) is
-		 only used when the Save Mod Name option on the System tab of the
-		 Mod Options screen is _not_ checked.
+		 only used when the Save Mod Name option on the Saves tab of the
+		 mod options screen is _not_ checked.
 		 The string gets written into savegames as the name of the mod.
 		 An empty string allows unmodified BtS to load the mod's savegames.
 		 (For exporting a savegame to another mod, e.g. BUG, it should be
@@ -90,7 +90,7 @@
 	<!-- trs.replayname:
 		 If set to 0, the Taurus Hall of Fame screen lists only replays of
 		 Taurus games. (Such replays can be correctly identified even when the
-		 "Mod Name in Replays" option on the System tab of the mod
+		 "Mod Name in Replays" option on the Saves tab of the mod
 		 options screen has been disabled.)
 		 If set to 1, the Taurus Hall of Fame screen also lists replays of
 		 BtS games played without mods.
@@ -122,7 +122,7 @@
 		 In any case, LMA is never _written_ into savegames that are exported
 		 through Ctrl+Shift+S. For values 1 and 2, LMA _will_ be written into
 		 (non-exported) Taurus savegames even if the Save Mod Name option on
-		 the Mod Option screen is disabled. (BtS will then be unable to load
+		 the mod option screen is disabled. (BtS will then be unable to load
 		 those saves.)
 
 		 Caveat: When not disabled, the LMA check in the EXE may crash to

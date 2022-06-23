@@ -16,11 +16,9 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_MAPFINDER__ENABLED_HOVER</Tag>
-		<English>When checked, the shortcut keys for regenerating the map (ALT + G) and starting/stopping MapFinder (ALT + CTRL + G) are active.</English>
-		<French>When checked, the shortcut keys for regenerating the map (ALT + G) and starting/stopping MapFinder (ALT + CTRL + G) are active.</French>
-		<German>Aktiviert die Tastenkombinationen, um eine Karte neu erstellen zu lassen ([ALT + G]) und den MapFinder zu starten/stoppen ([STRG + ALT + G])</German>
+		<English>When checked, the shortcut keys for regenerating the map (ALT + G) and starting/stopping MapFinder (ALT + CTRL + G) are active. The latter part [BOLD]requires the external MapFinder tool[\BOLD] to be installed; see the "MapFinder" tab on the webpage [COLOR_HIGHLIGHT_TEXT]hof.civfanatics.net/civ4/mod.php[COLOR_REVERT].</English>
+		<German>Aktiviert die Tastenkombinationen, um eine Karte neu erstellen zu lassen ([ALT + G]) und den MapFinder zu starten/stoppen ([STRG + ALT + G]). Letzteres [BOLD]erfordert die Installation des externen MapFinder-Tools[\BOLD]; siehe dazu den Reiter "MapFinder" auf der Webseite [COLOR_HIGHLIGHT_TEXT]hof.civfanatics.net/civ4/mod.php[COLOR_REVERT].</German>
 		<Italian>Quando è selezionato, sono attive le scorciatoie da tastiera per rigenerare la mappa (ALT + G) e per lanciare/fermare MapFinder (ALT + CTRL + G).</Italian>
-		<Spanish>When checked, the shortcut keys for regenerating the map (ALT + G) and starting/stopping MapFinder (ALT + CTRL + G) are active.</Spanish>
 	</TEXT>
 	
 	<TEXT>

@@ -14,11 +14,12 @@
 		<Italian>Promemoria della combinazione per accedere alle Opzioni del</Italian>
 		<Spanish>Options Shortcut Reminder</Spanish>
 	</TEXT>
+	<!-- trs. Mention the auto-disable behavior. -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_MAININTERFACE__OPTIONSKEY_HOVER</Tag>
-		<English>When checked, displays a message about Alt + Ctrl + O when a game is started or loaded.</English>
+		<English>When checked, displays a message about Alt + Ctrl + O when a game is started or loaded. This should become disabled automatically once the mod options screen has been accessed once - and stay enabled permanently if re-enabled manually.</English>
 		<French>En activant, en rappel sur l'utilisation de Alt + Ctrl + O est montré quand un jeu démarre ou est chargé.</French>
-		<German>Zeigt nach dem Spielstart oder dem Laden eines Spielstands eine Meldung, die an die Tastenkombination [STRG + ALT + O] erinnert, mit der man die Optionen der "BUG Mod" aufrufen kann</German>
+		<German>Zeigt nach dem Spielstart oder dem Laden eines Spielstands eine Meldung, die an die Tastenkombination [STRG + ALT + O] erinnert, mit der man das Mod-Optionsmenü aufrufen kann. Nach einmaligem Aufruf des Menüs deaktiviert sich der Hinweis automatisch; wird er manuell reaktiviert, dann bleibt er aktiviert.</German>
 		<Italian>Quando è selezionato, mostra un messaggio che ricorda la combinazione di tasti per accedere al Menù delle Opzioni del BUG Mod quando un gioco viene iniziato o caricato .</Italian>
 		<Spanish>When checked, displays a message about Alt + Ctrl + O when a game is started or loaded.</Spanish>
 	</TEXT>
@@ -30,13 +31,11 @@
 		<Italian>Options Button</Italian>
 		<Spanish>Options Button</Spanish>
 	</TEXT>
+	<!-- trs. Rewritten. -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_MAININTERFACE__OPTIONSBUTTON_HOVER</Tag>
-		<English>When checked, shows the BUG Option Screen button.</English>
-		<French>When checked, shows the BUG Option Screen button.</French>
-		<German>Zeigt die Schaltfläche zum Aufruf des Optionensbildschirms der BUG Mod an</German>
-		<Italian>When checked, shows the BUG Option Screen button.</Italian>
-		<Spanish>When checked, shows the BUG Option Screen button.</Spanish>
+		<English>When checked, a button for accessing the mod options screen (i.e. this screen) is shown on the upper left, next to the Event Log button.</English>
+		<German>Zeigt eine Schaltfläche zum Aufruf des Mod-Optionsmenüs in der linken oberen Ecke des Hauptbildschirms.</German>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_MAININTERFACE__GOLDRATEWARNING_TEXT</Tag>

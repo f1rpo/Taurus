@@ -21,32 +21,32 @@ class BugSystemOptionsTab(BugOptionsTab.BugOptionsTab):
 		panel = self.createMainPanel(screen)
 		column = self.addOneColumnLayout(screen, panel)
 
-		# trs: Center column added, position of OptionsButton and OptionsKey swapped.
-		left, center, right = self.addThreeColumnLayout(screen, column, "Bottom", False)
-		self.addCheckbox(screen, left, "MainInterface__OptionsButton")
-		self.addCheckbox(screen, left, "MainInterface__OptionsKey")
-		self.addCheckbox(screen, center, "Taurus__SaveModName") # trs.modname
-		self.addCheckbox(screen, center, "Taurus__ModNameInReplays") # trs.replayname
+		# trs.noflash: Options button and keyboard shortcut reminder moved
+		# to General tab.
+		left, right = self.addTwoColumnLayout(screen, column, "Bottom", False)
+		# trs.noflash: Moved up, into the same row as the version string.
+		self.addLabel(screen, left, "Debug_Logging", "Debugging Output:")
 		screen.setLayoutFlag(right, "LAYOUT_RIGHT")
 		screen.setLayoutFlag(right, "LAYOUT_SIZE_HPREFERREDEXPANDING")
 		self.addLabel(screen, right, "Version", 
 					  CvModName.getDisplayNameAndVersion() + " (" + CvModName.getCivNameAndVersion() + ")")
-		
-#		screen.attachHSeparator(column, column + "Sep1")		
+		# trs.noflash: Nothing left to separate
+		#screen.attachHSeparator(column, column + "Sep1")
+
 #		self.addLabel(screen, column, "Subversion", "Subversion (SVN):")
 #		self.addCheckbox(screen, column, "Core__CheckForUpdates")
 #		columnL, columnR = self.addTwoColumnLayout(screen, column, "Core")
 #		self.addTextEdit(screen, columnL, columnR, "Core__LocalRoot")
 #		self.addTextEdit(screen, columnL, columnR, "Core__RepositoryUrl")
+#		screen.attachHSeparator(column, column + "Sep2")
 
-		screen.attachHSeparator(column, column + "Sep2")
-		self.addLabel(screen, column, "Debug_Logging", "Debugging Output:")
+		# (trs.noflash: Label moved up)
 		left, center, right = self.addThreeColumnLayout(screen, column)
 		self.addTextDropdown(screen, left, left, "Core__ScreenLogLevel")
 		self.addTextDropdown(screen, center, center, "Core__FileLogLevel")
 		self.addCheckbox(screen, right, "Core__LogTime")
-				
 		screen.attachHSeparator(column, column + "Sep3")
+
 		items = BugConfigTracker.combine()
 		itemNum = 0
 #		first = True
