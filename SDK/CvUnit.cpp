@@ -9650,7 +9650,9 @@ void CvUnit::setXY(int iX, int iY, bool bGroup, bool bUpdate, bool bShow, bool b
 				{
 					if (pNewPlot->isVisible((TeamTypes)iI, false))
 					{
-						GET_TEAM((TeamTypes)iI).meet(getTeam(), true);
+						FirstContactData fcData(pNewPlot, NULL, this); // trs.1stcontact
+						GET_TEAM((TeamTypes)iI).meet(getTeam(), true,
+								&fcData); // trs.1stcontact
 					}
 				}
 			}

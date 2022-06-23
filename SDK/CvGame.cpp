@@ -2897,6 +2897,41 @@ void CvGame::updateSecretaryGeneral()
 	}
 }
 
+// <trs.1stcontact> (from AdvCiv)
+CvCity* CvGame::getVoteSourceCity(VoteSourceTypes eVS, TeamTypes eObserver, bool bDebug) const
+{
+	BuildingTypes eVSBuilding = getVoteSourceBuilding(eVS);
+	if (eVSBuilding == NO_BUILDING)
+		return NULL;
+	for (int i = 0; i < MAX_PLAYERS; i++)
+	{
+		CvPlayer const& kCityOwner = GET_PLAYER((PlayerTypes)i);
+		if (!kCityOwner.isAlive())
+			continue;
+		int iIter;
+		for (CvCity* pCity = kCityOwner.firstCity(&iIter); pCity != NULL;
+			pCity = kCityOwner.nextCity(&iIter))
+		{
+			if (eObserver != NO_TEAM && !pCity->isRevealed(eObserver, bDebug))
+				continue;
+			if (pCity->getNumBuilding(eVSBuilding) > 0)
+				return pCity;
+		}
+	}
+	return NULL;
+}
+
+BuildingTypes CvGame::getVoteSourceBuilding(VoteSourceTypes eVS) const
+{
+	for (int i = 0; i < GC.getNumBuildInfos(); i++)
+	{
+		BuildingTypes eLoopBuilding = (BuildingTypes)i;
+		if (GC.getBuildingInfo(eLoopBuilding).getVoteSourceType() == eVS)
+			return eLoopBuilding;
+	}
+	return NO_BUILDING;
+} // </trs.1stcontact>
+
 int CvGame::countCivPlayersAlive() const
 {
 	int iCount = 0;
@@ -9262,7 +9297,19 @@ void CvGame::doVoteSelection()
 
 							if (kTeam2.isAlive() && kTeam2.isVotingMember(eVoteSource))
 							{
-								kTeam1.meet((TeamTypes)iTeam2, true);
+								//kTeam1.meet((TeamTypes)iTeam2, true);
+								// <trs.1stcontact>
+								if (!kTeam1.isHasMet(kTeam2.getID())) // to save time
+								{
+									CvCity const* pSrcCity = getVoteSourceCity(eVoteSource, NO_TEAM);
+									if (pSrcCity == NULL)
+										kTeam1.meet(kTeam2.getID(), true, NULL);
+									else
+									{
+										FirstContactData fcData(pSrcCity->plot());
+										kTeam1.meet(kTeam2.getID(), true, &fcData);
+									}
+								} // </trs.1stcontact>
 							}
 						}
 					}

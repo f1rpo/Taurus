@@ -962,6 +962,7 @@ public:
 
 	PlayerTypes getLiberationPlayer(bool bConquest) const;   // Exposed to Python
 	void liberate(bool bConquest);    // Exposed to Python
+	void meetNewOwner(TeamTypes eOtherTeam, TeamTypes eNewOwner) const; // trs.1stcontact
 
 	void changeNoBonusCount(BonusTypes eBonus, int iChange);   // Exposed to Python
 	int getNoBonusCount(BonusTypes eBonus) const;

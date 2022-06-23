@@ -1686,7 +1686,8 @@ void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, C
 						CvPlot* pPlot = plotXY(getX_INLINE(), getY_INLINE(), dx, dy);
 						if (NULL != pPlot)
 						{
-							pPlot->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), aSeeInvisibleTypes[i], bUpdatePlotGroups);
+							pPlot->changeVisibilityCount(eTeam, ((bIncrement) ? 1 : -1), aSeeInvisibleTypes[i], bUpdatePlotGroups,
+									pUnit); // trs.1stcontact
 						}
 					}
 				}
@@ -1698,8 +1699,10 @@ void CvPlot::changeAdjacentSight(TeamTypes eTeam, int iRange, bool bIncrement, C
 						CvPlot* pPlot = plotXY(getX_INLINE(), getY_INLINE(), dx, dy);
 						if (NULL != pPlot)
 						{
-							pPlot->changeVisibilityCount(eTeam, 1, aSeeInvisibleTypes[i], bUpdatePlotGroups);
-							pPlot->changeVisibilityCount(eTeam, -1, aSeeInvisibleTypes[i], bUpdatePlotGroups);
+							pPlot->changeVisibilityCount(eTeam, 1, aSeeInvisibleTypes[i], bUpdatePlotGroups,
+									pUnit); // trs.1stcontact
+							pPlot->changeVisibilityCount(eTeam, -1, aSeeInvisibleTypes[i], bUpdatePlotGroups,
+									pUnit); // trs.1stcontact
 						}
 					}
 				}
@@ -4753,7 +4756,9 @@ void CvPlot::setOwner(PlayerTypes eNewValue, bool bCheckUnits, bool bUpdatePlotG
 					{
 						if (isVisible((TeamTypes)iI, false))
 						{
-							GET_TEAM((TeamTypes)iI).meet(getTeam(), true);
+							FirstContactData fcData(this); // trs.1stcontact
+							GET_TEAM((TeamTypes)iI).meet(getTeam(), true,
+									&fcData); // trs.1stcontact
 						}
 					}
 				}
@@ -6681,7 +6686,8 @@ int CvPlot::getVisibilityCount(TeamTypes eTeam) const
 }
 
 
-void CvPlot::changeVisibilityCount(TeamTypes eTeam, int iChange, InvisibleTypes eSeeInvisible, bool bUpdatePlotGroups)
+void CvPlot::changeVisibilityCount(TeamTypes eTeam, int iChange, InvisibleTypes eSeeInvisible, bool bUpdatePlotGroups,
+	CvUnit const* pUnit) // trs.1stcontact
 {
 	CvCity* pCity;
 	CvPlot* pAdjacentPlot;
@@ -6730,8 +6736,31 @@ void CvPlot::changeVisibilityCount(TeamTypes eTeam, int iChange, InvisibleTypes 
 
 				if (getTeam() != NO_TEAM)
 				{
-					GET_TEAM(getTeam()).meet(eTeam, true);
+					//GET_TEAM(getTeam()).meet(eTeam, true);
+					// trs.1stcontact:
+					FirstContactData fcData(this, pUnit == NULL ? NULL : pUnit->plot(), pUnit);
+					GET_TEAM(getTeam()).meet(eTeam, true, &fcData);
 				}
+				if (!isBULL12Rules()) // To be on the safe side
+				{
+					// from K-Mod: Meet the owner of any units you can see
+					for (CLLNode<IDInfo>* pNode = headUnitNode(); pNode != NULL;
+						pNode = nextUnitNode(pNode))
+					{
+						CvUnit const* pLoopUnit = ::getUnit(pNode->m_data);
+						if (GET_TEAM(eTeam).isHasMet(
+							GET_PLAYER(pLoopUnit->getOwner()).getTeam()))
+						{
+							continue; // save time
+						}
+						FirstContactData fcData(this,
+								pUnit == NULL ? NULL : pUnit->plot(),
+								pUnit, pLoopUnit);
+						GET_TEAM(eTeam).meet(
+								GET_PLAYER(pLoopUnit->getVisualOwner(eTeam)).getTeam(),
+								true, &fcData);
+					}
+				} // <trs.1stcontact
 			}
 
 			pCity = getPlotCity();

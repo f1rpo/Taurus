@@ -572,6 +572,17 @@
 		<Italian>Vittoria di Dominazione:</Italian>
 		<Spanish>Victory:</Spanish>
 	</TEXT>
+	<!-- trs.1stcontact (from AdvCiv)
+		 (The space matches the one in
+		 TXT_KEY_BUG_OPT_TAURUS__ONFIRSTCONTACT_TEXT) -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPTLABEL_ONFIRSTCONTACT</Tag>
+		<English>[SPACE]On First Contact:</English>
+		<French>[SPACE]Rencontre:</French>
+		<German>[SPACE]Erste Begegnung:</German>
+		<Italian>[SPACE]Incontro:</Italian>
+		<Spanish>[SPACE]Encuentro:</Spanish>
+	</TEXT>
 	
 	<!-- Logging Tab -->
 	

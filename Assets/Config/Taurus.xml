@@ -76,6 +76,19 @@
 			<!-- trs.promoleads -->
 			<option id="PromotionLeadsTo" key="Promotion Leads To"
 					type="boolean" default="True"/>
+
+		</section>
+		<section id="Alerts">
+
+			<!-- trs.1stcontact -->
+			<list   id="OnFirstContact" key="On First Contact" 
+					type="int" default="2" listType="string" 
+					values="Message|Diplo Popup|Both">
+				<choice id="Message"/>
+				<choice id="Diplo"/>
+				<choice id="Both"/>
+			</list>
+
 		</section>
 		<section id="System">
 

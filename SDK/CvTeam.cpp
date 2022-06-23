@@ -21,6 +21,7 @@
 #include "CvDLLPythonIFaceBase.h"
 #include "CyArgsList.h"
 #include "FProfiler.h"
+#include "CvBugOptions.h" // trs.1stcontact
 
 // Public Functions...
 
@@ -1646,13 +1647,35 @@ bool CvTeam::canContact(TeamTypes eTeam) const
 }
 
 
-void CvTeam::meet(TeamTypes eTeam, bool bNewDiplo)
+void CvTeam::meet(TeamTypes eTeam, bool bNewDiplo,
+	FirstContactData* pData) // trs.1stcontact
 {
-	if (!isHasMet(eTeam))
+	if (isHasMet(eTeam))
+		return; // trs.refactor
+
+	makeHasMet(eTeam, bNewDiplo, /* trs.1stcontact: */ pData);
+	GET_TEAM(eTeam).makeHasMet(getID(), bNewDiplo, /* trs.1stcontact: */ pData);
+
+	// <trs.1stcontact>
+	// Moved from makeHasMet
+	for (int i = 0; i < MAX_CIV_TEAMS; i++)
 	{
-		makeHasMet(eTeam, bNewDiplo);
-		GET_TEAM(eTeam).makeHasMet(getID(), bNewDiplo);
+		CvTeam& kLoopTeam = GET_TEAM((TeamTypes)i);
+		if (!kLoopTeam.isAlive())
+			continue;
+		if (kLoopTeam.isVassal(getID()) || isVassal(kLoopTeam.getID()))
+			kLoopTeam.meet(eTeam, bNewDiplo, pData);
 	}
+	// Vassals, master of eTeam should also meet us
+	for (int i = 0; i < MAX_CIV_TEAMS; i++)
+	{
+		CvTeam& kLoopTeam = GET_TEAM((TeamTypes)i);
+		if (!kLoopTeam.isAlive())
+			continue;
+		if (kLoopTeam.isVassal(eTeam) || GET_TEAM(eTeam).isVassal(kLoopTeam.getID()))
+			kLoopTeam.meet(getID(), bNewDiplo, pData);
+	}
+	// </trs.1stcontact>
 }
 
 
@@ -3376,7 +3399,8 @@ bool CvTeam::isHasMet(TeamTypes eIndex)	const
 	return m_abHasMet[eIndex];
 }
 
-void CvTeam::makeHasMet(TeamTypes eIndex, bool bNewDiplo)
+void CvTeam::makeHasMet(TeamTypes eIndex, bool bNewDiplo,
+	FirstContactData* pData) // trs.1stcontact
 {
 	CvDiploParameters* pDiplo;
 	int iI;
@@ -3384,79 +3408,88 @@ void CvTeam::makeHasMet(TeamTypes eIndex, bool bNewDiplo)
 	FAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
 	FAssertMsg(eIndex < MAX_TEAMS, "eIndex is expected to be within maximum bounds (invalid Index)");
 
-	if (!isHasMet(eIndex))
+	if (isHasMet(eIndex))
+		return; // trs.refactor
+
+	m_abHasMet[eIndex] = true;
+
+	updateTechShare();
+
+	if (GET_TEAM(eIndex).isHuman())
 	{
-		m_abHasMet[eIndex] = true;
-
-		updateTechShare();
-
-		if (GET_TEAM(eIndex).isHuman())
+		for (iI = 0; iI < MAX_PLAYERS; iI++)
 		{
-			for (iI = 0; iI < MAX_PLAYERS; iI++)
+			if (GET_PLAYER((PlayerTypes)iI).isAlive())
 			{
-				if (GET_PLAYER((PlayerTypes)iI).isAlive())
+				if (GET_PLAYER((PlayerTypes)iI).getTeam() == getID())
 				{
-					if (GET_PLAYER((PlayerTypes)iI).getTeam() == getID())
+					if (!(GET_PLAYER((PlayerTypes)iI).isHuman()))
 					{
-						if (!(GET_PLAYER((PlayerTypes)iI).isHuman()))
-						{
-							GET_PLAYER((PlayerTypes)iI).clearResearchQueue();
-							GET_PLAYER((PlayerTypes)iI).AI_makeProductionDirty();
-						}
+						GET_PLAYER((PlayerTypes)iI).clearResearchQueue();
+						GET_PLAYER((PlayerTypes)iI).AI_makeProductionDirty();
 					}
 				}
 			}
 		}
+	}
 
-		for (iI = 0; iI < MAX_CIV_TEAMS; iI++)
+	// (trs.1stcontact: Vassal/ master meetings moved to CvTeam::meet)
+
+	// report event to Python, along with some other key state (trs.1stcontact: moved up)
+	CvEventReporter::getInstance().firstContact(getID(), eIndex);
+	// <trs.1stcontact>
+	if (eIndex == getID() || isBarbarian() || eIndex == BARBARIAN_TEAM)
+		return; // </trs.1stcontact>
+
+	if ((getID() == GC.getGameINLINE().getActiveTeam()) || (eIndex == GC.getGameINLINE().getActiveTeam()))
+	{
+		gDLL->getInterfaceIFace()->setDirty(Score_DIRTY_BIT, true);
+	}
+	// <trs.1stcontact> (from AdvCiv)
+	bool bShowMessage = (isHuman() && pData != NULL);
+	if (bShowMessage || bNewDiplo)
+	{
+		enum FirstContactChoices { MESSAGE, DIPLO, BOTH };
+		FirstContactChoices const eOnFirstContact = (isBug() ?
+				(FirstContactChoices)getBugOptionINT("Taurus__OnFirstContact") :
+				DIPLO); // Met during the placement of free starting units
+		if (bNewDiplo && eOnFirstContact == MESSAGE)
+			bNewDiplo = false;
+		if (bShowMessage && eOnFirstContact == DIPLO)
+			bShowMessage = false;
+	} // </trs.1stcontact>
+	if (GC.getGameINLINE().isOption(GAMEOPTION_ALWAYS_WAR))
+	{
+		if (isHuman() && getID() != eIndex)
 		{
-			if (GET_TEAM((TeamTypes)iI).isAlive())
+			declareWar(eIndex, false, NO_WARPLAN);
+		}
+	}
+	else
+	{
+		if (GC.getGameINLINE().isFinalInitialized() && !(gDLL->GetWorldBuilderMode()))
+		{
+			if (bNewDiplo)
 			{
-				if (GET_TEAM((TeamTypes)iI).isVassal(getID()) || isVassal((TeamTypes)iI))
+				if (!isHuman())
 				{
-					GET_TEAM((TeamTypes)iI).meet(eIndex, bNewDiplo);
-				}
-			}
-		}
-
-		if ((getID() == GC.getGameINLINE().getActiveTeam()) || (eIndex == GC.getGameINLINE().getActiveTeam()))
-		{
-			gDLL->getInterfaceIFace()->setDirty(Score_DIRTY_BIT, true);
-		}
-
-		if (GC.getGameINLINE().isOption(GAMEOPTION_ALWAYS_WAR))
-		{
-			if (isHuman() && getID() != eIndex)
-			{
-				declareWar(eIndex, false, NO_WARPLAN);
-			}
-		}
-		else
-		{
-			if (GC.getGameINLINE().isFinalInitialized() && !(gDLL->GetWorldBuilderMode()))
-			{
-				if (bNewDiplo)
-				{
-					if (!isHuman())
+					if (!isAtWar(eIndex))
 					{
-						if (!isAtWar(eIndex))
+						for (iI = 0; iI < MAX_PLAYERS; iI++)
 						{
-							for (iI = 0; iI < MAX_PLAYERS; iI++)
+							if (GET_PLAYER((PlayerTypes)iI).isAlive())
 							{
-								if (GET_PLAYER((PlayerTypes)iI).isAlive())
+								if (GET_PLAYER((PlayerTypes)iI).getTeam() == eIndex)
 								{
-									if (GET_PLAYER((PlayerTypes)iI).getTeam() == eIndex)
+									if (GET_PLAYER(getLeaderID()).canContact((PlayerTypes)iI))
 									{
-										if (GET_PLAYER(getLeaderID()).canContact((PlayerTypes)iI))
+										if (GET_PLAYER((PlayerTypes)iI).isHuman())
 										{
-											if (GET_PLAYER((PlayerTypes)iI).isHuman())
-											{
-												pDiplo = new CvDiploParameters(getLeaderID());
-												FAssertMsg(pDiplo != NULL, "pDiplo must be valid");
-												pDiplo->setDiploComment((DiploCommentTypes)GC.getInfoTypeForString("AI_DIPLOCOMMENT_FIRST_CONTACT"));
-												pDiplo->setAIContact(true);
-												gDLL->beginDiplomacy(pDiplo, ((PlayerTypes)iI));
-											}
+											pDiplo = new CvDiploParameters(getLeaderID());
+											FAssertMsg(pDiplo != NULL, "pDiplo must be valid");
+											pDiplo->setDiploComment((DiploCommentTypes)GC.getInfoTypeForString("AI_DIPLOCOMMENT_FIRST_CONTACT"));
+											pDiplo->setAIContact(true);
+											gDLL->beginDiplomacy(pDiplo, ((PlayerTypes)iI));
 										}
 									}
 								}
@@ -3466,10 +3499,10 @@ void CvTeam::makeHasMet(TeamTypes eIndex, bool bNewDiplo)
 				}
 			}
 		}
-
-		// report event to Python, along with some other key state
-		CvEventReporter::getInstance().firstContact(getID(), eIndex);
 	}
+	// <trs.1stcontact>
+	if (bShowMessage)
+		addFirstContactMessage(*pData, eIndex); // </trs.1stcontact>
 }
 
 
@@ -4722,6 +4755,84 @@ void CvTeam::announceTechToPlayers(TechTypes eIndex, bool bPartial)
 				gDLL->getInterfaceIFace()->addMessage(((PlayerTypes)iI), false, (bSound ? GC.getEVENT_MESSAGE_TIME() : -1), szBuffer, (bSound ? GC.getTechInfo(eIndex).getSoundMP() : NULL), MESSAGE_TYPE_MAJOR_EVENT, NULL, (ColorTypes)GC.getInfoTypeForString("COLOR_TECH_TEXT"));
 			}
 		}
+	}
+}
+
+// trs.1stcontact (from AdvCiv):
+void CvTeam::addFirstContactMessage(FirstContactData const& fcData, TeamTypes eOther)
+{
+	CvPlot const* pAt1 = GC.getMap().plot(fcData.x1, fcData.y1);
+	CvPlot const* pAt2 = GC.getMap().plot(fcData.x2, fcData.y2);
+	CvUnit const* pUnit1 = ::getUnit(fcData.u1);
+	CvUnit const* pUnit2 = ::getUnit(fcData.u2);
+	CvUnit const* pUnitMet = NULL;
+	CvPlot const* pAt = NULL;
+	PlayerTypes ePlayerMet = NO_PLAYER;
+	if (pUnit1 != NULL && pUnit1->getTeam() == eOther)
+	{
+		ePlayerMet = pUnit1->getOwner();
+		if (pUnit1->plot()->isVisible(getID(), false))
+			pUnitMet = pUnit1;
+	}
+	if (pUnit2 != NULL && pUnit2->getTeam() == eOther)
+	{
+		if (ePlayerMet == NO_PLAYER)
+			ePlayerMet = pUnit2->getOwner();
+		if (pUnit2->plot()->isVisible(getID(), false))
+			pUnitMet = pUnit2;
+	}
+	if (pAt1 != NULL && pAt1->isOwned() && pAt1->getTeam() == eOther)
+	{
+		if (pAt1->isVisible(getID(), false))
+			pAt = pAt1;
+		if (ePlayerMet == NO_PLAYER)
+			ePlayerMet = pAt1->getOwner();
+	}
+	if (pAt2 != NULL && pAt2->isOwned() && pAt2->getTeam() == eOther)
+	{
+		if (pAt2->isVisible(getID(), false))
+			pAt = pAt2;
+		if (ePlayerMet == NO_PLAYER)
+			ePlayerMet = pAt2->getOwner();
+	}
+	if (ePlayerMet == NO_PLAYER)
+		ePlayerMet = GET_TEAM(eOther).getLeaderID();
+	if (pUnitMet != NULL && pUnitMet->plot()->isVisible(getID(), false))
+		pAt = pUnitMet->plot();
+	if (pAt == NULL) // We can't see any of their tiles or units, but they see ours.
+	{
+		if (pAt1 != NULL && pAt1->isOwned() && pAt1->getTeam() == getID())
+			pAt = pAt1;
+		else if (pAt2 != NULL && pAt2->isOwned() && pAt2->getTeam() == getID())
+			pAt = pAt2;
+		else if (pUnit1 != NULL && pUnit1->getTeam() == getID())
+		{
+			//pUnitMet = pUnit1; // Better not to show our own unit's icon
+			pAt = pUnit1->plot();
+		}
+		else if (pUnit2 != NULL && pUnit2->getTeam() == getID())
+		{
+			//pUnitMet = pUnit2;
+			pAt = pUnit2->plot();
+		}
+	}
+	CvWString szMsg = gDLL->getText("TXT_KEY_MISC_TEAM_MET",
+			GET_PLAYER(ePlayerMet).getCivilizationAdjectiveKey());
+	ColorTypes ePlayerColor = GET_PLAYER(ePlayerMet).getPlayerTextColor();
+	LPCSTR icon = (pUnitMet == NULL ? GC.getLeaderHeadInfo(GET_PLAYER(ePlayerMet).
+			getLeaderType()).getButton() : pUnitMet->getButton());
+	for (int i = 0; i < MAX_CIV_PLAYERS; i++)
+	{
+		CvPlayer const& kOurMember = GET_PLAYER((PlayerTypes)i);
+		if (!kOurMember.isAlive() || !kOurMember.isHuman() ||
+			kOurMember.getTeam() != getID())
+		{
+			continue;
+		}
+		gDLL->getInterfaceIFace()->addMessage(kOurMember.getID(), false, -1, szMsg, NULL,
+				MESSAGE_TYPE_MINOR_EVENT, icon, ePlayerColor,
+				pAt == NULL ? -1 : pAt->getX(), pAt == NULL ? -1 : pAt->getY(),
+				pAt != NULL, pAt != NULL);
 	}
 }
 

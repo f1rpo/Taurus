@@ -173,4 +173,26 @@
 	</TEXT>
 	<!-- trs.promoleads: end -->
 
+	<!-- trs.1stcontact: start (from AdvCiv) -->
+	<!-- (Italian, Spanish based on TXT_KEY_BUG_OPT_REMINDER__DISPLAYMETHOD_LIST) -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__ONFIRSTCONTACT_LIST</Tag>
+		<English>Message|Diplo Popup|Message+Popup</English>
+		<French>Message|Popup|Message+Popup</French>
+		<German>Meldung|Kontakt|Beides</German>
+		<Italian>Messaggio|Popup|Entrambe</Italian>
+		<Spanish>Mensaje|Popup|Mensaje+Popup</Spanish>
+	</TEXT>
+	<!-- Use a label instead so that the dropdown menu goes on a separate line -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__ONFIRSTCONTACT_TEXT</Tag>
+		<English>[SPACE]</English>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__ONFIRSTCONTACT_HOVER</Tag>
+		<English>On the first meeting with a rival:[NEWLINE][COLOR_HIGHLIGHT_TEXT]Message[COLOR_REVERT] - Show an on-screen message that indicates where the rival was encountered.[NEWLINE][COLOR_HIGHLIGHT_TEXT]Diplo Popup[COLOR_REVERT] - Allow the rival to introduce him-/herself (as in BtS).[NEWLINE][COLOR_HIGHLIGHT_TEXT]Both[COLOR_REVERT] - Show the on-screen message and let the rival contact you.</English>
+		<German>Bei der ersten Begegnung mit einem Gegner:[NEWLINE][COLOR_HIGHLIGHT_TEXT]Meldung[COLOR_REVERT] - Nachricht auf dem Hauptbildschirm, die auch anzeigt, wo die Begegnung stattgefunden hat.[NEWLINE][COLOR_HIGHLIGHT_TEXT]Kontakt[COLOR_REVERT] - Der Gegner kontaktiert Sie und stellt sich vor (wie in BtS).[NEWLINE][COLOR_HIGHLIGHT_TEXT]Beides[COLOR_REVERT] - Anzeige auf dem Hauptbildschirm und Kontaktaufnahme.</German>
+	</TEXT>
+	<!-- trs.1stcontact: end -->
+
 </Civ4GameText>

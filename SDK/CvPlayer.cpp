@@ -10481,6 +10481,12 @@ int CvPlayer::getPlayerTextColorA() const
 	return ((int)(GC.getColorInfo((ColorTypes) GC.getPlayerColorInfo(getPlayerColor()).getTextColorType()).getColor().a * 255));
 }
 
+// trs. (helper)
+ColorTypes CvPlayer::getPlayerTextColor() const
+{
+	return (ColorTypes)GC.getPlayerColorInfo(getPlayerColor()).getTextColorType();
+}
+
 
 int CvPlayer::getSeaPlotYield(YieldTypes eIndex) const
 {

@@ -15015,6 +15015,17 @@ int CvCity::getBuildingHealthChange(BuildingClassTypes eBuildingClass) const
 	return 0;
 }
 
+// trs.1stcontact (from AdvCiv):
+void CvCity::meetNewOwner(TeamTypes eOtherTeam, TeamTypes eNewOwner) const
+{
+	if (!isRevealed(eOtherTeam, false) || GET_TEAM(eOtherTeam).isHasMet(eNewOwner))
+		return;
+	FirstContactData fcData;
+	fcData.x1 = getX();
+	fcData.y1 = getY();
+	GET_TEAM(eOtherTeam).meet(eNewOwner, true, &fcData);
+}
+
 void CvCity::liberate(bool bConquest)
 {
 	CvPlot* pPlot = plot();
@@ -15035,11 +15046,13 @@ void CvCity::liberate(bool bConquest)
 		CvWString szBuffer = gDLL->getText("TXT_KEY_MISC_CITY_LIBERATED", getNameKey(), GET_PLAYER(eOwner).getNameKey(), GET_PLAYER(ePlayer).getCivilizationAdjectiveKey());
 		for (int iI = 0; iI < MAX_PLAYERS; ++iI)
 		{
-			if (GET_PLAYER((PlayerTypes)iI).isAlive())
-			{
-				if (isRevealed(GET_PLAYER((PlayerTypes)iI).getTeam(), false))
+			CvPlayer const& kObs = GET_PLAYER((PlayerTypes)iI); // trs.1stcontact
+			if (kObs.isAlive())
+			{	// trs.1stcontact: Meet before the announcement
+				meetNewOwner(kObs.getTeam(), GET_PLAYER(ePlayer).getTeam());
+				if (isRevealed(kObs.getTeam(), false))
 				{
-					gDLL->getInterfaceIFace()->addMessage(((PlayerTypes)iI), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, "AS2D_REVOLTEND", MESSAGE_TYPE_MAJOR_EVENT, ARTFILEMGR.getInterfaceArtInfo("WORLDBUILDER_CITY_EDIT")->getPath(), (ColorTypes)GC.getInfoTypeForString("COLOR_HIGHLIGHT_TEXT"), getX_INLINE(), getY_INLINE(), true, true);
+					gDLL->getInterfaceIFace()->addMessage(kObs.getID(), false, GC.getEVENT_MESSAGE_TIME(), szBuffer, "AS2D_REVOLTEND", MESSAGE_TYPE_MAJOR_EVENT, ARTFILEMGR.getInterfaceArtInfo("WORLDBUILDER_CITY_EDIT")->getPath(), (ColorTypes)GC.getInfoTypeForString("COLOR_HIGHLIGHT_TEXT"), getX_INLINE(), getY_INLINE(), true, true);
 				}
 			}
 		}

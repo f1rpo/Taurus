@@ -62,4 +62,15 @@
 		<Spanish>&#161;Los enemigos infiltrados han saqueado %d1[ICON_GOLD] de nuestro tesoro!</Spanish>
 	</TEXT>
 
+	<!-- trs.1stcontact (from AdvCiv)
+		 (grammar in translations based on TXT_KEY_MISC_CIV_DESTROYED) -->
+	<TEXT>
+		<Tag>TXT_KEY_MISC_TEAM_MET</Tag>
+		<English>We have met the %s1_CivAdj civilization</English>
+		<French>Nous avons rencontrés les %s1_CivAdj</French>
+		<German>Wir sind erstmals der %s1:3_CivAdj Zivilisation begegnet</German>
+		<Italian>Abbiamo incontrato la civilt&#224; %s1:4_CivAdj</Italian>
+		<Spanish>Hemos encontrado la civilizaci&#243;n %s1:2_CivAdj</Spanish>
+	</TEXT>
+
 </Civ4GameText>

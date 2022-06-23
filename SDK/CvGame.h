@@ -121,6 +121,10 @@ public:
 	bool canHaveSecretaryGeneral(VoteSourceTypes eVoteSource) const;												// Exposed to Python
 	void clearSecretaryGeneral(VoteSourceTypes eVoteSource);
 	void updateSecretaryGeneral();
+	// <trs.1stcontact>
+	BuildingTypes getVoteSourceBuilding(VoteSourceTypes eVS) const;
+	CvCity* getVoteSourceCity(VoteSourceTypes eVS, TeamTypes eObserver, bool bDebug = false) const;
+	// </trs.1stcontact>
 
 	DllExport int countCivPlayersAlive() const;																		// Exposed to Python
 	DllExport int countCivPlayersEverAlive() const;																// Exposed to Python

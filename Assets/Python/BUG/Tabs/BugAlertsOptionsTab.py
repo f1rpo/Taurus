@@ -79,3 +79,8 @@ class BugAlertsOptionsTab(BugOptionsTab.BugOptionsTab):
 
 		# trs. Moved from the Map tab.
 		self.addCheckbox(screen, right, "Actions__IgnoreHarmlessBarbarians")
+
+		# <trs.1stcontact>
+		self.addLabel(screen, right, "OnFirstContact", "On First Contact:") 
+		self.addTextDropdown(screen, right, right, "Taurus__OnFirstContact")
+		# </trs.1stcontact>
