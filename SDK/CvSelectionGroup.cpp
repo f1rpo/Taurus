@@ -1551,6 +1551,10 @@ void CvSelectionGroup::startMission()
 		{
 			if (bDelete)
 			{
+				// <trs.unitcyc> (from K-Mod)
+				deleteMissionQueueNode(headMissionQueueNode()); // moved up
+				if (headMissionQueueNode() != NULL)
+					activateHeadMission(); // </trs.unitcyc>
 				if (getOwnerINLINE() == GC.getGameINLINE().getActivePlayer())
 				{
 					if (IsSelected())
@@ -1558,13 +1562,19 @@ void CvSelectionGroup::startMission()
 						gDLL->getInterfaceIFace()->changeCycleSelectionCounter((GET_PLAYER(getOwnerINLINE()).isOption(PLAYEROPTION_QUICK_MOVES)) ? 1 : 2);
 					}
 				}
-
-				deleteMissionQueueNode(headMissionQueueNode());
+				//deleteMissionQueueNode(headMissionQueueNode()); // trs.unitcyc: moved up
 			}
 			else if (getActivityType() == ACTIVITY_MISSION)
 			{
 				continueMission();
 			}
+			// <trs.unitcyc> (from K-Mod)
+			else if (GC.getGame().getActivePlayer() == getOwner() &&
+				IsSelected() && !canAnyMove())
+			{
+				gDLL->getInterfaceIFace()->changeCycleSelectionCounter(
+						GET_PLAYER(getOwner()).isOption(PLAYEROPTION_QUICK_MOVES) ? 1 : 2);
+			} // </trs.unitcyc>
 		}
 	}
 }
@@ -4867,10 +4877,13 @@ void CvSelectionGroup::deactivateHeadMission()
 		{
 			setActivityType(ACTIVITY_AWAKE);
 		}
-
 		setMissionTimer(0);
-
-		if (getOwnerINLINE() == GC.getGameINLINE().getActivePlayer())
+		if (getOwner() == GC.getGame().getActivePlayer()
+			/*	trs.unitcyc: Don't cycle after cancellation.
+				(Won't work as intended when the canceled order was given on the
+				current turn. K-Mod gets this right, but it's hard to say which
+				K-Mod changes would have to be adopted.) */
+			&& headMissionQueueNode()->m_data.iPushTurn == GC.getGame().getGameTurn())
 		{
 			if (IsSelected())
 			{
