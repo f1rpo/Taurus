@@ -2100,7 +2100,9 @@ void CvGame::update()
 
 		if (getTurnSlice() == 0)
 		{
-			gDLL->getEngineIFace()->AutoSave(true);
+			// trs.autosave: Don't autosave after loading turn-0 autosave
+			if (m_iNumSessions <= 1)
+				gDLL->getEngineIFace()->AutoSave(true);
 			// <trs.start-with-resources>
 			gDLL->getEngineIFace()->setResourceLayer(getBugOptionBOOL(
 					"Taurus__StartWithResourceDisplay"));
