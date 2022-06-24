@@ -41,6 +41,39 @@
 	</TEXT>
 	<!-- trs.replayname: end -->
 
+	<!-- trs.savmsg: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__AUTOSAVEMSG_TEXT</Tag>
+		<English>AutoSave Message</English>
+		<German>AutoSave-Nachricht</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__AUTOSAVEMSG_LIST</Tag>
+		<English>Disabled|Briefly|Normal</English>
+		<German>Deaktiviert|Kurz|Normal</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__AUTOSAVEMSG_HOVER</Tag>
+		<English>Whether to show an on-screen message when writing an AutoSave and for how long the message should be displayed; [COLOR_HIGHLIGHT_TEXT]Normal[COLOR_REVERT] means for 10 seconds, as in BtS.</English>
+		<German>Ob beim automatischen Speichern eine Nachricht auf dem Hauptbildschirm angezeigt werden soll - und für wie lange. [COLOR_HIGHLIGHT_TEXT]Normal[COLOR_REVERT] bedeutet 10 Sekunden, wie in BtS.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__QUICKSAVEMSG_TEXT</Tag>
+		<English>QuickSave Message</English>
+		<German>QuickSave-Nachricht</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__QUICKSAVEMSG_LIST</Tag>
+		<English>Disabled|Briefly|Normal</English>
+		<German>Deaktiviert|Kurz|Normal</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__QUICKSAVEMSG_HOVER</Tag>
+		<English>Whether to show an on-screen message when writing a QuickSave (Shift+F5) and for how long the message should be displayed; [COLOR_HIGHLIGHT_TEXT]Normal[COLOR_REVERT] means for 10 seconds, as in BtS.</English>
+		<German>Ob beim Schnellspeichern (Umschalt+F5) eine Nachricht auf dem Hauptbildschirm angezeigt werden soll - und für wie lange. [COLOR_HIGHLIGHT_TEXT]Normal[COLOR_REVERT] bedeutet 10 Sekunden, wie in BtS.</German>
+	</TEXT>
+	<!-- trs.savmsg: end -->
+
 	<!-- trs.balloon: start -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TAURUS__PLOTINDICATORSIZE_TEXT</Tag>

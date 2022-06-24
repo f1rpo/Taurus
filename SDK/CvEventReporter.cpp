@@ -6,6 +6,7 @@
 #include "BugMod.h"
 #include "CvBugOptions.h"
 // </trs.modname>
+#include "CvDLLInterfaceIFaceBase.h" // trs.savmsg
 
 //
 // static, singleton accessor
@@ -490,6 +491,31 @@ void CvEventReporter::preSave()
 	GC.getModName().setSaving(true);
 	// </trs.modname>
 	m_kPythonEventMgr.preSave();
+	/*	<trs.savmsg> (based on AdvCiv) The original autosaving and quicksaving
+		messages are disabled through XML. Show replacement messages here. */
+	if (!m_bAutoSaving && !m_bQuickSaving)
+		return;
+	bool bAutoSave = m_bAutoSaving;
+	bool bQuickSave = m_bQuickSaving;
+	FAssert(!bAutoSave || !bQuickSave);
+	m_bAutoSaving = m_bQuickSaving = false;
+	enum SavingMsgChoices { DISABLED, BRIEF, NORMAL };
+	int iMsgLength = 0;
+	switch ((SavingMsgChoices)getBugOptionINT(bAutoSave ?
+		"Taurus__AutoSaveMsg" : "Taurus__QuickSaveMsg"))
+	{
+	case DISABLED: break;
+	case BRIEF: iMsgLength = 4; break;
+	case NORMAL: iMsgLength = GC.getEVENT_MESSAGE_TIME(); break;
+	default: FErrorMsg("Unrecognized choice for savmsg length");
+	}
+	if (iMsgLength <= 0)
+		return;
+	CvWString sTxtKey(bAutoSave ?
+			L"TXT_KEY_AUTOSAVING2" : L"TXT_KEY_QUICK_SAVING2");
+	gDLL->getInterfaceIFace()->addMessage(GC.getGame().getActivePlayer(), true,
+			iMsgLength, gDLL->getText(sTxtKey), NULL, MESSAGE_TYPE_DISPLAY_ONLY);
+	// </trs.savmsg>
 }
 
 void CvEventReporter::windowActivation(bool bActive)

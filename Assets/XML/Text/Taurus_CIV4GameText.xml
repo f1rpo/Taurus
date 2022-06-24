@@ -2,6 +2,40 @@
 <!-- trs.doc: Game text for misc. Taurus additions -->
 <Civ4GameText xmlns="http://www.firaxis.com">
 
+	<!-- Redefines - start -->
+	<!-- trs.savmsg: The EXE displays these, but we want
+		 the DLL to handle them. -->
+	<TEXT>
+		<Tag>TXT_KEY_AUTOSAVING</Tag>
+		<English></English>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_QUICK_SAVING</Tag>
+		<English></English>
+	</TEXT>
+	<!-- Redefines - end -->
+
+	<!-- trs.savmsg: start -->
+	<!-- Copies of BtS game text, with a "2" appended.
+		 To replace the text cleared under Redefines above. -->
+	<TEXT>
+		<Tag>TXT_KEY_AUTOSAVING2</Tag>
+		<English>Autosaving...</English>
+		<French>Sauvegarde automatique...</French>
+		<German>Automatisches Speichern ...</German>
+		<Italian>Salvataggio automatico...</Italian>
+		<Spanish>Guardado autom&#225;tico...</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_QUICK_SAVING2</Tag>
+		<English>Quick Saving...</English>
+		<French>Sauvegarde rapide en cours...</French>
+		<German>Schnellspeichern ...</German>
+		<Italian>Salvataggio rapido in corso...</Italian>
+		<Spanish>Guardado r&#225;pido...</Spanish>
+	</TEXT>
+	<!-- trs.savmsg: end -->
+
 	<!-- trs.modname: start -->
 	<TEXT>
 		<Tag>TXT_KEY_POPUP_EXPORT_SAVE_TITLE</Tag>

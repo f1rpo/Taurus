@@ -21,6 +21,8 @@ class CvSelectionGroup;
 class CvEventReporter
 {
 	friend class CyStatistics;
+	// trs.savmsg:
+	CvEventReporter() : m_bAutoSaving(false), m_bQuickSaving(false) {}
 public:
 	DllExport static CvEventReporter& getInstance();		// singleton accessor
 	DllExport void resetStatistics();
@@ -143,6 +145,10 @@ public:
 	void vassalState(TeamTypes eMaster, TeamTypes eVassal, bool bVassal);
 
 	DllExport void preSave();
+	// <trs.savmsg>
+	void setAutoSaving(bool b = true) { m_bAutoSaving = b; }
+	void setQuickSaving(bool b = true) { m_bQuickSaving = b; }
+	// </trs.savmsg>
 
 	DllExport void getGameStatistics(std::vector<CvStatBase*>& aStats);
 	DllExport void getPlayerStatistics(PlayerTypes ePlayer, std::vector<CvStatBase*>& aStats);
@@ -152,6 +158,7 @@ public:
 private:
 	CvDllPythonEvents m_kPythonEventMgr;
 	CvStatistics m_kStatistics;
+	bool m_bAutoSaving, m_bQuickSaving; // trs.savmsg
 };
 
 // helper

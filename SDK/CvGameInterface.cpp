@@ -9,11 +9,10 @@
 #include "FAStarNode.h"
 #include "CvGameTextMgr.h"
 #include "CvMessageControl.h"
+#include "CvEventReporter.h" // trs.savmsg
 #include "SelfMod.h" // trs.balloon
 #include "ModName.h" // trs.modname
-// BUG - start
-#include "CvBugOptions.h"
-// BUG - end
+#include "CvBugOptions.h" // BUG
 
 void CvGame::updateColoredPlots()
 {
@@ -1977,6 +1976,7 @@ void CvGame::doControl(ControlTypes eControl)
 	case CONTROL_QUICK_SAVE:
 		if (!(isNetworkMultiPlayer()))	// SP only!
 		{
+			CvEventReporter::getInstance().setQuickSaving(); // trs.savmsg
 			gDLL->QuickSave();
 		}
 		break;

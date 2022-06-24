@@ -378,11 +378,7 @@ void CvGame::regenerateMap()
 
 	gDLL->getInterfaceIFace()->setCycleSelectionCounter(1);
 
-	gDLL->getEngineIFace()->AutoSave(true);
-
-// BUG - AutoSave - start
-	gDLL->getPythonIFace()->callFunction(PYBugModule, "gameStartSave");
-// BUG - AutoSave - end
+	autoSave(true); // trs.savmsg
 
 	// EF - This doesn't work until after the game has had time to update.
 	//      Centering on the starting location is now done by MapFinder using BugUtil.delayCall().
@@ -2102,7 +2098,7 @@ void CvGame::update()
 		{
 			// trs.autosave: Don't autosave after loading turn-0 autosave
 			if (m_iNumSessions <= 1)
-				gDLL->getEngineIFace()->AutoSave(true);
+				autoSave(true); // trs.savmsg
 			// <trs.start-with-resources>
 			gDLL->getEngineIFace()->setResourceLayer(getBugOptionBOOL(
 					"Taurus__StartWithResourceDisplay"));
@@ -2321,6 +2317,25 @@ void CvGame::testExtendedGame()
 				}
 			}
 		}
+	}
+}
+
+// trs.savmsg (from AdvCiv): Wrapper that reports the event
+void CvGame::autoSave(bool bInitial)
+{
+	CvEventReporter& kEventReporter = CvEventReporter::getInstance();
+	kEventReporter.setAutoSaving();
+	gDLL->getEngineIFace()->AutoSave(bInitial);
+	// <trs.fix>
+	if (bInitial)
+	{
+		// Treat automatic Start Save as an autosave
+		kEventReporter.setAutoSaving();
+		/*	trs.fix: Moved from regenerateMap. Needs to be called for all
+			initial autosaves, not just after re-gen. */
+		gDLL->getPythonIFace()->callFunction(PYBugModule, "gameStartSave"); // BUG - AutoSave
+		// Needed when Start Save disabled (or somehow not working)
+		kEventReporter.setAutoSaving(false);
 	}
 }
 
@@ -4821,10 +4836,13 @@ void CvGame::setGameState(GameStateTypes eNewValue)
 
 		if (eNewValue == GAMESTATE_OVER)
 		{
-			CvEventReporter::getInstance().gameEnd();
-
+			CvEventReporter& kEventReporter = CvEventReporter::getInstance();
+			kEventReporter.gameEnd();
 // BUG - AutoSave - start
+			// trs.savmsg: Treat automatic End Save as an autosave
+			kEventReporter.setAutoSaving();
 			gDLL->getPythonIFace()->callFunction(PYBugModule, "gameEndSave");
+			kEventReporter.setAutoSaving(false); // trs.savmsg
 // BUG - AutoSave - end
 
 			showEndGameSequence();
@@ -5853,7 +5871,7 @@ void CvGame::doTurn()
 
 	stopProfilingDLL();
 
-	gDLL->getEngineIFace()->AutoSave();
+	autoSave(); // trs.savmsg
 }
 
 
