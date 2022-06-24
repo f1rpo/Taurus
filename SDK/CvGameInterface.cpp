@@ -3118,6 +3118,17 @@ void CvGame::handleCityScreenPlotRightPicked(CvCity* pCity, CvPlot* pPlot, bool 
 {
 	if (pCity != NULL && pPlot != NULL)
 	{
+		// <trs.exitcity> (from AdvCiv)
+		if (pCity->plot() == pPlot)
+		{
+			CvDLLInterfaceIFaceBase& kUI = *gDLL->getInterfaceIFace();
+			CvPlot const* pCityPlot = (kUI.isCityScreenUp() ?
+					kUI.getHeadSelectedCity()->plot() : NULL);
+			gDLL->getInterfaceIFace()->clearSelectedCities();
+			if (pCityPlot != NULL)
+				kUI.lookAt(pCityPlot->getPoint(), CAMERALOOKAT_NORMAL);
+			return;
+		} // </trs.exitcity>
 		if ((pCity->getOwnerINLINE() == getActivePlayer()) && (pPlot->getOwnerINLINE() == getActivePlayer()) && (pCity->getCityPlotIndex(pPlot) != -1))
 		{
 			CvMessageControl::getInstance().sendDoTask(pCity->getID(), TASK_CLEAR_WORKING_OVERRIDE, pCity->getCityPlotIndex(pPlot), -1, false, bAlt, bShift, bCtrl);

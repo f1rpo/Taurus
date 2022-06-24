@@ -8,6 +8,12 @@
 		<English>[Taurus] Most features are enabled by default, but that doesn't mean that they're all likely useful to most players. If the interface seems cluttered to you, open the Mod Options screen and keep only what you need.</English>
 		<German>[Taurus] Kaum ein Spieler wird alle Funktionen der Mod nutzen. Wenn Ihnen die Benutzeroberfläche überfrachtet vorkommt, dann kann das Optionsmenü Abhilfe schaffen; praktisch alles ist optional.</German>
 	</TEXT>
+	<!-- trs.exitcity -->
+	<TEXT>
+		<Tag>TXT_KEY_TAURUS_HINT_1</Tag>
+		<English>[Taurus] To exit the city screen without moving the camera, right-lick on the city center tile.</English>
+		<German>[Taurus] Um den Stadtbildschirm zu schließen ohne die Kamera zu bewegen, rechts-klicken Sie das Geländefeld auf dem sich die Stadt befindet.</German>
+	</TEXT>
 	<!-- trs.doc: Now named just "Mod Options" screen -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_HINT_INTERFACE_1</Tag>
