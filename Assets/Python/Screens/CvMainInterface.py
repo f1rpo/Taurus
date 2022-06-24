@@ -21,6 +21,7 @@ import CityUtil
 ClockOpt = BugCore.game.NJAGC
 ScoreOpt = BugCore.game.Scores
 MainOpt = BugCore.game.MainInterface
+TaurusOpt = BugCore.game.Taurus # trs.
 CityScreenOpt = BugCore.game.CityScreen
 # BUG - Options - end
 
@@ -1101,7 +1102,9 @@ class CvMainInterface:
 			else:
 				# Flash select messages if no popups are present
 				if ( CyInterface().shouldDisplayReturn() ):
-					acOutput = localText.getText("SYSTEM_RETURN", ())
+					if TaurusOpt.isShowExitCityFlash(): # trs.noflash
+						acOutput = localText.getText("SYSTEM_RETURN", ())
+					else: acOutput = "" # trs.noflash
 					#screen.modifyLabel( "EndTurnText", acOutput, CvUtil.FONT_CENTER_JUSTIFY )
 					screen.setEndTurnState( "EndTurnText", acOutput )
 					bShow = True
@@ -1114,8 +1117,10 @@ class CvMainInterface:
 # BUG - Reminders - start
 					if ( ReminderEventManager.g_turnReminderTexts ):
 						acOutput = u"%s" % ReminderEventManager.g_turnReminderTexts
-					else:
+					#else:
+					elif TaurusOpt.isShowEndTurnFlash(): # trs.noflash
 						acOutput = localText.getText("SYSTEM_END_TURN", ())
+					else: acOutput = "" # trs.noflash
 # BUG - Reminders - end
 					#screen.modifyLabel( "EndTurnText", acOutput, CvUtil.FONT_CENTER_JUSTIFY )
 					screen.setEndTurnState( "EndTurnText", acOutput )

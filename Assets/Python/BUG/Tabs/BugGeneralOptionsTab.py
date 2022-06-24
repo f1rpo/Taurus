@@ -71,7 +71,8 @@ class BugGeneralOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addLabel(screen, panel, "FlashHints")
 		# Moved from System tab
 		self.addCheckbox(screen, panel, "MainInterface__OptionsKey")
-		# tbd.
+		self.addCheckbox(screen, panel, "Taurus__EndTurnFlash")
+		self.addCheckbox(screen, panel, "Taurus__ExitCityFlash")
 		
 	def createActionsPanel(self, screen, panel):
 		self.addLabel(screen, panel, "Actions", "Actions:")

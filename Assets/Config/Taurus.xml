@@ -8,6 +8,15 @@
 
 		<section id="MainScreen">
 
+			<!-- trs.noflash: start -->
+			<option id="EndTurnFlash" key="No End Turn Flash"
+					type="boolean" default="False"
+					get="isShowEndTurnFlash"/>
+			<option id="ExitCityFlash" key="No Exit City Flash"
+					type="boolean" default="False"
+					get="isShowExitCityFlash"/>
+			<!-- trs.noflash: end -->
+
 			<!-- trs.promoleads -->
 			<option id="PromotionLeadsTo" key="Promotion Leads To"
 					type="boolean" default="True"/>

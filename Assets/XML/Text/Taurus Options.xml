@@ -13,7 +13,31 @@
 		<English>When checked, the hover text for a promotion button lists the promotions enabled by that promotion.</English>
 		<German>Listet im Hilfe-Text zu einer Beförderung jene andere Beförderungen auf, die durch die erste Beförderung freigeschaltet werden.</German>
 	</TEXT>
+
 	<!-- trs.promoleads: end -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__ENDTURNFLASH_TEXT</Tag>
+		<English>End Turn</English>
+		<German>Zug beenden</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__ENDTURNFLASH_HOVER</Tag>
+		<English>When checked, the hint "Press ENTER to end the turn" is shown flashing on the main screen once all units have orders (as in BtS). Otherwise, no such hint is shown (but the End Turn button still turns red and pulses).</English>
+		<German>Zeigt den blinkenden Hinweistext "Runde beenden mit EINGABETASTE" auf dem Hauptbildschirm, wenn allen Einheiten Befehle erteilt worden sind (wie in BtS). Ist diese Option deaktiviert, wird kein solcher Hinweis angezeigt - aber die Runde-Beenden-Schaltfläche wird weiterhin rot und pulsiert.</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__EXITCITYFLASH_TEXT</Tag>
+		<English>Exit City Screen</English>
+		<German>Stadt-Bildschirm schließen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__EXITCITYFLASH_HOVER</Tag>
+		<English>When checked, the hint "Press ESC to return" is shown flashing while the city screen is up (as in BtS).</English>
+		<German>Zeigt den blinkenden Hinweistext "Zurück mit ESC" an während der Stadt-Bildschirm geöffnet ist.</German>
+	</TEXT>
+	<!-- trs.noflash: start -->
+	
+	<!-- trs.noflash: end -->
 
 	<!-- trs.modname: start -->
 	<TEXT>
