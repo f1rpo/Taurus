@@ -4,4 +4,5 @@
 
 def resetUnitPlotListStackedBarColors(option, value):
 	import CvScreensInterface
-	CvScreensInterface.mainInterface.resetUnitPlotListStackedBarColors()
+	# trs.fix (from AdvCiv): The .PLE was missing
+	CvScreensInterface.mainInterface.PLE.resetUnitPlotListStackedBarColors()

@@ -1860,7 +1860,10 @@ class PLE:
 		# get units owner name if its not a player unit
 		if (pUnit.getOwner() != gc.getGame().getActivePlayer()):
 			pOwner = gc.getPlayer(pUnit.getOwner())
-			szOwner = u"<font=2> [" + localText.changeTextColor(pOwner.getName(), pOwner.getPlayerColor()) + u"]</font>"
+			#szOwner = localText.changeTextColor(szOwner, pOwner.getPlayerColor())
+			# trs.fix (from AdvCiv): Doesn't seem to be the proper use of changeTextColor
+			szOwner = u"<color=%d,%d,%d,%d>%s</color>" % (pOwner.getPlayerTextColorR(), pOwner.getPlayerTextColorG(), pOwner.getPlayerTextColorB(), pOwner.getPlayerTextColorA(), szOwner)
+			szOwner = u"<font=2> [" + szOwner + u"]</font>"
 		else:
 			szOwner = u""
 

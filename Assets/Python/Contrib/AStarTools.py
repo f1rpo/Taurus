@@ -429,7 +429,8 @@ class AStarMoveArea:
 	# checks if there forwign territory on the plot and returns the corresponding color
 	def checkTerritory(self, pPlot):
 		iPlayer = pPlot.getRevealedOwner(self.iActivePlayerTeam, false)
-		pPlayer = gc.getPlayer(iPlayer)
+		# trs.fix (from AdvCiv): Unused and will crash when pPlot unowned
+		#pPlayer = gc.getPlayer(iPlayer)
 		iTeam = pPlot.getRevealedTeam(self.iActivePlayerTeam, false)
 		pTeam = gc.getTeam(iTeam)
 		if pPlot.isRevealedGoody(iTeam):

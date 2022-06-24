@@ -370,7 +370,7 @@ def getPlotHealFactor(pUnit):
 	eDomain 					= gc.getUnitInfo(pUnit.getUnitType()).getDomainType()
 	
 	# a sea or air unit in a city, behaves like a land unit
-	if pPlot.isCity():
+	if pLoopPlot.isCity(): # trs.fix (from AdvCiv): was pPlot
 		eDomain = DomainTypes.DOMAIN_LAND
 
 	# calculate the adjacent-tile heal-factor caused by other units (only the unit with the highest factor counts)
