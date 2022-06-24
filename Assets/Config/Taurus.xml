@@ -6,7 +6,25 @@
  
 	<options id="Taurus" file="Taurus.ini">
 
+		<section id="MainScreen">
+
+			<!-- trs.promoleads -->
+			<option id="PromotionLeadsTo" key="Promotion Leads To"
+					type="boolean" default="True"/>
+
+		</section>
+		<section id="Saves">
+
+			<!-- trs.modname -->
+			<option id="SaveModName" key="Save Mod Name"
+					type="boolean" default="True"/>
+			<!-- trs.replayname -->
+			<option id="ModNameInReplays" key="Mod Name In Replays"
+					type="boolean" default="True"/>
+
+		</section>
 		<section id="Map">
+
 			<!-- trs.balloon: start -->
 			<!-- (Caveat: The DLL doesn't have access to these ID strings;
 				 the behavior is only based only on the order of the choices.) -->
@@ -71,13 +89,6 @@
 			</list>
 
 		</section>
-		<section id="MainScreen">
-
-			<!-- trs.promoleads -->
-			<option id="PromotionLeadsTo" key="Promotion Leads To"
-					type="boolean" default="True"/>
-
-		</section>
 		<section id="Alerts">
 
 			<!-- trs.1stcontact -->
@@ -89,15 +100,6 @@
 				<choice id="Both"/>
 			</list>
 
-		</section>
-		<section id="System">
-
-			<!-- trs.modname -->
-			<option id="SaveModName" key="Save Mod Name"
-					type="boolean" default="True"/>
-			<!-- trs.replayname -->
-			<option id="ModNameInReplays" key="Mod Name In Replays"
-					type="boolean" default="True"/>
 		</section>
 
 	</options>

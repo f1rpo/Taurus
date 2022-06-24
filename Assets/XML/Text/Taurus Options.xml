@@ -2,6 +2,45 @@
 <!-- trs.doc: Game text for Taurus additions to Mod Options screen -->
 <Civ4GameText xmlns="http://www.firaxis.com">
 
+	<!-- trs.promoleads: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__PROMOTIONLEADSTO_TEXT</Tag>
+		<English>Promotion Leads-To Help</English>
+		<German>Beförderungs-Voraussetzungen</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__PROMOTIONLEADSTO_HOVER</Tag>
+		<English>When checked, the hover text for a promotion button lists the promotions enabled by that promotion.</English>
+		<German>Listet im Hilfe-Text zu einer Beförderung jene andere Beförderungen auf, die durch die erste Beförderung freigeschaltet werden.</German>
+	</TEXT>
+	<!-- trs.promoleads: end -->
+
+	<!-- trs.modname: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__SAVEMODNAME_TEXT</Tag>
+		<English>Save Mod Name</English>
+		<German>Mod-Namen speichern</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__SAVEMODNAME_HOVER</Tag>
+		<English>When checked, the name of the mod's folder (e.g. "Taurus") is written into your savegames. This is what mods normally do, and prevents other mods and BtS without mods from loading your savegames. Unchecking this option means that your savegames look just like unmodified savegames, so BtS (also with custom assets) will be able to load them. A downside is that double-clicking a savegame in Windows Explorer will no longer launch this mod. Hint: Regardless of this option, the key combination Shift+Ctrl+S can be used to "export" a savegame to BtS or to another mod.</English>
+		<German>Speichert den Ordner-Namen des Mods (z.B. "Taurus") in Spielständen. Das geschieht bei praktisch allen Mods und hat den Effekt, dass andere Mods sowie BtS ohne Mods diese Spielstände als inkompatibel zurückweisen. Ist die Option deaktiviert, dann wird kein Odner-Name gespeichert und BtS (ggf. auch mit installierten [COLOR_BUILDING_TEXT]CustomAssets[COLOR_REVERT]) akzeptiert unsere Spielstände. Allerdings lässt sich die Mod dann nicht mehr per Doppelklick auf eine Spielstands-Datei starten.</German>
+	</TEXT>
+	<!-- trs.modname: end -->
+
+	<!-- trs.replayname: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__MODNAMEINREPLAYS_TEXT</Tag>
+		<English>Mod Name in Replays</English>
+		<German>Mod-Name in Replays</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__MODNAMEINREPLAYS_HOVER</Tag>
+		<English>When checked, the name of the mod's folder (e.g. "Taurus") is written into your replay files, which excludes them from the Hall of Fame screen when BtS is run without mods. (As for showing replays created by BtS or other mods on the Taurus Hall of Fame screen, see [COLOR_BUILDING_TEXT]HOF_LIST_OTHER_REPLAYS[COLOR_REVERT] in [COLOR_BUILDING_TEXT]Assets\XML\GlobalDefinesAlt.xml[COLOR_REVERT].)</English>
+		<German>Speichert den Ordner-Namen des Mods (z.B. "Taurus") in [COLOR_BUILDING_TEXT]Civ4BeyondSwordReplay[COLOR_REVERT]-Dateien (Wiederholungen). Dies verhindert, dass die BtS-Ruhmeshalle Taurus-Replays aufführt, wenn kein Mod geladen ist. (Was die Anzeige von BtS-Replays und Replays anderer Mods in der Taurus-Ruhmeshalle angeht, siehe [COLOR_BUILDING_TEXT]HOF_LIST_OTHER_REPLAYS[COLOR_REVERT] in [COLOR_BUILDING_TEXT]Assets\XML\GlobalDefinesAlt.xml[COLOR_REVERT].)</German>
+	</TEXT>
+	<!-- trs.replayname: end -->
+
 	<!-- trs.balloon: start -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TAURUS__PLOTINDICATORSIZE_TEXT</Tag>
@@ -133,45 +172,6 @@
 		<German>Zeigt extra-breite Fortschritts-Balken auf der Hauptkarte an. (Die rechten Hälften dieser Balken lassen sich nicht anklicken - bekanntes Problem.)</German>
 	</TEXT>
 	<!-- trs.wcitybars: end -->
-
-	<!-- trs.modname: start -->
-	<TEXT>
-		<Tag>TXT_KEY_BUG_OPT_TAURUS__SAVEMODNAME_TEXT</Tag>
-		<English>Save Mod Name</English>
-		<German>Mod-Namen speichern</German>
-	</TEXT>
-	<TEXT>
-		<Tag>TXT_KEY_BUG_OPT_TAURUS__SAVEMODNAME_HOVER</Tag>
-		<English>When checked, the name of the mod's folder (e.g. "Taurus") is written into your savegames. This is what mods normally do, and prevents other mods and BtS without mods from loading your savegames. Unchecking this option means that your savegames look just like unmodified savegames, so BtS (also with custom assets) will be able to load them. A downside is that double-clicking a savegame in Windows Explorer will no longer launch this mod. Hint: Regardless of this option, the key combination Shift+Ctrl+S can be used to "export" a savegame to BtS or to another mod.</English>
-		<German>Speichert den Ordner-Namen des Mods (z.B. "Taurus") in Spielständen. Das geschieht bei praktisch allen Mods und hat den Effekt, dass andere Mods sowie BtS ohne Mods diese Spielstände als inkompatibel zurückweisen. Ist die Option deaktiviert, dann wird kein Odner-Name gespeichert und BtS (ggf. auch mit installierten [COLOR_BUILDING_TEXT]CustomAssets[COLOR_REVERT]) akzeptiert unsere Spielstände. Allerdings lässt sich die Mod dann nicht mehr per Doppelklick auf eine Spielstands-Datei starten.</German>
-	</TEXT>
-	<!-- trs.modname: end -->
-
-	<!-- trs.replayname: start -->
-	<TEXT>
-		<Tag>TXT_KEY_BUG_OPT_TAURUS__MODNAMEINREPLAYS_TEXT</Tag>
-		<English>Mod Name in Replays</English>
-		<German>Mod-Name in Replays</German>
-	</TEXT>
-	<TEXT>
-		<Tag>TXT_KEY_BUG_OPT_TAURUS__MODNAMEINREPLAYS_HOVER</Tag>
-		<English>When checked, the name of the mod's folder (e.g. "Taurus") is written into your replay files, which excludes them from the Hall of Fame screen when BtS is run without mods. (As for showing replays created by BtS or other mods on the Taurus Hall of Fame screen, see [COLOR_BUILDING_TEXT]HOF_LIST_OTHER_REPLAYS[COLOR_REVERT] in [COLOR_BUILDING_TEXT]Assets\XML\GlobalDefinesAlt.xml[COLOR_REVERT].)</English>
-		<German>Speichert den Ordner-Namen des Mods (z.B. "Taurus") in [COLOR_BUILDING_TEXT]Civ4BeyondSwordReplay[COLOR_REVERT]-Dateien (Wiederholungen). Dies verhindert, dass die BtS-Ruhmeshalle Taurus-Replays aufführt, wenn kein Mod geladen ist. (Was die Anzeige von BtS-Replays und Replays anderer Mods in der Taurus-Ruhmeshalle angeht, siehe [COLOR_BUILDING_TEXT]HOF_LIST_OTHER_REPLAYS[COLOR_REVERT] in [COLOR_BUILDING_TEXT]Assets\XML\GlobalDefinesAlt.xml[COLOR_REVERT].)</German>
-	</TEXT>
-	<!-- trs.replayname: end -->
-
-	<!-- trs.promoleads: start -->
-	<TEXT>
-		<Tag>TXT_KEY_BUG_OPT_TAURUS__PROMOTIONLEADSTO_TEXT</Tag>
-		<English>Promotion Leads-To Help</English>
-		<German>Beförderungs-Voraussetzungen</German>
-	</TEXT>
-	<TEXT>
-		<Tag>TXT_KEY_BUG_OPT_TAURUS__PROMOTIONLEADSTO_HOVER</Tag>
-		<English>When checked, the hover text for a promotion button lists the promotions enabled by that promotion.</English>
-		<German>Listet im Hilfe-Text zu einer Beförderung jene andere Beförderungen auf, die durch die erste Beförderung freigeschaltet werden.</German>
-	</TEXT>
-	<!-- trs.promoleads: end -->
 
 	<!-- trs.1stcontact: start (from AdvCiv) -->
 	<!-- (Italian, Spanish based on TXT_KEY_BUG_OPT_REMINDER__DISPLAYMETHOD_LIST) -->
