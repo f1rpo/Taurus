@@ -481,6 +481,7 @@ void CvGame::reset(HandicapTypes eHandicap, bool bConstructorCall)
 	m_bDebugMode = false;
 	m_bDebugModeCache = false;
 	m_bFeignSP = false; // trs.cheats
+	m_bCityScreenUp = false; // trs.citycam
 	m_bFinalInitialized = false;
 	m_bPbemTurnSent = false;
 	m_bHotPbemBetweenTurns = false;
@@ -2136,7 +2137,15 @@ void CvGame::update()
 		}
 
 		changeTurnSlice(1);
-
+		// <trs.citycam>
+		{
+			bool bCityScreenUp = gDLL->getInterfaceIFace()->isCityScreenUp();
+			if (bCityScreenUp != m_bCityScreenUp)
+			{
+				m_bCityScreenUp = bCityScreenUp;
+				onCityScreenChange();
+			}
+		} // </trs.citycam>
 		if (NO_PLAYER != getActivePlayer() && GET_PLAYER(getActivePlayer()).getAdvancedStartPoints() >= 0 && !gDLL->getInterfaceIFace()->isInAdvancedStart())
 		{
 			gDLL->getInterfaceIFace()->setInAdvancedStart(true);

@@ -3202,7 +3202,6 @@ void CvGame::handleDiplomacySetAIComment(DiploCommentTypes eComment) const
 	}
 }
 
-
 /*	<trs.balloon> Could get this through winuser.h, but that's not trivial.
 	Let's just let Python provide the info to us. */
 void CvGame::setScreenDimensions(int iWidth, int iHeight)
@@ -3230,3 +3229,27 @@ int CvGame::getScreenHeight() const
 {
 	return m_iScreenHeight;
 } // </trs.balloon>
+
+// trs.citycam (from AdvCiv):
+void CvGame::onCityScreenChange()
+{
+	/*	Move the camera north a bit b/c that'll center the map excerpt
+		on the city screen better. */
+	if (m_bCityScreenUp)
+	{
+		CvPlot const* pCityPlot = gDLL->getInterfaceIFace()->getSelectionPlot();
+		if (pCityPlot != NULL)
+		{
+			CvPlot const* pOneNorth = plotDirection(
+					pCityPlot->getX(), pCityPlot->getY(), DIRECTION_NORTH);
+			if (pOneNorth != NULL)
+			{
+				NiPoint3 nOneNorth = pOneNorth->getPoint();
+				NiPoint3 nCity = pCityPlot->getPoint();
+				NiPoint3 nLookAt(nCity.x,
+						nCity.y + 0.23f * (nOneNorth.y - nCity.y), nCity.z);
+				gDLL->getInterfaceIFace()->lookAt(nLookAt, CAMERALOOKAT_CITY_ZOOM_IN);
+			}
+		}
+	}
+}
