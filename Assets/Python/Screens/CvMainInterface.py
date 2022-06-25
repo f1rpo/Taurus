@@ -2491,11 +2491,20 @@ class CvMainInterface:
 
 		i = 0
 		if ( CyInterface().shouldShowResearchButtons() and CyInterface().getShowInterface() == InterfaceVisibility.INTERFACE_SHOW ):
+			# <trs.research-btn-pos> Need to know the total number of buttons
+			# to center them
+			iTotal = 0
+			for i in range(gc.getNumTechInfos()):
+				if gc.getActivePlayer().canResearch(i, False):
+					iTotal += 1
+					if iTotal >= 19:
+						break
+			# </trs.research-btn-pos>
 			iCount = 0
-			
 			for i in range( gc.getNumTechInfos() ):
 				if (gc.getActivePlayer().canResearch(i, False)):
-					if (iCount < 20):
+					#if (iCount < 20):
+					if iCount <= iTotal: # trs.research-btn-pos
 						szName = "ResearchButton" + str(i)
 
 						bDone = False
@@ -2507,7 +2516,8 @@ class CvMainInterface:
 										bDone = True
 
 						screen.show( szName )
-						self.setResearchButtonPosition(szName, iCount)
+						self.setResearchButtonPosition(szName, iCount,
+								iTotal) # trs.research-btn-pos
 
 					iCount = iCount + 1
 					
@@ -5212,7 +5222,8 @@ class CvMainInterface:
 		return (266 - (24 * (iPromotionCount / 6)), yResolution - 144 + (24 * (iPromotionCount % 6)))
 
 	# Will set the selection button position
-	def setResearchButtonPosition( self, szButtonID, iCount ):
+	def setResearchButtonPosition(self, szButtonID, iCount,
+			iTotal): # trs.research-btn-pos
 		
 		screen = CyGInterfaceScreen( "MainInterface", CvScreenEnums.MAIN_INTERFACE )
 		xResolution = screen.getXResolution()
@@ -5222,10 +5233,14 @@ class CvMainInterface:
 		and (MainOpt.isShowGGProgressBar() or MainOpt.isShowGPProgressBar())):
 			xCoord = 268 + (xResolution - 1440) / 2
 			xCoord += 6 + 84
+			# trs.research-btn-pos (note): This seems to work well enough -
+			# if we return afterward.
 			screen.moveItem( szButtonID, 264 + ( ( xResolution - 1024 ) / 2 ) + ( 34 * ( iCount % 15 ) ), 0 + ( 34 * ( iCount / 15 ) ), -0.3 )
-		else:
-			xCoord = 264 + ( ( xResolution - 1024 ) / 2 )
-
+			return # trs.fix
+		#else:
+		xCoord = 264 + ( ( xResolution - 1024 ) / 2 )
+		# trs.research-btn-pos: Center on the available width
+		xCoord += (xResolution - 2 * xCoord - min(iTotal, 15) * 34) / 2
 		screen.moveItem( szButtonID, xCoord + ( 34 * ( iCount % 15 ) ), 0 + ( 34 * ( iCount / 15 ) ), -0.3 )
 # BUG - Bars on single line for higher resolution screens - end
 
