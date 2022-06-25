@@ -15,9 +15,9 @@
 	 
 	<options id="Actions" file="BUG Actions.ini">
 		<section id="Units">
-			<!-- Ask Declare War -->
+			<!-- Ask Declare War (trs.bugdefaults: default was True) -->
 			<option id="AskDeclareWarUnits" key="Ask Declare War Units" 
-					type="boolean" default="True"/>
+					type="boolean" default="False"/>
 			
 			<!-- Sentry Healing by Unofficial Patch -->
 			<option id="SentryHealing" key="Sentry Healing" 
