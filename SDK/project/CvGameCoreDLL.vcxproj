@@ -44,6 +44,7 @@
     <ClCompile Include="..\CvDiploParameters.cpp" />
     <ClCompile Include="..\CvDLLButtonPopup.cpp" />
     <ClCompile Include="..\CvDLLEntity.cpp" />
+    <ClCompile Include="..\CvDLLInterfaceIFaceBase.cpp" />
     <ClCompile Include="..\CvDLLPython.cpp" />
     <ClCompile Include="..\CvDllPythonEvents.cpp" />
     <ClCompile Include="..\CvDllTranslator.cpp" />
