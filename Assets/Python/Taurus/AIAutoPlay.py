@@ -160,6 +160,6 @@ def launchAIAutoPlayDialog(argsList=None):
 		return
 	if game.getAIAutoPlay() > 0:
 		game.setAIAutoPlay(-1) # Signaling to Civ4lerts that Auto Play has just ended
-		aiplay.checkPlayer()
+		aiplay.reEnableHuman()
 	else:
 		aiplay.toAIChooser()
