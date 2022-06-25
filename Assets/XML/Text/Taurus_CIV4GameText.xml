@@ -47,6 +47,25 @@
 	</TEXT>
 	<!-- trs.savmsg: end -->
 
+	<!-- trs.maxslider: start (from AdvCiv) -->
+	<TEXT>
+		<Tag>TXT_KEY_MISC_INCREASE_RATE_HINT</Tag>
+		<English>. (Right-click to set to 100%.)</English>
+		<French>.</French>
+		<German>. (Rechtsklick setzt die Rate auf 100%.)</German>
+		<Italian>.</Italian>
+		<Spanish>.</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_MISC_DECREASE_RATE_HINT</Tag>
+		<English>. (Right-click to set to 0.)</English>
+		<French>.</French>
+		<German>. (Rechtsklick setzt die Rate auf 0.)</German>
+		<Italian>.</Italian>
+		<Spanish>.</Spanish>
+	</TEXT>
+	<!-- trs.maxslider: end -->
+
 	<!-- trs.modname: start -->
 	<TEXT>
 		<Tag>TXT_KEY_POPUP_EXPORT_SAVE_TITLE</Tag>

@@ -41,6 +41,7 @@ public:
 	void doChangeSpecialist(CvWidgetDataStruct &widgetDataStruct);
 	void doResearch(CvWidgetDataStruct &widgetDataStruct);
 	void doChangePercent(CvWidgetDataStruct &widgetDataStruct);
+	void doChangePercentAlt(CvWidgetDataStruct &widgetDataStruct); // trs.maxslider
 // BUG - Min/Max Commerce Rate - start
 	void doSetPercent(CvWidgetDataStruct &widgetDataStruct);
 // BUG - Min/Max Commerce Rate - end

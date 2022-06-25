@@ -1003,6 +1003,10 @@ bool CvDLLWidgetData::executeAltAction( CvWidgetDataStruct &widgetDataStruct )
 	case WIDGET_TECH_TREE:
 		doPediaTechJump(widgetDataStruct);
 		break;
+	// <trs.maxslider>
+	case WIDGET_CHANGE_PERCENT:
+		doChangePercentAlt(widgetDataStruct);
+		break; // </trs.maxslider>
 	case WIDGET_TRAIN:
 		doPediaTrainJump(widgetDataStruct);
 		break;
@@ -1366,6 +1370,13 @@ void CvDLLWidgetData::doResearch(CvWidgetDataStruct &widgetDataStruct)
 void CvDLLWidgetData::doChangePercent(CvWidgetDataStruct &widgetDataStruct)
 {
 	CvMessageControl::getInstance().sendPercentChange(((CommerceTypes)widgetDataStruct.m_iData1), widgetDataStruct.m_iData2);
+}
+
+// trs.maxslider (from K-Mod):
+void CvDLLWidgetData::doChangePercentAlt(CvWidgetDataStruct &widgetDataStruct)
+{
+	CvMessageControl::getInstance().sendPercentChange(
+			(CommerceTypes)widgetDataStruct.m_iData1, widgetDataStruct.m_iData2 * 100);
 }
 
 // BUG - Min/Max Commerce Rate - start
@@ -3480,6 +3491,13 @@ void CvDLLWidgetData::parseChangePercentHelp(CvWidgetDataStruct &widgetDataStruc
 	{
 		szBuffer.assign(gDLL->getText("TXT_KEY_MISC_DECREASE_RATE", GC.getCommerceInfo((CommerceTypes) widgetDataStruct.m_iData1).getTextKeyWide(), -(widgetDataStruct.m_iData2)));
 	}
+	// <trs.maxslider> (from AdvCiv)
+	if (getBugOptionBOOL("MainInterface__MinMax_Commerce"))
+	{
+		szBuffer.append(gDLL->getText(widgetDataStruct.m_iData2 > 0 ?
+				"TXT_KEY_MISC_INCREASE_RATE_HINT" :
+				"TXT_KEY_MISC_DECREASE_RATE_HINT"));
+	} // </trs.maxslider>
 }
 
 // BUG - Min/Max Commerce Rate - start

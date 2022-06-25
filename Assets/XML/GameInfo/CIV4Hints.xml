@@ -461,6 +461,10 @@
 		<HintInfo>
 			<Description>TXT_KEY_TAURUS_HINT_1</Description>
 		</HintInfo>
+		<!-- trs.maxslider -->
+		<HintInfo>
+			<Description>TXT_KEY_TAURUS_HINT_2</Description>
+		</HintInfo>
 
 		<!-- BUG Hints -->
 		<!-- trs.doc: Disabled some bad ones;

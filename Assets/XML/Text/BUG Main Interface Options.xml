@@ -118,13 +118,12 @@
 		<Italian>Bottoni del Commercio minimo/massimo</Italian>
 		<Spanish>Min/Max Commerce Buttons</Spanish>
 	</TEXT>
+	<!-- trs.maxslider: Mention right-click behavior -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_MAININTERFACE__MINMAX_COMMERCE_HOVER</Tag>
-		<English>When checked, displays a second pair of +/- buttons for each commerce type that set the rate to 100% and 0% respectively.</English>
-		<French>When checked, displays a second pair of +/- buttons for each commerce type that set the rate to 100% and 0% respectively.</French>
-		<German>Zeigt ein zweites Paar "+/-"-Schaltflächen für jede Art Investitionsanteil an, die diese auf 100% beziehungsweise 0% setzen</German>
+		<English>When checked, displays a second pair of +/- buttons for each commerce type that set the rate to 100% and 0% respectively. Note that, regardless of this option, Taurus also sets the rate to 100%/0% when one of the original +/- button is [COLOR_HIGHLIGHT_TEXT]right-clicked[COLOR_REVERT].</English>
+		<German>Zeigt ein zweites Paar "+/-"-Schaltflächen für jeden Anteilsregler an, die den Anteil auf 100% bzw. 0% setzen. Hinweis: In Taurus lassen sich (auch ohne diese Zusatz-Schaltflächen) die Anteile durch einen [COLOR_HIGHLIGHT_TEXT]Rechtsklick[COLOR_REVERT] auf die gewöhnlichen "+/-"-Schaltflächen auf 100%/0% setzen.</German>
 		<Italian>Quando è selezionato, mostra una seconda coppia di bottoni +/- per ogni tipo di commercio che impostano il valore rispettivamente al 100% ed allo 0%.</Italian>
-		<Spanish>When checked, displays a second pair of +/- buttons for each commerce type that set the rate to 100% and 0% respectively.</Spanish>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_MAININTERFACE__CITYARROWS_TEXT</Tag>
