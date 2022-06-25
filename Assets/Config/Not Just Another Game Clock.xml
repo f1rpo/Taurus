@@ -110,21 +110,26 @@
 					get="isShowAltTime" set="setShowAltTime" dirtyBit="GameData" 
 					label="Clock" 
 					help="When checked, the real time is displayed."/>
+			<!-- trs.bugdefaults: start
+				 Completed/TotalTurns set to True by default,
+				 CompletedPercentage to False, effectively deactivating
+				 the alternation by default. -->
 			<option id="ShowAltCompletedTurns" key="Alternate Show Game Completed Turns" 
-					type="boolean" default="False" 
+					type="boolean" default="True" 
 					get="isShowAltGameTurn" set="setShowAltGameTurn" dirtyBit="GameData" 
 					label="Completed Turns" 
 					help="When checked, the number of turns completed is displayed."/>
 			<option id="ShowAltTotalTurns" key="Alternate Show Game Total Turns" 
-					type="boolean" default="False" 
+					type="boolean" default="True" 
 					get="isShowAltTotalTurns" set="setShowAltTotalTurns" dirtyBit="GameData" 
 					label="Total Turns" 
 					help="When checked, the total turns in the game is displayed if Time Victory is enabled."/>
 			<option id="ShowAltCompletedPercent" key="Alternate Show Game Completed Percent" 
-					type="boolean" default="True" 
+					type="boolean" default="False" 
 					get="isShowAltPercentComplete" set="setShowAltPercentComplete" dirtyBit="GameData" 
 					label="Completed Percentage" 
 					help="When checked, the completed percentage is displayed if Time Victory is enabled."/>
+			<!-- trs.bugdefaults: end -->
 			<option id="ShowAltDate" key="Alternate Show Turns" 
 					type="boolean" default="True" 
 					get="isShowAltDateGA" set="setShowAltDateGA" dirtyBit="GameData" 
