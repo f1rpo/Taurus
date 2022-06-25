@@ -123,8 +123,9 @@
 			<!-- Production Popup by EmperorFool -->
 			<option id="ProductionPopupTrainCivilianUnitsForever" key="Production Popup Train Civilian Units Forever" dll="1" 
 					type="boolean" default="False" get="isProductionPopupTrainCivilianUnitsForever"/>
+			<!-- trs.bugdefaults: default was True -->
 			<option id="ProductionPopupTrainMilitaryUnitsForever" key="Production Popup Train Military Units Forever" dll="1" 
-					type="boolean" default="True" get="isProductionPopupTrainMilitaryUnitsForever"/>
+					type="boolean" default="False" get="isProductionPopupTrainMilitaryUnitsForever"/>
 		</section>
 	</options>
 </mod>
