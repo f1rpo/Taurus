@@ -173,8 +173,6 @@
 	
 	<screen id="BUGFull">
 		<tab module="BugGeneralOptionsTab"/>
-		<!-- trs.savtab -->
-		<tab module="BugSavesOptionsTab"/>
 		<tab module="BugMapOptionsTab"/>
 		<tab module="BugCityScreenOptionsTab"/>
 		
@@ -189,7 +187,9 @@
 		<tab module="BugUnitNameOptionsTab"/>
 		
 		<tab module="BugAutologOptionsTab"/>
-		
+
+		<!-- trs.savtab -->
+		<tab module="BugSavesOptionsTab"/>
 		<tab module="BugSystemOptionsTab"/>
 		<tab module="BugCreditsOptionsTab"/>
 	</screen>

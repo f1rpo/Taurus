@@ -442,12 +442,13 @@
 	</TEXT>
 	
 	<!-- Scores Tab -->
-	
+
+	<!-- trs. Was "Scoreboard". -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTTAB_SCORES</Tag>
-		<English>Scoreboard</English>
+		<English>Scores</English>
 		<French>Scores</French>
-		<German>Punkteanzeige</German>
+		<German>Punktestand</German>
 		<Italian>Punteggio</Italian>
 		<Spanish>Scoreboard</Spanish>
 	</TEXT>
@@ -673,10 +674,11 @@
 	</TEXT>
 	
 	<!-- Unit Naming Tab -->
-	
+
+	<!-- trs. Was "Unit Naming". -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPTTAB_UNITNAMING</Tag>
-		<English>Unit Naming</English>
+		<English>Unit Names</English>
 		<French>Noms des Unités</French>
 		<German>Einheitennamen</German>
 		<Italian>Nomi Unità</Italian>
