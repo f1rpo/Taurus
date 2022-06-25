@@ -291,7 +291,7 @@ public:
 	int getScreenWidth() const;
 	int getScreenHeight() const;
 	// </trs.balloon>
-	void onCityScreenChange(); // trs.citycam
+	void onCityScreenChange(); // trs.camcity
 
 	bool getPbemTurnSent() const;
 	DllExport void setPbemTurnSent(bool bNewValue);

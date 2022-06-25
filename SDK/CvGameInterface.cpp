@@ -3230,7 +3230,7 @@ int CvGame::getScreenHeight() const
 	return m_iScreenHeight;
 } // </trs.balloon>
 
-// trs.citycam (from AdvCiv):
+// trs.camcity (from AdvCiv):
 void CvGame::onCityScreenChange()
 {
 	/*	Move the camera north a bit b/c that'll center the map excerpt
