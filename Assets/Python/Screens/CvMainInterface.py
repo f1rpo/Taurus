@@ -5566,7 +5566,9 @@ class CvMainInterface:
 
 # BUG - field of view slider - start
 	def setFieldofView(self, screen, bDefault):
-		if bDefault or not MainOpt.isShowFieldOfView():
+		if bDefault or (not MainOpt.isShowFieldOfView()
+				# trs.fov (from K-Mod):
+				and not MainOpt.isRememberFieldOfView()):
 			self._setFieldofView(screen, DEFAULT_FIELD_OF_VIEW)
 		else:
 			self._setFieldofView(screen, self.iField_View)
