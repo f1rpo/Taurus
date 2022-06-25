@@ -3,6 +3,17 @@
 <Civ4GameText xmlns="http://www.firaxis.com">
 
 	<!-- Redefines - start -->
+	<!-- trs.unitdisplay: Rename "Domestics" filter
+		 (Translations based on
+		 TXT_KEY_GLOBELAYER_UNITS_ENEMYMILITARY) -->
+	<TEXT>
+		<Tag>TXT_KEY_GLOBELAYER_UNITS_DOMESTICS</Tag>
+		<English>Civilians</English>
+		<French>Unités non militaires</French>
+		<German>Zivilisten</German>
+		<Italian>Eserciti non militari</Italian>
+		<Spanish>Ej&#233;rcitos no militares</Spanish>
+	</TEXT>
 	<!-- trs.savmsg: The EXE displays these, but we want
 		 the DLL to handle them. -->
 	<TEXT>

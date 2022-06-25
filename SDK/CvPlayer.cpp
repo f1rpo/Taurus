@@ -21479,7 +21479,9 @@ void CvPlayer::getUnitLayerColors(GlobeLayerUnitOptionTypes eOption, std::vector
 						if (pUnit->getVisualOwner() == iPlayer && !pUnit->isInvisible(getTeam(), GC.getGameINLINE().isDebugMode()))
 						{
 							// now, is this unit of interest?
-							bool bIsMilitary = pUnit->baseCombatStr() > 0;
+							bool bIsMilitary = pUnit->//baseCombatStr() > 0
+									// trs.unitdisplay: The above doesn't work for air units
+									canCombat();
 							bool bIsEnemy = pUnit->isEnemy(getTeam());
 							bool bIsOnOurTeam = pUnit->getTeam() == getTeam();
 							bool bOfInterest = false;
@@ -21539,7 +21541,45 @@ void CvPlayer::getUnitLayerColors(GlobeLayerUnitOptionTypes eOption, std::vector
 
 					if (bShowIndicator)
 					{
-						CvUnit* pUnit = pLoopPlot->getBestDefender(NO_PLAYER);
+						/*	<trs.unitdisplay> (from AdvCiv) Don't show a defender
+							when we're displaying civilians */
+						CvUnit* pUnit = NULL;
+						if (eOption == SHOW_PLAYER_DOMESTICS)
+						{
+							UnitAITypes aePriorityList[] =
+							{
+								UNITAI_GENERAL, UNITAI_ARTIST, UNITAI_ENGINEER,
+								UNITAI_MERCHANT, UNITAI_PROPHET, UNITAI_SCIENTIST,
+								UNITAI_SETTLE, UNITAI_SPY, UNITAI_MISSIONARY,
+								UNITAI_WORKER, UNITAI_WORKER_SEA
+							};
+							PlayerTypes eActivePlayer = GC.getGame().getActivePlayer();
+							TeamTypes eActiveTeam = GC.getGame().getActiveTeam();
+							for (int j = 0; j < ARRAYSIZE(aePriorityList); j++)
+							{
+								// Use unit owner as tiebreaker
+								for (int k = 0; k < 3; k++)
+								{
+									pUnit = pLoopPlot->plotCheck(PUF_isUnitAIType,
+											aePriorityList[j], -1,
+											(k == 0 ? eActivePlayer : NO_PLAYER),
+											(k == 1 ? eActiveTeam : NO_TEAM),
+											PUF_isVisibleDebug, eActivePlayer, -1);
+									if (pUnit != NULL)
+										break;
+								}
+								if (pUnit != NULL)
+									break;
+							}
+							if (pUnit == NULL)
+							{
+								pUnit = pLoopPlot->plotCheck(PUF_cannotDefend,
+										-1, -1, NO_PLAYER, NO_TEAM,
+										PUF_isVisibleDebug, eActivePlayer, -1);
+							}
+						}
+						else // </trs.unitdisplay>
+							pUnit = pLoopPlot->getBestDefender(NO_PLAYER);
 						if (pUnit != NULL)
 						{
 							PlayerColorTypes eUnitColor = GET_PLAYER(pUnit->getVisualOwner()).getPlayerColor();
@@ -21556,8 +21596,9 @@ void CvPlayer::getUnitLayerColors(GlobeLayerUnitOptionTypes eOption, std::vector
 							if (eOption == SHOW_ENEMIES_IN_TERRITORY)
 							{
 								kIndicator.m_kColor.r = 1;
-								kIndicator.m_kColor.r = 0;
-								kIndicator.m_kColor.r = 0;
+								// <trs.fix> Was .r (likely copy-paste error)
+								kIndicator.m_kColor.g = 0;
+								kIndicator.m_kColor.b = 0; // </trs.fix>
 							}
 							else
 							{

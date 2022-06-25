@@ -8240,6 +8240,12 @@ float CvUnit::currCombatStrFloat(const CvPlot* pPlot, const CvUnit* pAttacker) c
 	return (((float)(currCombatStr(pPlot, pAttacker))) / 100.0f);
 }
 
+// trs. (from Kek-Mod)
+bool CvUnit::canCombat() const
+{
+	return (baseCombatStr() > 0 || airBaseCombatStr() > 0 || nukeRange() >= 0);
+}
+
 
 bool CvUnit::canFight() const
 {

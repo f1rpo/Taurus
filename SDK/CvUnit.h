@@ -334,6 +334,7 @@ public:
 	DllExport float currCombatStrFloat(const CvPlot* pPlot, const CvUnit* pAttacker) const;																	// Exposed to Python
 
 	DllExport bool canFight() const;																									// Exposed to Python
+	bool canCombat() const; // trs.
 	bool canAttack() const;																														// Exposed to Python
 	bool canAttack(const CvUnit& defender) const;
 	bool canDefend(const CvPlot* pPlot = NULL) const;																	// Exposed to Python
