@@ -142,4 +142,12 @@
         <iDefineIntVal>0</iDefineIntVal>
     </Define>
 
+	<!-- trs.camcity: Same as CAMERA_CITY_ZOOM_IN_DISTANCE in BtS - which now
+		 gets set, based on CAMERA_BASE_CITY_DISTANCE, field-of-view value and
+		 screen dimensions, by the DLL. -->
+	<Define>
+		<DefineName>CAMERA_BASE_CITY_DISTANCE</DefineName>
+        <fDefineFloatVal>3500</fDefineFloatVal>
+    </Define>
+
 </Civ4Defines>

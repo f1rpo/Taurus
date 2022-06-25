@@ -196,6 +196,7 @@ public:
 
 	DllExport NiPoint3& getPt3CameraDir();
 	void updateDefaultCamDistance(); // trs.camdist (exposed to Python)
+	void updateCityCamDistance(); // trs.camcity
 	void updateCamScrollSpeed(); // trs.camspeed (exposed to Python)
 
 	DllExport bool& getLogging();

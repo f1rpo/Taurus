@@ -3206,18 +3206,17 @@ void CvGame::handleDiplomacySetAIComment(DiploCommentTypes eComment) const
 	Let's just let Python provide the info to us. */
 void CvGame::setScreenDimensions(int iWidth, int iHeight)
 {
+	if (m_iScreenWidth == iWidth && m_iScreenHeight == iHeight)
+		return;
+	GC.updateCityCamDistance(); // trs.camcity
 	// Avoid warped plot indicators upon changing resolution
-	if (m_iScreenWidth != iWidth || m_iScreenHeight != iHeight)
-		gDLL->getInterfaceIFace()->setDirty(GlobeLayer_DIRTY_BIT, true);
+	gDLL->getInterfaceIFace()->setDirty(GlobeLayer_DIRTY_BIT, true);
 	m_iScreenWidth = iWidth;
-	if (m_iScreenHeight != iHeight)
-	{
-		m_iScreenHeight = iHeight;
-		/*	Do this as soon as we know the screen dimensions, before a
-			plot indicator gets created for the initially selected units. */
-		if (m_iScreenHeight > 0)
-			smc::BtS_EXE.patchPlotIndicatorSize();
-	}
+	m_iScreenHeight = iHeight;
+	/*	Do this as soon as we know the screen dimensions, before a
+		plot indicator gets created for the initially selected units. */
+	if (m_iScreenHeight > 0)
+		smc::BtS_EXE.patchPlotIndicatorSize();
 }
 
 int CvGame::getScreenWidth() const

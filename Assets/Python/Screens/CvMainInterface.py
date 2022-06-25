@@ -1207,7 +1207,11 @@ class CvMainInterface:
 		screen = CyGInterfaceScreen( "MainInterface", CvScreenEnums.MAIN_INTERFACE )
 
 # BUG - Field of View - start
-		self.setFieldofView(screen, CyInterface().isCityScreenUp())
+		#self.setFieldofView(screen, CyInterface().isCityScreenUp())
+		# trs.camcity (from K-Mod): Doesn't work properly because the screen is
+		# drawn before the value is changed. Handled by the through a
+		# cam-distance adjustment in the DLL instead.
+		self.setFieldofView(screen, False)
 # BUG - Field of View - end
 
 		# Check Dirty Bits, see what we need to redraw...

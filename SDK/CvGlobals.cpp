@@ -650,6 +650,25 @@ void CvGlobals::updateDefaultCamDistance()
 	m_fCAMERA_START_DISTANCE = fDist;
 }
 
+// trs.camcity (from AdvCiv):
+void CvGlobals::updateCityCamDistance()
+{
+	float fCityCamDist = getDefineFLOAT("CAMERA_BASE_CITY_DISTANCE");
+	/*	Exponentiate to let the player yet exert _some_ control (through the FoV)
+		over the city-screen camera distance. */
+	fCityCamDist *= std::pow(42.f / GC.getFIELD_OF_VIEW(), 0.85f);
+	float fDefaultAspectRatio = 8/5.f;
+	int const iW = getGame().getScreenWidth();
+	int const iH = getGame().getScreenHeight();
+	float fAspectRatio = (iH <= 0 ? fDefaultAspectRatio : iW / (float)iH);
+	float fScreenDimMult = fAspectRatio / fDefaultAspectRatio;
+	// On small screens, width can be the limiting dimension.
+	if (iW > 0 && iW < 1400)
+		fScreenDimMult *= std::pow(1280.f / getGame().getScreenWidth(), 0.85f);
+	fCityCamDist *= ::range(fScreenDimMult, 2/3.f, 1.5f);
+	setDefineFLOAT("CAMERA_CITY_ZOOM_IN_DISTANCE", fCityCamDist);
+}
+
 // trs.camspeed:
 void CvGlobals::updateCamScrollSpeed()
 {
@@ -2741,9 +2760,12 @@ void CvGlobals::cacheGlobals()
 	{
 		float fOldFoV = m_fFIELD_OF_VIEW; // trs.camdist
 		m_fFIELD_OF_VIEW = getDefineFLOAT("FIELD_OF_VIEW");
-		// <trs.camdist> Adjust default camera distance (if it's set to Auto)
+		// <trs.cam> Adjust camera distance
 		if (std::abs(fOldFoV - m_fFIELD_OF_VIEW) > 0.5f)
-			updateDefaultCamDistance(); // </trs.camdist>
+		{
+			updateDefaultCamDistance(); // trs.camdist
+			updateCityCamDistance(); // trs.camcity
+		} // </trs.cam>
 	}
 	m_fSHADOW_SCALE = getDefineFLOAT("SHADOW_SCALE");
 	m_fUNIT_MULTISELECT_DISTANCE = getDefineFLOAT("UNIT_MULTISELECT_DISTANCE");
