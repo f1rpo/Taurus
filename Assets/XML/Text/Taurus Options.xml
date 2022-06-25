@@ -73,7 +73,7 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TAURUS__AUTOSAVEMSG_LIST</Tag>
-		<English>Disabled|Briefly|Normal</English>
+		<English>Disabled|Brief|Normal</English>
 		<German>Deaktiviert|Kurz|Normal</German>
 	</TEXT>
 	<TEXT>
@@ -88,7 +88,7 @@
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_TAURUS__QUICKSAVEMSG_LIST</Tag>
-		<English>Disabled|Briefly|Normal</English>
+		<English>Disabled|Brief|Normal</English>
 		<German>Deaktiviert|Kurz|Normal</German>
 	</TEXT>
 	<TEXT>

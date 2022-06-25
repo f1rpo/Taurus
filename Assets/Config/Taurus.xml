@@ -34,13 +34,13 @@
 			<list	id="AutoSaveMsg" key="Auto Save Msg"
 					type="int" default="0" listType="string">
 				<choice id="Disable"/>
-				<choice id="Briefly"/>
+				<choice id="Brief"/>
 				<choice id="Normal"/>
 			</list>
 			<list	id="QuickSaveMsg" key="Quick Save Msg"
 					type="int" default="1" listType="string">
 				<choice id="Disable"/>
-				<choice id="Briefly"/>
+				<choice id="Brief"/>
 				<choice id="Normal"/>
 			</list>
 			<!-- trs.savmsg: end -->
