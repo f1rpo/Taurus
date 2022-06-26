@@ -4829,7 +4829,8 @@ void CvTeam::addFirstContactMessage(FirstContactData const& fcData, TeamTypes eO
 		{
 			continue;
 		}
-		gDLL->getInterfaceIFace()->addMessage(kOurMember.getID(), false, -1, szMsg, NULL,
+		gDLL->getInterfaceIFace()->addMessage(kOurMember.getID(), false,
+				GC.getEVENT_MESSAGE_TIME(), szMsg, NULL,
 				MESSAGE_TYPE_MINOR_EVENT, icon, ePlayerColor,
 				pAt == NULL ? -1 : pAt->getX(), pAt == NULL ? -1 : pAt->getY(),
 				pAt != NULL, pAt != NULL);
