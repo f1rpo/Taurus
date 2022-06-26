@@ -37,9 +37,10 @@
 			<option id="DeltaIncludeCurrent" key="Delta Includes Current Turn" 
 					type="boolean" default="True" 
 					get="isScoreDeltaIncludeCurrentTurn" set="setScoreDeltaIncludeCurrentTurn" dirtyBit="Score"/>
-			
+
+			<!-- trs.bugdefaults: default was 2 (e.g. "English Empire") -->
 			<list   id="DisplayName" key="Display Name" 
-					type="int" default="2" listType="string" 
+					type="int" default="0" listType="string" 
 					get="getDisplayName" set="setDisplayName" dirtyBit="Score">
 				<choice id="Leader" get="isShowLeaderName" set="setShowLeaderName"/>
 				<choice id="Civilization" get="isShowCivName" set="setShowCivName"/>
