@@ -99,7 +99,7 @@
 	<!-- trs.promoleads: start -->
 	<!-- (Akin to TXT_KEY_PEDIA_LEADS_TO) -->
 	<TEXT>
-		<Tag>TXT_KEY_MISC_LEADS_TO</Tag>
+		<Tag>TXT_KEY_MISC_PROMO_LEADS_TO</Tag>
 		<English>Leads to</English>
 		<French>M&#232;ne &#224;</French>
 		<German>F&#252;hrt zu</German>
@@ -107,7 +107,7 @@
 		<Spanish>Lleva a</Spanish>
 	</TEXT>
 	<TEXT>
-		<Tag>TXT_KEY_MISC_REQUIRED_FOR</Tag>
+		<Tag>TXT_KEY_MISC_PROMO_REQUIRED_FOR</Tag>
 		<English>Required for</English>
 		<French>N&#233;cessaire pour</French>
 		<German>Ben&#246;tigt f&#252;r</German>

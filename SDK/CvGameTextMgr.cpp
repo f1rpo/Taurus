@@ -6608,7 +6608,7 @@ void CvGameTextMgr::parsePromotionLeadsToHelp(CvWStringBuffer &szBuffer, Promoti
 	if (!aeReq.empty())
 	{
 		szBuffer.append(pcNewline);
-		szBuffer.append(gDLL->getText("TXT_KEY_MISC_REQUIRED_FOR"));
+		szBuffer.append(gDLL->getText("TXT_KEY_MISC_PROMO_REQUIRED_FOR"));
 		bool bFirst = true;
 		for (size_t i = 0; i < aeReq.size(); i++)
 		{
@@ -6620,7 +6620,7 @@ void CvGameTextMgr::parsePromotionLeadsToHelp(CvWStringBuffer &szBuffer, Promoti
 	if (!aeAltReq.empty())
 	{
 		szBuffer.append(pcNewline);
-		szBuffer.append(gDLL->getText("TXT_KEY_MISC_LEADS_TO"));
+		szBuffer.append(gDLL->getText("TXT_KEY_MISC_PROMO_LEADS_TO"));
 		bool bFirst = true;
 		for (size_t i = 0; i < aeAltReq.size(); i++)
 		{
