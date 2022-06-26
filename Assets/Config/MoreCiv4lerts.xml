@@ -17,8 +17,9 @@
 	<options id="MoreCiv4lerts" file="MoreCiv4lerts.ini">
 		<section id="MoreCiv4lerts">
 			<!-- City -->
+			<!-- trs.bugdefaults: default was True -->
 			<option id="CityPendingBorderExpansion" key="City Pending Border Expansion" 
-					type="boolean" default="True" and="Enabled" 
+					type="boolean" default="False" and="Enabled" 
 					get="isShowCityPendingExpandBorderAlert" set="setShowCityPendingExpandBorderAlert" 
 					label="Pending Border Expansion" 
 					help="When checked, displays an alert when a city will expand its curltural borders next turn."/>

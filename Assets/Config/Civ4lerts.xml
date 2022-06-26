@@ -55,8 +55,9 @@
 					get="isShowCityHealthinessAlert" set="setShowCityHealthinessAlert" 
 					label="Healthiness" 
 					help="When checked, displays an alert when a city has become healthy or unhealthy."/>
+			<!-- trs.bugdefaults: default was True -->
 			<option id="CityPendingOccupation" key="City Pending Occupation" 
-					type="boolean" default="True" and="Enabled" 
+					type="boolean" default="False" and="Enabled" 
 					get="isShowCityPendingOccupationAlert" set="setShowCityPendingOccupationAlert" 
 					label="Pending" 
 					help="When checked, displays an alert when a city will be pacified next turn, ending occupation."/>
