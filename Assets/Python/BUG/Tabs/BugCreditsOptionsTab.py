@@ -85,6 +85,7 @@ credits = [
 			"jdog5000 - AI Auto Play",
 			"karadoc (K-Mod) - More flexible loading of translations, various UI tweaks and bugfixes",
 			"Nightinggale - GameCoreDLL Makefile",
+			"alberts2, DarkLunaPhantom, lfgr - a few minor bugfixes",
 			"f1rpo - the rest"
 		# </trs.doc>
 ]
