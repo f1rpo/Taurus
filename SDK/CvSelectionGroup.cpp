@@ -23,9 +23,8 @@
 #include <set>
 #include "CvEventReporter.h"
 
-// BUG - start
-#include "CvBugOptions.h"
-// BUG - end
+#include "CvBugOptions.h" // BUG
+#include "UnofficialPatch.h" // trs.modname
 
 // Public Functions...
 
@@ -3617,7 +3616,10 @@ bool CvSelectionGroup::groupBuild(BuildTypes eBuild)
 	}
 
 // BUG - Pre-Chop - start
-	if (bStopOtherWorkers)
+	if (bStopOtherWorkers
+		/*	trs. Not a rules issue, but will go OOS if we stop those workers and
+			the BULL 1.2 participants do not. */
+		&& !isBULL12Rules())
 	{
 		pUnitNode = pPlot->headUnitNode();
 
