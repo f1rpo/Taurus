@@ -1,8 +1,10 @@
 /*	trs.modname: New header, for function that decides whether gameplay changes
 	from v1.6 of the Unofficial Patch should take effect. I'm disabling them in
 	network games b/c UP 1.6 can lead to OOS errors when BULL players are in the
-	game. (Would be nice to check whether that's actually the case ...)
-	BULL 1.2 (the last official release) only uses UP 1.5. */
+	game. BULL 1.2 (the last official release) only uses UP 1.5.
+	(To check whether there actually are BULL players, we could send a net message
+	and check if we receive one from every other human; but getting the timing
+	right could be tricky, and BULL players might join later in the game.) */
 
 #pragma once
 #ifndef UNOFFICIAL_PATCH_H

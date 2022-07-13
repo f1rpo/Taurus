@@ -78,7 +78,7 @@ protected:
 			w/o checking pNeeldeBytes. */
 		byte* pQuickTestBytes = NULL, int iQuickTestBytes = 0, uint uiQuickTestStart = 0,
 		/*	How big an offset we contemplate. Not going to search the
-			entire virtual memory*/
+			entire virtual memory. */
 		int iMaxAbsOffset = 256 * 1024)
 	{
 		// Preserve the (most recent) offset in m_iAddressOffset

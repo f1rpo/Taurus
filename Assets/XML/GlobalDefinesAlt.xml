@@ -84,7 +84,7 @@
 		<DefineName>COMPATIBLE_MOD_NAME_PREFIXES</DefineName>
         <DefineTextVal>taurus, bug, bull, bat</DefineTextVal>
     </Define>
-	<!-- Hint: Regardless of the two defines above, the 'x' key be held down
+	<!-- Hint: Regardless of the two defines above, the 'x' key can be held down
 		 while starting to load any savegame to suspend the mod name check
 		 in the EXE. This does not affect the SAVE_VERSION check; SAVE_VERSION
 		 can be re-defined (iDefineIntVal) in this XML file to work around
