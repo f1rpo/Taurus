@@ -498,7 +498,7 @@ protected:
 	{
 		/*	Handle the address offset calculations upfront.
 			(For robustness; hopefully will never be needed.) */
-		int iAddressOffset1 = 0, iAddressOffset2 = 0;
+		int iAddressOffset1 = 0, iAddressOffset2 = 0, iAddressOffset3 = 0;
 		{
 			byte aQuickTestBytes[] = { 0x0F, 0x95, 0xC1, 0x8A, 0xC1, 0x5E, 0xC3, 0x1B, 0xC0 };
 			byte aNeedleBytes[] = {
@@ -522,6 +522,20 @@ protected:
 					aNeedleBytes, ARRAYSIZE(aNeedleBytes), 0x0040D8B9,
 					aNeedleBytes, 12, 0x0040D8B9);
 			if (iAddressOffset2 == MIN_INT)
+				return false;
+		}
+		{
+			byte aNeedleBytes[] = {
+				0x8D, 0x44, 0x24, 0x78, 0xC6, 0x84, 0x24, 0xB8, 0x00, 0x00, 0x00, 0x06,
+				0x8B, 0x7C, 0x24, 0x1C, 0x50, 0xE8, 0xDA, 0x23, 0xF6, 0xFF, 0x6A, 0x00,
+				0x6A, 0x00, 0x6A, 0x60, 0x8D, 0x4C, 0x24, 0x4C, 0x51, 0x8D, 0x94, 0x24,
+				0x88, 0x00, 0x00, 0x00, 0x52, 0x8D, 0x4C, 0x24, 0x44, 0xC6, 0x84, 0x24,
+				0xCC, 0x00, 0x00, 0x00, 0x07
+			};
+			iAddressOffset3 = findAddressOffset(
+					aNeedleBytes, ARRAYSIZE(aNeedleBytes), 0x004AE770,
+					aNeedleBytes, 12, 0x004AE770);
+			if (iAddressOffset3 == MIN_INT)
 				return false;
 		}
 
@@ -567,10 +581,12 @@ protected:
 
 			Where do we get the saved CRCs? Conveniently, they get stored as
 			C-strings (char**) at these hardcoded addresses:
-			 DLL CRC:		0x00BE2D10
-			 Shader CRC:	0x00BE2D2C
-			 Python CRC:	0x00BE2D48
-			 XML CRC:		0x00BE2D64
+			 checksum	|	str address	 |	hardcoded at
+			------------------------------------------
+			 DLL CRC:		0x00BE2D10		0x004AEBAE
+			 Shader CRC:	0x00BE2D2C		0x004AEBEC
+			 Python CRC:	0x00BE2D48		0x004AEC21
+			 XML CRC:		0x00BE2D64		0x004AEC5A
 			The function that stores them there gets called (four times) by the
 			outer function at 0x004AE5CE onward.
 
@@ -585,24 +601,37 @@ protected:
 			Instead of those two instructions, we store the saved DLL CRC in ESI
 			and jump to a location near the end of the calc function where ESI
 			gets moved into EAX. */
+		int const iBytes = 8; // code bytes to be replaced
 		{
 			byte* pStartAddress = reinterpret_cast<byte*>(0x0040D8A9 + iAddressOffset2);
-			byte aCodeBytes[][2] = {
-				//  replacement| original
-				{	0xBE,		0x75 },	// 0x0040D8A9: MOV ESI
-				{	0x10,		0x1C },	// saved DLL CRC (in inverse byte order) ...
-				{	0x2D,		0xFF },
-				{	0xBE,		0x15 },
-				{	0x00,		0x5C },
-				{	0xEB,		0x19 },	// 0x0040D8AE: JMP (relative)
-				{	0x59,		0xBC },	// dist: 0x0040D909 (dest) - 0x0040D8B0 = 89
-				{	0x90,		0x00 }	// 0x0040D8B0: NOP
+			byte aCodeBytes[2][iBytes] = {
+				{	// replacement
+					0xBE,	// 0x0040D8A9: MOV ESI
+					0x10, 0x2D, 0xBE, 0x00, // saved DLL CRC (in inverse byte order)
+					0xEB,	// 0x0040D8AE: JMP (relative)
+					0x59,	// dist: 0x0040D909 (dest) - 0x0040D8B0 = 89
+					0x90	// 0x0040D8B0: NOP
+				},
+				// original
+				{ 0x75, 0x1C, 0xFF, 0x15, 0x5C, 0x19, 0xBC, 0x00 }
 			};
-			if (!unprotectPage(pStartAddress, ARRAYSIZE(aCodeBytes)))
-				return false;
-			for (int i = 0; i < ARRAYSIZE(aCodeBytes); i++)
+			/*	Better not to rely on the CRC string addresses copied from
+				disassembly. Rather look them up at (possibly) an address offset.
+				If no offset is needed, then the string addresses found at runtime
+				should (arguably) equal those copied from disassembly. */
 			{
-				pStartAddress[i] = aCodeBytes[i][m_bEnable ? 1 : 0];
+				uint& uiRepl = *reinterpret_cast<uint*>(&(aCodeBytes[0][1]));
+			#ifdef FASSERT_ENABLE
+				uint uiExpected = uiRepl;
+			#endif
+				uiRepl = *reinterpret_cast<uint*>(0x004AEBAE + iAddressOffset3);
+				FAssert(iAddressOffset3 != 0 || uiExpected == uiRepl);
+			}
+			if (!unprotectPage(pStartAddress, iBytes))
+				return false;
+			for (int i = 0; i < iBytes; i++)
+			{
+				pStartAddress[i] = aCodeBytes[m_bEnable ? 1 : 0][i];
 			}
 		}
 		// Similar deal for the other CRCs ...
@@ -611,61 +640,83 @@ protected:
 			some code.) */
 		{
 			byte* pStartAddress = reinterpret_cast<byte*>(0x0040D94A + iAddressOffset2);
-			byte aCodeBytes[][2] = {
-				//  replacement| original
-				{	0xBE,		0x75 },
-				{	0x2C,		0x1C },
-				{	0x2D,		0xFF },
-				{	0xBE,		0x15 },
-				{	0x00,		0x5C },
-				{	0xEB,		0x19 },	// 0x0040D94F: JMP (relative)
-				{	0x5E,		0xBC },	// dist: 0x0040D9AF (dest) - 0x0040D951 = 94
-				{	0x90,		0x00 }	// 0x0040D951: NOP
+			byte aCodeBytes[2][iBytes] = {
+				{	// replacement
+					0xBE, 0x2C, 0x2D, 0xBE, 0x00,
+					0xEB,	// 0x0040D94F: JMP (relative)
+					0x5E,	// dist: 0x0040D9AF (dest) - 0x0040D951 = 94
+					0x90	// 0x0040D951: NOP
+				},
+				// original
+				{ 0x75, 0x1C, 0xFF, 0x15, 0x5C, 0x19, 0xBC, 0x00 }
 			};
-			if (!unprotectPage(pStartAddress, ARRAYSIZE(aCodeBytes)))
+			{
+				uint& uiRepl = *reinterpret_cast<uint*>(&(aCodeBytes[0][1]));
+			#ifdef FASSERT_ENABLE
+				uint uiExpected = uiRepl;
+			#endif
+				uiRepl = *reinterpret_cast<uint*>(0x004AEBEC + iAddressOffset3);
+				FAssert(iAddressOffset3 != 0 || uiExpected == uiRepl);
+			}
+			if (!unprotectPage(pStartAddress, iBytes))
 				return false;
-			for (int i = 0; i < ARRAYSIZE(aCodeBytes); i++)
-				pStartAddress[i] = aCodeBytes[i][m_bEnable ? 1 : 0];
+			for (int i = 0; i < iBytes; i++)
+				pStartAddress[i] = aCodeBytes[m_bEnable ? 1 : 0][i];
 		}
 		// Python CRC
 		{
 			byte* pStartAddress = reinterpret_cast<byte*>(0x0040D7FA + iAddressOffset2);
-			byte aCodeBytes[][2] = {
-				//  replacement| original
-				{	0xBE,		0x75 },
-				{	0x48,		0x1C },
-				{	0x2D,		0xFF },
-				{	0xBE,		0x15 },
-				{	0x00,		0x5C },
-				{	0xEB,		0x19 },	// 0x0040D7FF: JMP (relative)
-				{	0x5E,		0xBC },	// dist: 0x0040D85F (dest) - 0x0040D801 = 94
-				{	0x90,		0x00 }	// 0x0040D801: NOP
+			byte aCodeBytes[2][iBytes] = {
+				{	// replacement
+					0xBE, 0x48, 0x2D, 0xBE, 0x00,
+					0xEB,	// 0x0040D7FF: JMP (relative)
+					0x5E,	// dist: 0x0040D85F (dest) - 0x0040D801 = 94
+					0x90	// 0x0040D801: NOP
+				},
+				// original
+				{ 0x75, 0x1C, 0xFF, 0x15, 0x5C, 0x19, 0xBC, 0x00 }
 			};
-			if (!unprotectPage(pStartAddress, ARRAYSIZE(aCodeBytes)))
+			{
+				uint& uiRepl = *reinterpret_cast<uint*>(&(aCodeBytes[0][1]));
+			#ifdef FASSERT_ENABLE
+				uint uiExpected = uiRepl;
+			#endif
+				uiRepl = *reinterpret_cast<uint*>(0x004AEC21 + iAddressOffset3);
+				FAssert(iAddressOffset3 != 0 || uiExpected == uiRepl);
+			}
+			if (!unprotectPage(pStartAddress, iBytes))
 				return false;
-			for (int i = 0; i < ARRAYSIZE(aCodeBytes); i++)
-				pStartAddress[i] = aCodeBytes[i][m_bEnable ? 1 : 0];
+			for (int i = 0; i < iBytes; i++)
+				pStartAddress[i] = aCodeBytes[m_bEnable ? 1 : 0][i];
 		}
 		/*	For the XML CRC, the replaced code is a little different:
 			 0040DA3E	jne 0040DA52			75 12
 			 0040DA40	mov ecx,dword ptr [...]	8B 8E C0 00 00 00 */
 		{
 			byte* pStartAddress = reinterpret_cast<byte*>(0x0040DA3E + iAddressOffset2);
-			byte aCodeBytes[][2] = {
-				//  replacement| original
-				{	0xB8,		0x75 },	// MOV EAX (need to store directly in EAX here)
-				{	0x64,		0x12 },
-				{	0x2D,		0x8B },
-				{	0xBE,		0x8E },
-				{	0x00,		0xC0 },
-				{	0xEB,		0x00 },	// 0x0040DA43: JMP (relative)
-				{	0x5C,		0x00 },	// dist: 0x0040DAA1 (dest) - 0x0040DA45 = 92
-				{	0x90,		0x00 }	// 0x0040DA45: NOP
+			byte aCodeBytes[2][iBytes] = {
+				{	// replacement
+					0xB8,	// MOV EAX (need to store directly in EAX here)
+					0x64, 0x2D, 0xBE, 0x00,
+					0xEB,	// 0x0040DA43: JMP (relative)
+					0x5C,	// dist: 0x0040DAA1 (dest) - 0x0040DA45 = 92
+					0x90,	// 0x0040DA45: NOP
+				},
+				// original
+				{ 0x75, 0x12, 0x8B, 0x8E, 0xC0, 0x00, 0x00, 0x00 }
 			};
-			if (!unprotectPage(pStartAddress, ARRAYSIZE(aCodeBytes)))
+			{
+				uint& uiRepl = *reinterpret_cast<uint*>(&(aCodeBytes[0][1]));
+			#ifdef FASSERT_ENABLE
+				uint uiExpected = uiRepl;
+			#endif
+				uiRepl = *reinterpret_cast<uint*>(0x004AEC5A + iAddressOffset3);
+				FAssert(iAddressOffset3 != 0 || uiExpected == uiRepl);
+			}
+			if (!unprotectPage(pStartAddress, iBytes))
 				return false;
-			for (int i = 0; i < ARRAYSIZE(aCodeBytes); i++)
-				pStartAddress[i] = aCodeBytes[i][m_bEnable ? 1 : 0];
+			for (int i = 0; i < iBytes; i++)
+				pStartAddress[i] = aCodeBytes[m_bEnable ? 1 : 0][i];
 		}
 		return true;
 	}

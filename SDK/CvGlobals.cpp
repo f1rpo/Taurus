@@ -2805,10 +2805,11 @@ void CvGlobals::cacheGlobals()
 // trs.modname: Separate function for external calls
 int CvGlobals::getDefineINTExternal(char const* szName) const
 {
-	// <trs.debug> The EXE polls this while idle; harmless - but annoying.
+	// <trs.debug> The EXE constantly queries this while idle; harmless but annoying.
 	if (szName == reinterpret_cast<char*>(0x00c9c868))
 		return getEVENT_MESSAGE_STAGGER_TIME(); // </trs.debug>
-	if (szName == reinterpret_cast<char*>(0x00c93dc4) && // "SAVE_VERSION"
+	if (//szName == 0x00c93dc4 && // Better not to rely on a specific address here
+		std::strcmp(szName, "SAVE_VERSION") == 0 &&
 		isModNameKnown() &&
 		(GC.getInitCore().isLoadGameType() ||
 		(getInitCore().getActivePlayer() != NO_PLAYER && !getModName().isSaving())) &&
