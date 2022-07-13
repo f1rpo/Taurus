@@ -12,6 +12,11 @@
 		 (As a convention, let's put any defines that override BtS upfront.)
 	-->
 
+	<!-- trs. Show a warning when BtS not fully patched. -->
+	<Define>
+		<DefineName>MIN_VERSION</DefineName>
+		<iDefineIntVal>319</iDefineIntVal>
+	</Define>
 	<!-- trs.camdist: As in BtS, copied here for the user's convenience.
 		 This value only gets used when the Default Camera Distance option
 		 (Map tab of the mod options screen) is set to "XML". -->
