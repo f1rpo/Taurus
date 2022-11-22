@@ -90,6 +90,18 @@
 		 can be re-defined (iDefineIntVal) in this XML file to work around
 		 that check. (But it's unlikely that loading will succeed when the
 		 save versions don't match.) -->
+
+	<!-- 1 enables minor AI bugfixes from version 1.6 of the Unofficial Patch
+		 (UP) except in network games, meaning that Taurus will (hopefully) be
+		 able to stay in sync with any participants that use BULL 1.2 (which
+		 only includes UP 1.5).
+		 2 enables UP 1.6 even in network games.
+		 0 disables UP 1.6 even in non-network games, meaning that the AI
+		 behavior should be just the same as in BULL 1.2. -->
+	<Define>
+		<DefineName>ENABLE_GAMEPLAY_CHANGES</DefineName>
+        <iDefineIntVal>1</iDefineIntVal>
+    </Define>
 	<!-- trs.modname: end -->
 
 	<!-- trs.replayname:

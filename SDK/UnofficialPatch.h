@@ -13,7 +13,12 @@
 /*	trs.fix: Will use this guard for minor Taurus gameplay changes
 	(probably exclusively bugfixes). Somewhat fits in this header as one could
 	consider such bugfixes as part of a UP fork. */
-inline bool isBULL12Rules() { return GC.getInitCore().getMultiplayer(); }
+inline bool isBULL12Rules()
+{
+	static int const iENABLE_GAMEPLAY_CHANGES = GC.getDefineINT("ENABLE_GAMEPLAY_CHANGES");
+	return (iENABLE_GAMEPLAY_CHANGES <= 0 ||
+			(iENABLE_GAMEPLAY_CHANGES == 1 && GC.getInitCore().getMultiplayer()));
+}
 inline bool isEnableUP16() { return !isBULL12Rules(); }
 
 #endif
