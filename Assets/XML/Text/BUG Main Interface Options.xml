@@ -142,13 +142,12 @@
 		<Spanish>When checked, displays arrows to cycle through cities above your civ's flag.</Spanish>
 	</TEXT>
 
+	<!-- trs. Proper German translation. -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_MAININTERFACE__FIELDOFVIEW_TEXT</Tag>
 		<English>Field of View</English>
-		<French>Field of View</French>
-		<German>Field of View (FOV)</German>
+		<German>Sichtfeld</German>
 		<Italian>Campo visuale</Italian>
-		<Spanish>Field of View</Spanish>
 	</TEXT>
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_MAININTERFACE__FIELDOFVIEW_HOVER</Tag>

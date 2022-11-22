@@ -62,8 +62,9 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 	def createOtherLayersPanel(self, screen, panel):
 		self.addLabel(screen, panel, "MapLayers")
 		# <trs.balloon>
-		self.addTextDropdown(screen, panel, panel, "Taurus__PlotIndicatorSize")
-		self.addTextDropdown(screen, panel, panel, "Taurus__OffScreenUnitSizeMult")
+		left, right = self.addTwoColumnLayout(screen, panel, "BalloonCols")
+		self.addTextDropdown(screen, left, right, "Taurus__PlotIndicatorSize")
+		self.addTextDropdown(screen, left, right, "Taurus__OffScreenUnitSizeMult")
 		# </trs.balloon>
 		# trs.start-with-resources:
 		self.addCheckbox(screen, panel, "Taurus__StartWithResourceDisplay")
@@ -89,10 +90,12 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		# FoV options moved from Misc. panel ...
 		self.addCheckbox(screen, panel, "MainInterface__FieldOfView")
 		self.addCheckbox(screen, panel, "MainInterface__FieldOfView_Remember", True)
+		# trs.cam:
+		left, right = self.addTwoColumnLayout(screen, panel, "CamCols")
 		# trs.camdist:
-		self.addTextDropdown(screen, panel, panel, "Taurus__DefaultCamDistance")
+		self.addTextDropdown(screen, left, right, "Taurus__DefaultCamDistance")
 		# trs.camspeed:
-		self.addTextDropdown(screen, panel, panel, "Taurus__CamScrollSpeed")
+		self.addTextDropdown(screen, left, right, "Taurus__CamScrollSpeed")
 		
 	def createMiscellaneousPanel(self, screen, panel):
 		self.addLabel(screen, panel, "Misc", "Misc:")
