@@ -5,7 +5,6 @@ PROJECT_CFLAGS = /W3 /WX /D_MOD_AIAUTOPLAY
 #/D_MOD_FRACTRADE /D_MOD_SENTRY /D_MOD_GOVWORKERS /D_MOD_SHAM_SPOILER /D_MOD_GWARM
 # And a Taurus option: (Seems that the XML cache is never used for mods)
 #/D_XML_FILE_CACHE
-# Allow inline expansion of functions with an inline keyword even for debug builds
 PROJECT_LIBS = ../CxImage/lib/Gdi32.Lib ../CxImage/lib/Ole32.Lib
 PROJECT_RELEASE_LIBS = ../CxImage/lib/CxImage.lib
 #PROJECT_DEBUG_LIBS = ../CxImage/lib/CxImage_debug.lib
@@ -13,6 +12,7 @@ PROJECT_RELEASE_LIBS = ../CxImage/lib/CxImage.lib
 # At least I'm getting an error message about that file when debugging
 # with CxImage_debug.lib. Annoying, and who needs symbols for CxImage anyway?
 PROJECT_DEBUG_LIBS = ../CxImage/lib/CxImage.lib
+# Allow inline expansion of functions with an inline keyword even for debug builds
 PROJECT_Debug_CFLAGS = /Ob1
 # For debugging memory errors that don't occur in debug builds
 #PROJECT_DebugOpt_CFLAGS = /DFASSERT_ENABLE /Oy-

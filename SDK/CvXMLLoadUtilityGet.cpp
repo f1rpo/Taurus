@@ -838,7 +838,7 @@ bool CvXMLLoadUtility::GetChildXmlValByName(wchar* pszVal, const TCHAR* szName, 
 		wcscpy(pszVal, L"");
 	}
 	/*	trs.xmlcomments (from AdvCiv): This was already partially disabled
-		and gets in the way of tloerating comments. I think FXML already
+		and gets in the way of tolerating comments. I think FXml already
 		detects duplicate tags when enforcing the XML schema. */
 	/*iNumChildrenByTagName = gDLL->getXMLIFace()->NumOfChildrenByTagName(m_pFXml,szName);
 	FAssertMsg((iNumChildrenByTagName < 2),"More children with tag name than expected, should only be 1.");
