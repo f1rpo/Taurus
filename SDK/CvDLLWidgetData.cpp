@@ -24,7 +24,9 @@
 #include "BugMod.h"
 #include "CvBugOptions.h"
 // BUG - end
-#include "ModName.h" // trs.modname
+// <trs.modname>
+#include "UnofficialPatch.h"
+#include "ModName.h" // </trs.modname>
 
 // BUFFY - start
 #ifdef _BUFFY
@@ -3933,7 +3935,8 @@ void CvDLLWidgetData::parseFlagHelp(CvWidgetDataStruct &widgetDataStruct, CvWStr
 
 	// unofficial patch
 	szBuffer.append(szTempBuffer);
-	szBuffer.append(L"Unofficial 3.19 Patch v1.60");
+	szBuffer.append(L"Unofficial 3.19 Patch v"/*1.60"*/);
+	szBuffer.append(isEnableUP16() ? "1.60" : "1.50"); // trs.modname
 
 	// compile-time mods
 #ifdef _MOD_FRACTRADE
