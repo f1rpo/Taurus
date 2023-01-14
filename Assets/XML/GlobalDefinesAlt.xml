@@ -100,8 +100,8 @@
 		 behavior should be just the same as in BULL 1.2. -->
 	<Define>
 		<DefineName>ENABLE_GAMEPLAY_CHANGES</DefineName>
-        <iDefineIntVal>1</iDefineIntVal>
-    </Define>
+		<iDefineIntVal>1</iDefineIntVal>
+	</Define>
 	<!-- trs.modname: end -->
 
 	<!-- trs.replayname:
