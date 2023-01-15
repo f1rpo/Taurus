@@ -3099,6 +3099,7 @@ class CvMainInterface:
 					screen.show( "EraText" )
 # BUG - NJAGC - end
 				
+				iTech = -1 # trs.fix for Sevopedia
 				if (gc.getPlayer(ePlayer).isAnarchy()):
 				
 # BUG - Bars on single line for higher resolution screens - start
@@ -3121,7 +3122,7 @@ class CvMainInterface:
 				elif (gc.getPlayer(ePlayer).getCurrentResearch() != -1):
 
 					szText = CyGameTextMgr().getResearchStr(ePlayer)
-
+					iTech = gc.getPlayer(ePlayer).getCurrentResearch() # trs.fix for Sevopedia
 # BUG - Bars on single line for higher resolution screens - start
 					if (xResolution >= 1440
 					and (MainOpt.isShowGGProgressBar() or MainOpt.isShowGPProgressBar())):
@@ -3132,7 +3133,9 @@ class CvMainInterface:
 						xCoord = screen.centerX(512)
 
 					yCoord = 5  # Ruff: this use to be 3 but I changed it so it lines up with the Great Person Bar
-					screen.setText( "ResearchText", "Background", szText, CvUtil.FONT_CENTER_JUSTIFY, xCoord, yCoord, -0.4, FontTypes.GAME_FONT, WidgetTypes.WIDGET_RESEARCH, -1, -1 )
+					screen.setText( "ResearchText", "Background", szText, CvUtil.FONT_CENTER_JUSTIFY, xCoord, yCoord, -0.4,
+							FontTypes.GAME_FONT, WidgetTypes.WIDGET_RESEARCH, #-1, -1 )
+							iTech, -1 ) # trs.fix: Pass along tech id for jump to Sevopedia
 					screen.show( "ResearchText" )
 # BUG - Bars on single line for higher resolution screens - end
 
