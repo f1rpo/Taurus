@@ -20,14 +20,17 @@ class BugPleOptionsTab(BugOptionsTab.BugOptionsTab):
 		left, center, right = self.addThreeColumnLayout(screen, panel, panel, True)
 
 		#self.addCheckbox(screen, left, "PLE__Enabled")
-		self.addCheckbox(screen, left, "PLE__PLE_Style")
+		# trs. Removed b/c this has no effect
+		#self.addCheckbox(screen, left, "PLE__PLE_Style")
 
-		self.addCheckbox(screen, left, "PLE__Show_Buttons")
 		leftL, leftR = self.addTwoColumnLayout(screen, left, "Show_Buttons_Column")
 		self.addTextDropdown(screen, leftL, leftR, "PLE__Draw_Method", True, "LAYOUT_LEFT")
 		self.addTextDropdown(screen, leftL, leftR, "PLE__Default_View_Mode", True, "LAYOUT_LEFT")
 		self.addTextDropdown(screen, leftL, leftR, "PLE__Default_Group_Mode", True, "LAYOUT_LEFT")
 		self.addTextDropdown(screen, leftL, leftR, "PLE__Filter_Behavior", True, "LAYOUT_LEFT")
+	
+		# trs. Moved down so that the important Draw Method menu is at the very top
+		self.addCheckbox(screen, left, "PLE__Show_Buttons")
 
 		# trs. To avoid a vertical scrollbar.
 		#self.addSpacer(screen, left, "PLE_Indicators", 1)
