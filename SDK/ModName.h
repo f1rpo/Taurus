@@ -7,7 +7,8 @@
 	So the paths stored will be e.g. "Mods/Taurus". We'll still use separate
 	variables for the paths returned by getModName b/c we can't be sure that the
 	"full path" can't be longer under some circumstances, or the "mod name"
-	just the name of the mod's folder. */
+	just the name of the mod's folder. Upd.: Reportedly, installation under
+	My Games can make a difference. */
 #pragma once
 #ifndef MOD_NAME_H
 #define MOD_NAME_H
