@@ -252,4 +252,17 @@
 	</TEXT>
 	<!-- trs.1stcontact: end -->
 
+	<!-- trs.featgrowth: start -->
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__UNOWNEDFEATUREGROWTH_TEXT</Tag>
+		<English>Growth of Unowned Jungle/Forest</English>
+		<German>Bewuchs auf neutralen Feldern</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_BUG_OPT_TAURUS__UNOWNEDFEATUREGROWTH_HOVER</Tag>
+		<English>When checked, growth of terrain features in unowned tiles is reported to the owner of the nearest city. This behavior was likely intended in BtS. When unchecked, only growth in owned tiles is reported.</English>
+		<German>Meldet dem Besitzer der nächstgelegenen Stadt, wenn in einem neutralen Geländefeld ein Dschungel oder Wald wächst. (Dieses Verhalten war vermutlich beabsichtigt, aber nicht richtig implementiert.) Deaktivieren Sie diese Option, um nur Bewuchs in Feldern mit Besitzer melden zu lassen.</German>
+	</TEXT>
+	<!-- trs.featgrowth: end -->
+
 </Civ4GameText>

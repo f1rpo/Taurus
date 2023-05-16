@@ -26,6 +26,7 @@
 #include "CvDLLPythonIFaceBase.h"
 #include "CvEventReporter.h"
 #include "UnofficialPatch.h" // trs.modname
+#include "CvBugOptions.h" // trs.featgrowth
 
 #define STANDARD_MINIMAP_ALPHA		(0.6f)
 
@@ -8336,10 +8337,18 @@ void CvPlot::doFeature()
 										&& isRevealed(pCity->getTeam(), false)) // trs.fix
 									{
 										// Tell the owner of this city.
-										szBuffer = gDLL->getText("TXT_KEY_MISC_FEATURE_GROWN_NEAR_CITY", GC.getFeatureInfo((FeatureTypes) iI).getTextKeyWide(), pCity->getNameKey());
-										gDLL->getInterfaceIFace()->addMessage(
-												/*getOwner()*/ pCity->getOwner(), // trs.fix (from K-Mod)
-												false, GC.getEVENT_MESSAGE_TIME(), szBuffer, "AS2D_FEATUREGROWTH", MESSAGE_TYPE_INFO, GC.getFeatureInfo((FeatureTypes) iI).getButton(), (ColorTypes)GC.getInfoTypeForString("COLOR_WHITE"), getX_INLINE(), getY_INLINE(), true, true);
+										// trs.fix (from K-Mod)
+										PlayerTypes eMsgPlayer = /*getOwner()*/ pCity->getOwner();
+										// <trs.featgrowth> Make this bugfix optional
+										if (!getBugOptionBOOL("Taurus__UnownedFeatureGrowth"))
+											eMsgPlayer = getOwner();
+										// ... but don't attempt sending to invalid player in any case.
+										if (eMsgPlayer != NO_PLAYER)
+										{	// </trs.featgrowth>
+											szBuffer = gDLL->getText("TXT_KEY_MISC_FEATURE_GROWN_NEAR_CITY", GC.getFeatureInfo((FeatureTypes) iI).getTextKeyWide(), pCity->getNameKey());
+											gDLL->getInterfaceIFace()->addMessage( /* trs.fix: */ eMsgPlayer,
+													false, GC.getEVENT_MESSAGE_TIME(), szBuffer, "AS2D_FEATUREGROWTH", MESSAGE_TYPE_INFO, GC.getFeatureInfo((FeatureTypes) iI).getButton(), (ColorTypes)GC.getInfoTypeForString("COLOR_WHITE"), getX_INLINE(), getY_INLINE(), true, true);
+										}
 									}
 
 									break;

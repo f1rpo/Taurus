@@ -70,15 +70,17 @@ class BugAlertsOptionsTab(BugOptionsTab.BugOptionsTab):
 		
 		screen.attachHSeparator(column, column + "Sep")
 
-		# Reminders
-		left, right = self.addTwoColumnLayout(screen, column, "Main",
-				True) # trs. separator.
+		# Reminders (trs. Three columns, with separators.)
+		left, center, right = self.addThreeColumnLayout(screen, column, "Main", True)
 		self.addCheckbox(screen, left, "Reminder__Enabled")
 		self.addCheckbox(screen, left, "Reminder__Autolog")
 		self.addTextDropdown(screen, left, left, "Reminder__DisplayMethod")
 
 		# trs. Moved from the Map tab.
-		self.addCheckbox(screen, right, "Actions__IgnoreHarmlessBarbarians")
+		self.addCheckbox(screen, center, "Actions__IgnoreHarmlessBarbarians")
+
+		# trs.featgrowth
+		self.addCheckbox(screen, center, "Taurus__UnownedFeatureGrowth")
 
 		# <trs.1stcontact>
 		self.addLabel(screen, right, "OnFirstContact", "On First Contact:") 

@@ -123,6 +123,10 @@
 				<choice id="Both"/>
 			</list>
 
+			<!-- trs.featgrowth -->
+			<option id="UnownedFeatureGrowth" key="Unowned Feature Growth" 
+					type="boolean" default="True"/>
+
 		</section>
 
 	</options>
