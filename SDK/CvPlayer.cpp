@@ -9861,6 +9861,48 @@ void CvPlayer::verifyAlive()
 
 		if (bKill)
 		{
+			// <trs.autoplay> (based on AdvCiv)
+			if (isHumanDisabled() && GC.getGameINLINE().getActivePlayer() == getID())
+			{
+				// Automatically change active player
+				PlayerTypes eNextAlive = getID();
+				for (int iPass = 0; iPass < 2; iPass++)
+				{
+					bool bAllowMinor = (iPass == 1);
+					do
+					{
+						eNextAlive = (PlayerTypes)((eNextAlive + 1) % MAX_CIV_PLAYERS);
+					} while (eNextAlive != getID() &&
+						(!GET_PLAYER(eNextAlive).isAlive()
+						|| GET_PLAYER(eNextAlive).isHuman()
+						|| GET_PLAYER(eNextAlive).isHumanDisabled()
+						|| (!bAllowMinor && GET_PLAYER(eNextAlive).isMinorCiv())));
+					if (eNextAlive != getID())
+						break;
+				}
+				if (eNextAlive != getID())
+				{
+					GC.getInitCore().setSlotStatus(getID(), SS_COMPUTER);
+					setAlive(false);
+					PlayerTypes const eCurHuman = GC.getGameINLINE().getActivePlayer();
+					GC.getInitCore().setSlotStatus(eCurHuman, SS_COMPUTER);
+					GC.getInitCore().setSlotStatus(eNextAlive, SS_TAKEN);
+					// Otherwise, the selected unit will affect CvPlot::updateCenterUnit.
+					gDLL->getInterfaceIFace()->clearSelectionList();
+					gDLL->getInterfaceIFace()->clearSelectedCities(); 
+					GC.getGameINLINE().setActivePlayer(eNextAlive, //false
+							/*	This makes sure that net ids are updated. Apparently,
+								inconsistent net ids can cause the diplo screen to refuse
+								putting certain items on the table. */
+							true);
+					GET_PLAYER(eNextAlive).setHumanDisabled(true);
+					return;
+				}
+				else
+				{
+					FAssertMsg(GC.getGameINLINE().isGameMultiPlayer(), "No other civ alive left?");
+				}
+			} // </trs.autoplay>
 			setAlive(false);
 		}
 	}

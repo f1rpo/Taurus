@@ -99,7 +99,9 @@ class AIAutoPlay :
 		pPlayer = gc.getActivePlayer()
 		if( not pPlayer.isHuman() ) :
 			game.setActivePlayer( pPlayer.getID(), False )
-			pPlayer.setIsHuman( True )
+			# This DLL function hasn't been merged. We should never reach this point anyway
+			# b/c CvPlayer::verifyAlive will pick a different active player upon defeat.
+			#pPlayer.setIsHuman( True )
 
 	def onBeginGameTurn( self, argsList):
 		iGameTurn = argsList[0]
