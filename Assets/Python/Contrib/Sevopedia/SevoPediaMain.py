@@ -564,8 +564,14 @@ class SevoPediaMain(CvPediaScreen.CvPediaScreen):
 		self.placeItems(WidgetTypes.WIDGET_PEDIA_JUMP_TO_CIV, gc.getCivilizationInfo)
 	
 	def getCivilizationList(self):
-		return self.getSortedList(gc.getNumCivilizationInfos(), gc.getCivilizationInfo)
-
+		civList = self.getSortedList(gc.getNumCivilizationInfos(), gc.getCivilizationInfo)
+		# <trs> Filter out Minor Civ but not Barbarians, which have sensible strategy text.
+		iMinorCiv = gc.getInfoTypeForString("CIVILIZATION_MINOR")
+		result = []
+		for descr, iCiv in civList:
+			if iCiv != iMinorCiv:
+				result.append((descr, iCiv))
+		return result # </trs>
 
 	def placeLeaders(self):
 		self.list = self.getLeaderList()
