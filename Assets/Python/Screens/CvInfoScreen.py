@@ -2367,6 +2367,7 @@ class CvInfoScreen:
 									self.aaWondersBeingBuilt_BUG.append([iProjectLoop,pPlayer.getCivilizationShortDescription(0), pCity, iPlayerLoop])
 
 								if (self.pActiveTeam.isHasMet(iPlayerTeam)
+								and self.iInvestigateCityMission != -1 # trs.fix
 								and self.pActivePlayer.canDoEspionageMission(self.iInvestigateCityMission, pCity.getOwner(), pCity.plot(), -1)
 								and pCity.isRevealed(gc.getGame().getActiveTeam())):
 									self.aaWondersBeingBuilt_BUG.append([iProjectLoop,pPlayer.getCivilizationShortDescription(0), pCity, iPlayerLoop])
@@ -2385,6 +2386,7 @@ class CvInfoScreen:
 										self.aaWondersBeingBuilt_BUG.append([iBuildingLoop,pPlayer.getCivilizationShortDescription(0), pCity, iPlayerLoop])
 
 									if (self.pActiveTeam.isHasMet(iPlayerTeam)
+									and self.iInvestigateCityMission != -1 # trs.fix
 									and self.pActivePlayer.canDoEspionageMission(self.iInvestigateCityMission, pCity.getOwner(), pCity.plot(), -1)
 									and pCity.isRevealed(gc.getGame().getActiveTeam())):
 										self.aaWondersBeingBuilt_BUG.append([iBuildingLoop,pPlayer.getCivilizationShortDescription(0), pCity, iPlayerLoop])
@@ -2407,6 +2409,7 @@ class CvInfoScreen:
 										self.aaWondersBeingBuilt_BUG.append([iBuildingLoop,pPlayer.getCivilizationShortDescription(0), pCity, iPlayerLoop])
 
 									if (self.pActiveTeam.isHasMet(iPlayerTeam)
+									and self.iInvestigateCityMission != -1 # trs.fix
 									and self.pActivePlayer.canDoEspionageMission(self.iInvestigateCityMission, pCity.getOwner(), pCity.plot(), -1)
 									and pCity.isRevealed(gc.getGame().getActiveTeam())):
 										self.aaWondersBeingBuilt_BUG.append([iBuildingLoop,pPlayer.getCivilizationShortDescription(0), pCity, iPlayerLoop])
