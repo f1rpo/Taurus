@@ -107,6 +107,10 @@ public:
 	DllExport void setBadHealthHelp(CvWStringBuffer &szBuffer, CvCity& city);
 // BUG - Building Additional Health - start
 	bool setBuildingAdditionalHealthHelp(CvWStringBuffer &szBuffer, const CvCity& city, const CvWString& szStart, bool bStarted = false);
+	// <trs>
+	bool setBuildingAdditionalHealthHelp(CvWStringBuffer& kBuffer, CvWString const& kStart,
+			CvCity const& kCity, BuildingTypes eBuilding,
+			bool bNewLine = true, bool bStartedLine = false); // </trs>
 // BUG - Building Additional Health - end
 	DllExport void setAngerHelp(CvWStringBuffer &szBuffer, CvCity& city);
 	DllExport void setHappyHelp(CvWStringBuffer &szBuffer, CvCity& city);

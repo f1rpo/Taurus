@@ -9035,15 +9035,8 @@ void CvGameTextMgr::setBuildingActualEffects(CvWStringBuffer &szBuffer, CvWStrin
 		bStarted = setResumableGoodBadChangeHelp(szBuffer, szStart, L": ", L"", iGood, gDLL->getSymbolID(HAPPY_CHAR), iBad, gDLL->getSymbolID(UNHAPPY_CHAR), false, bNewLine, bStarted);
 		bStarted = setResumableValueChangeHelp(szBuffer, szStart, L": ", L"", iAngryPop, gDLL->getSymbolID(ANGRY_POP_CHAR), false, bNewLine, bStarted);
 
-		// Health
-		iGood = 0;
-		iBad = 0;
-		pCity->getAdditionalHealthByBuilding(eBuilding, iGood, iBad);
-		int iSpoiledFood = pCity->getAdditionalSpoiledFood(iGood, iBad);
-		int iStarvation = pCity->getAdditionalStarvation(iSpoiledFood);
-		bStarted = setResumableGoodBadChangeHelp(szBuffer, szStart, L": ", L"", iGood, gDLL->getSymbolID(HEALTHY_CHAR), iBad, gDLL->getSymbolID(UNHEALTHY_CHAR), false, bNewLine, bStarted);
-		bStarted = setResumableValueChangeHelp(szBuffer, szStart, L": ", L"", iSpoiledFood, gDLL->getSymbolID(EATEN_FOOD_CHAR), false, bNewLine, bStarted);
-		bStarted = setResumableValueChangeHelp(szBuffer, szStart, L": ", L"", iStarvation, gDLL->getSymbolID(BAD_FOOD_CHAR), false, bNewLine, bStarted);
+		// Health (trs: Make use of new subroutine)
+		bStarted = setBuildingAdditionalHealthHelp(szBuffer, szStart, *pCity, eBuilding, bNewLine, bStarted);
 
 		// Yield
 		int aiYields[NUM_YIELD_TYPES];
@@ -11277,38 +11270,60 @@ void CvGameTextMgr::setGoodHealthHelp(CvWStringBuffer &szBuffer, CvCity& city)
 // BUG - Building Additional Health - start
 bool CvGameTextMgr::setBuildingAdditionalHealthHelp(CvWStringBuffer &szBuffer, const CvCity& city, const CvWString& szStart, bool bStarted)
 {
-	CvWString szLabel;
 	CvCivilizationInfo& kCivilization = GC.getCivilizationInfo(GET_PLAYER(city.getOwnerINLINE()).getCivilizationType());
-
 	for (int iI = 0; iI < GC.getNumBuildingClassInfos(); iI++)
 	{
 		BuildingTypes eBuilding = (BuildingTypes)kCivilization.getCivilizationBuildings((BuildingClassTypes)iI);
-
 		if (eBuilding != NO_BUILDING && city.canConstruct(eBuilding, false, true, false))
 		{
-			int iGood = 0, iBad = 0;
-			int iChange = city.getAdditionalHealthByBuilding(eBuilding, iGood, iBad);
-
-			if (iGood != 0 || iBad != 0)
+			if (!bStarted)
 			{
-				int iSpoiledFood = city.getAdditionalSpoiledFood(iGood, iBad);
-				int iStarvation = city.getAdditionalStarvation(iSpoiledFood);
-
-				if (!bStarted)
-				{
-					szBuffer.append(szStart);
-					bStarted = true;
-				}
-
-				szLabel.Format(SETCOLR L"%s" ENDCOLR, TEXT_COLOR("COLOR_BUILDING_TEXT"), GC.getBuildingInfo(eBuilding).getDescription());
-				bool bStartedLine = setResumableGoodBadChangeHelp(szBuffer, szLabel, L": ", L"", iGood, gDLL->getSymbolID(HEALTHY_CHAR), iBad, gDLL->getSymbolID(UNHEALTHY_CHAR), false, true);
-				setResumableValueChangeHelp(szBuffer, szLabel, L": ", L"", iSpoiledFood, gDLL->getSymbolID(EATEN_FOOD_CHAR), false, true, bStartedLine);
-				setResumableValueChangeHelp(szBuffer, szLabel, L": ", L"", iStarvation, gDLL->getSymbolID(BAD_FOOD_CHAR), false, true, bStartedLine);
+				szBuffer.append(szStart);
+				bStarted = true;
 			}
+			CvWString szLabel;
+			szLabel.Format(SETCOLR L"%s" ENDCOLR, TEXT_COLOR("COLOR_BUILDING_TEXT"),
+					GC.getBuildingInfo(eBuilding).getDescription());
+			// trs: Moved into subroutine
+			setBuildingAdditionalHealthHelp(szBuffer, szLabel, city, eBuilding);
+
 		}
 	}
-
 	return bStarted;
+}
+
+/*	trs: Cut from setBuildingAdditionalHealthHelp to avoid duplicate code in
+	setBuildingActualEffect */
+bool CvGameTextMgr::setBuildingAdditionalHealthHelp(
+	CvWStringBuffer& kBuffer, CvWString const& kStart,
+	CvCity const& kCity, BuildingTypes eBuilding,
+	bool bNewLine, bool bStartedLine)
+{
+	int iGood = 0, iBad = 0;
+	kCity.getAdditionalHealthByBuilding(eBuilding, iGood, iBad);
+	if (iGood == 0 && iBad == 0)
+		return false;
+	int iSpoiledFood = kCity.getAdditionalSpoiledFood(iGood, iBad);
+	int iStarvation = kCity.getAdditionalStarvation(iSpoiledFood);
+	/*	<trs> If spoiled food is causing a change to the food deficit,
+		show only that latter change. */
+	if (iSpoiledFood == iStarvation)
+		iSpoiledFood = 0; // </trs>
+	bStartedLine = setResumableGoodBadChangeHelp(kBuffer, kStart,
+			L": ", L"", iGood, gDLL->getSymbolID(HEALTHY_CHAR), iBad,
+			gDLL->getSymbolID(UNHEALTHY_CHAR), false, bNewLine, bStartedLine);
+	bStartedLine = setResumableValueChangeHelp(kBuffer, kStart, L": ", L"",
+			iSpoiledFood, gDLL->getSymbolID(EATEN_FOOD_CHAR),
+			/*	(trs. Show positive food instead of negative eaten food?
+				Would look confusing for Baray ...) */
+			/*std::abs(iSpoiledFood), iSpoiledFood < 0 ?
+			GC.getYieldInfo(YIELD_FOOD).getChar() :
+			gDLL->getSymbolID(EATEN_FOOD_CHAR),*/
+			false, bNewLine, bStartedLine);
+	bStartedLine = setResumableValueChangeHelp(kBuffer, kStart, L": ", L"",
+			iStarvation, gDLL->getSymbolID(BAD_FOOD_CHAR),
+			false, bNewLine, bStartedLine);
+	return bStartedLine;
 }
 // BUG - Building Additional Health - end
 
