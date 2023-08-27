@@ -11,7 +11,7 @@
 	<!-- trs.exitcity -->
 	<TEXT>
 		<Tag>TXT_KEY_TAURUS_HINT_1</Tag>
-		<English>[Taurus] To exit the city screen without moving the camera, right-lick on the city center tile.</English>
+		<English>[Taurus] To exit the city screen without moving the camera, right-click on the city center tile.</English>
 		<German>[Taurus] Um den Stadtbildschirm zu schlieﬂen ohne die Kamera zu bewegen, rechts-klicken Sie das Gel‰ndefeld auf dem sich die Stadt befindet.</German>
 	</TEXT>
 	<!-- trs.maxslider -->
