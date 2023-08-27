@@ -11314,11 +11314,6 @@ bool CvGameTextMgr::setBuildingAdditionalHealthHelp(
 			gDLL->getSymbolID(UNHEALTHY_CHAR), false, bNewLine, bStartedLine);
 	bStartedLine = setResumableValueChangeHelp(kBuffer, kStart, L": ", L"",
 			iSpoiledFood, gDLL->getSymbolID(EATEN_FOOD_CHAR),
-			/*	(trs. Show positive food instead of negative eaten food?
-				Would look confusing for Baray ...) */
-			/*std::abs(iSpoiledFood), iSpoiledFood < 0 ?
-			GC.getYieldInfo(YIELD_FOOD).getChar() :
-			gDLL->getSymbolID(EATEN_FOOD_CHAR),*/
 			false, bNewLine, bStartedLine);
 	bStartedLine = setResumableValueChangeHelp(kBuffer, kStart, L": ", L"",
 			iStarvation, gDLL->getSymbolID(BAD_FOOD_CHAR),
