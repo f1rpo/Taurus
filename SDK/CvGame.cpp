@@ -2100,11 +2100,15 @@ void CvGame::update()
 			// trs.autosave: Don't autosave after loading turn-0 autosave
 			if (m_iNumSessions <= 1)
 				autoSave(true); // trs.savmsg
-			// <trs.start-with-resources>
+		}
+		// <trs.start-with-resources>
+		/*	Slice 0 appears to be too early for some players, no balloons
+			get shown (race condition?). */
+		if (getTurnSlice() == 1)
+		{
 			gDLL->getEngineIFace()->setResourceLayer(getBugOptionBOOL(
 					"Taurus__StartWithResourceDisplay"));
-			// </trs.start-with-resources>
-		}
+		} // </trs.start-with-resources>
 
 		if (getNumGameTurnActive() == 0)
 		{
