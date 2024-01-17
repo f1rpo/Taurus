@@ -505,14 +505,17 @@ class CityHappiness(AbstractCityTestAlert):
 			iExtra = 0
 		iHappy = city.happyLevel()
 		iUnhappy = city.unhappyLevel(iExtra)
-		if (iUnhappy > 0 and city.getHurryAngerTimer() > 0 
-		and city.getHurryAngerTimer() % city.flatHurryAngerLength() == 0):
+		if (iUnhappy > 0 and city.getHurryAngerTimer() > 0
+		# trs.fix: Minus 1
+		and (city.getHurryAngerTimer() - 1) % city.flatHurryAngerLength() == 0):
 			iUnhappy -= 1
 		if (iUnhappy > 0 and city.getConscriptAngerTimer()
-		and city.getConscriptAngerTimer() % city.flatConscriptAngerLength() == 0):
+		# trs.fix: Minus 1
+		and (city.getConscriptAngerTimer() - 1) % city.flatConscriptAngerLength() == 0):
 			iUnhappy -= 1
 		if (iUnhappy > 0 and city.getDefyResolutionAngerTimer() > 0
-		and city.getDefyResolutionAngerTimer() % city.flatDefyResolutionAngerLength() == 0):
+		# trs.fix: Minus 1
+		and (city.getDefyResolutionAngerTimer() - 1) % city.flatDefyResolutionAngerLength() == 0):
 			iUnhappy -= 1
 		if (iUnhappy > 0 and city.getEspionageHappinessCounter() > 0):
 			iUnhappy -= 1
