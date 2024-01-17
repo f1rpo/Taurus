@@ -3748,7 +3748,14 @@ void CvCity::processBonus(BonusTypes eBonus, int iChange)
 			iBadValue += iValue;
 		}
 	}
-
+	// <trs.fix> Make sure bad-health indicator is updated (from AdvCiv)
+	if ((iGoodValue != 0 || iBadValue != 0) &&
+		GET_PLAYER(getOwnerINLINE()).getID() == GC.getGame().getActivePlayer())
+	{
+		int iHealth = healthRate();
+		if ((iHealth < 0) != (iHealth + (iGoodValue - iBadValue) * iChange < 0))
+			gDLL->getInterfaceIFace()->setDirty(CityInfo_DIRTY_BIT, true);
+	} // </trs.fix>
 	changeBonusGoodHealth(iGoodValue * iChange);
 	changeBonusBadHealth(iBadValue * iChange);
 
@@ -3770,7 +3777,14 @@ void CvCity::processBonus(BonusTypes eBonus, int iChange)
 			iBadValue += iValue;
 		}
 	}
-
+	// <trs.fix> Make sure anger indicator is updated (from AdvCiv)
+	if ((iGoodValue != 0 || iBadValue != 0) &&
+		GET_PLAYER(getOwnerINLINE()).getID() == GC.getGame().getActivePlayer())
+	{
+		int iHappy = happyLevel() - unhappyLevel();
+		if ((iHappy < 0) != (iHappy + (iGoodValue - iBadValue) * iChange < 0))
+			gDLL->getInterfaceIFace()->setDirty(CityInfo_DIRTY_BIT, true);
+	} // </trs.fix>
 	changeBonusGoodHappiness(iGoodValue * iChange);
 	changeBonusBadHappiness(iBadValue * iChange);
 
