@@ -4812,6 +4812,27 @@ int CvSelectionGroup::getMissionData2(int iNode) const
 	return -1;
 }
 
+// <trs.modname> For safe import of savegames with enabled BULL compiler options
+namespace
+{
+// BUG - Sentry Actions - start
+	enum ModSentryActivityTypes
+	{
+		MOD_SENTRY_ACTIVITY_SENTRY_WHILE_HEAL = NUM_ACTIVITY_TYPES,
+		MOD_SENTRY_ACTIVITY_SENTRY_NAVAL_UNITS,
+		MOD_SENTRY_ACTIVITY_SENTRY_LAND_UNITS,
+	};
+// BUG - Sentry Actions - end
+// BUG - Sentry Actions - start
+	enum ModSentryMissionTypes
+	{
+		MOD_SENTRY_MISSION_MOVE_TO_SENTRY = NUM_MISSION_TYPES,
+		MOD_SENTRY_MISSION_SENTRY_WHILE_HEAL,
+		MOD_SENTRY_MISSION_SENTRY_NAVAL_UNITS,
+		MOD_SENTRY_MISSION_SENTRY_LAND_UNITS,
+	};
+// BUG - Sentry Actions - end
+} // </trs.modname>
 
 void CvSelectionGroup::read(FDataStreamBase* pStream)
 {
@@ -4828,10 +4849,55 @@ void CvSelectionGroup::read(FDataStreamBase* pStream)
 
 	pStream->Read((int*)&m_eOwner);
 	pStream->Read((int*)&m_eActivityType);
+	// <trs.modname> Convert unsupported activities
+	if (m_eActivityType >= NUM_ACTIVITY_TYPES)
+	{
+		switch(m_eActivityType)
+		{
+		case MOD_SENTRY_ACTIVITY_SENTRY_WHILE_HEAL:
+			m_eActivityType = ACTIVITY_HEAL;
+			break;
+		case MOD_SENTRY_ACTIVITY_SENTRY_NAVAL_UNITS:
+		case MOD_SENTRY_ACTIVITY_SENTRY_LAND_UNITS:
+			m_eActivityType = ACTIVITY_SENTRY;
+			break;
+		default:
+			FErrorMsg("Unrecognized activity type in savegame");
+			m_eActivityType = ACTIVITY_AWAKE;
+		}
+	} // </trs.modname>
 	pStream->Read((int*)&m_eAutomateType);
 
 	m_units.Read(pStream);
 	m_missionQueue.Read(pStream);
+	// <trs.modname> Convert unsupported missions
+	for (CLLNode<MissionData>* pNode = m_missionQueue.head(); pNode != NULL;
+		pNode = m_missionQueue.next(pNode))
+	{
+		MissionTypes& eMission = pNode->m_data.eMissionType;
+		if (eMission >= NUM_MISSION_TYPES)
+		{
+			switch(eMission)
+			{
+			case MOD_SENTRY_MISSION_MOVE_TO_SENTRY:
+				eMission = MISSION_MOVE_TO;
+				break;
+			case MOD_SENTRY_MISSION_SENTRY_WHILE_HEAL:
+				eMission = MISSION_HEAL;
+				break;
+			case MOD_SENTRY_MISSION_SENTRY_NAVAL_UNITS:
+			case MOD_SENTRY_MISSION_SENTRY_LAND_UNITS:
+				eMission = MISSION_SENTRY;
+				break;
+			default:
+				FErrorMsg("Unrecognized mission type in savegame");
+				eMission = NO_MISSION;
+				pNode->m_data.iData1 = pNode->m_data.iData2 = -1;
+				pNode->m_data.iFlags = 0;
+			}
+		}
+	}
+	// </trs.modname>
 }
 
 
