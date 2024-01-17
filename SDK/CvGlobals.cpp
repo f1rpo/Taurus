@@ -3745,11 +3745,9 @@ void CvGlobals::SetGraphicsInitialized(bool bVal)
 {
 	m_bGraphicsInitialized = bVal;
 	// <trs.>
-	if (IsGraphicsInitialized())
-	{	// trs.wcitybars:
-		getGame().setCityBarWidth(getBugOptionBOOL("Taurus__WideCityBars"));
-		updateDefaultCamDistance(); // trs.camdist
-	} // </trs.>
+	if (!IsGraphicsInitialized())
+		return; // </trs.>
+	updateDefaultCamDistance(); // trs.camdist
 }
 void CvGlobals::setInterface(CvInterface* pVal) { m_interface = pVal; }
 void CvGlobals::setDiplomacyScreen(CvDiplomacyScreen* pVal) { m_diplomacyScreen = pVal; }

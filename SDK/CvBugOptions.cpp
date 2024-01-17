@@ -35,10 +35,17 @@ void setIsBug(bool bIsBug)
 {
 	logMsg("isBug: %s", bIsBug ? "true" : "false");
 	g_bIsBug = bIsBug;
-	/*	trs.camdist: (NB: This is too late to affect the distance at the start
-		of a new game) */
+	// <trs.>
+	if (!isBug())
+		return; // </trs.>
+	/*	Hopefully, we can just assume that BUG initialization always happens
+		later than graphics initialization. */
+	FAssert(GC.IsGraphicsInitialized());
+	/*	trs.camdist: (NB: This is too late to affect the distance at the start of a
+		new game, therefore, the update is also run upon graphics being initialized.) */
 	GC.updateDefaultCamDistance();
 	GC.updateCamScrollSpeed(); // trs.camspeed
+	GC.getGame().setCityBarWidth(getBugOptionBOOL("Taurus__WideCityBars")); // trs.wcitybars
 }
 
 
