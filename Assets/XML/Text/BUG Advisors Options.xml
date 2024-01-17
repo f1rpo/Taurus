@@ -342,28 +342,32 @@
 		<Italian>Attivata</Italian>
 		<Spanish>Enabled</Spanish>
 	</TEXT>
+	<!-- trs. Info about known issue added (from AdvCiv) -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_ADVISORS__SEVOPEDIA_HOVER</Tag>
-		<English>When checked, uses the Sevopedia (requires restart).</English>
+		<English>Enables the Sevopedia layout of the Civilopedia (requires restart). Known issue: Regardless of this setting, if the Civilopedia is accessed from the Opening Menu, Sevopedia is automatically enabled and remains enabled until the game is restarted.</English>
 		<French>En activant, utilise le Sevopedia (requièrt un redémarrage).</French>
-		<German>Aktiviert die "Sevopedia" (erfordert Neustart)</German>
+		<German>Aktiviert das Sevopedia-Layout für die Zivilopädie (erfordert Neustart). Bekanntes Problem: Bei Zugriff auf die Zivilopädie vom Hauptmenü aus wird Sevopedia in jedem Fall aktiviert und bleibt dann bis zum nächsten Neustart aktiv.</German>
 		<Italian>Quando è selezionato, viene utilizzata la Sevopedia invece della Civilopedia (è richiesto un riavvio perchè il cambiamento abbia effetto).</Italian>
-		<Spanish>When checked, uses the Sevopedia (requires restart).</Spanish>
+		<Spanish>Si se activa, emplea la Sevopedia (requiere reiniciar).</Spanish>
 	</TEXT>
+	<!-- trs. Was "Sort Lists" (from AdvCiv). -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_ADVISORS__SEVOPEDIASORTITEMLIST_TEXT</Tag>
-		<English>Sort Lists</English>
+		<English>Sort Entries</English>
 		<French>Trier les Listes</French>
-		<German>Listen sortieren</German>
+		<German>Einträge sortieren</German>
 		<Italian>Liste ordinate</Italian>
-		<Spanish>Sort Lists</Spanish>
+		<Spanish>Ordenar Listas</Spanish>
 	</TEXT>
+	<!-- trs. Rewritten (from AdvCiv). -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_OPT_ADVISORS__SEVOPEDIASORTITEMLIST_HOVER</Tag>
-		<English>When checked, the lists of units, buildings, technologies, etc. are sorted.</English>
+		<English>When checked, the entries within each category of Sevopedia are sorted alphabetically. (Otherwise, the order of the entries corresponds to internal ID numbers.)</English>
 		<French>En activant, les listes des unités, bâtiments, technologies, etc. seront triées.</French>
-		<German>Sortiert die Listen der Einheiten, Gebäuden, Technologien etc.</German>
+		<German>Sortiert die Einträge innerhalb der einzelnen Kategorien alphabetisch. (Ohne diese Option werden die Einträge nach internen IDs geordnet.)</German>
 		<Italian>Quando è selezionato, le liste di Unità, Edifici, Tecnologie ecc. sono ordinate.</Italian>
-		<Spanish>When checked, the lists of units, buildings, technologies, etc. are sorted.</Spanish>
+		<Spanish>Si se activa esta opción, las listas de la Sevopedia se muestran ordenadas.</Spanish>
 	</TEXT>
+
 </Civ4GameText>
