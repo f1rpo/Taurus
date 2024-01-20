@@ -53,7 +53,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,2,0
+ FILEVERSION 1,0,3,0
  PRODUCTVERSION 3,1,9,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
@@ -71,7 +71,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Firaxis Games"
             VALUE "FileDescription", "Modified GameCore DLL (Taurus Mod) for BtS 3.19"
-            VALUE "FileVersion", "1, 0, 2, 0"
+            VALUE "FileVersion", "1, 0, 3, 0"
             VALUE "InternalName", "Taurus GameCore DLL"
             VALUE "LegalCopyright", "Copyright (C) 2009 Firaxis Games, 2010 BUG Mod. All Rights Reserved."
             VALUE "OriginalFilename", "CvGameCoreDLL.dll"
