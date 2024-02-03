@@ -247,7 +247,7 @@
     <None Include="CvGameCoreDLL.def" />
     <None Include="Makefile" />
     <None Include="Makefile.project" />
-    <None Include="Makefile.settings" />
+    <None Include="Makefile.user" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CvGameCoreDLL.rc" />

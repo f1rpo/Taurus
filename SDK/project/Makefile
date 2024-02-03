@@ -33,22 +33,22 @@
 
 ## User setup
 ##
-## Any setting here can be overwritten by assigning a new value to the variables in Makefile.settings
-##  Makefile.settings is made automatically if it is missing whenever the project is build or cleaned
+## Any setting here can be overwritten by assigning a new value to the variables in Makefile.user
+##  Makefile.user is made automatically if it is missing whenever the project is build or cleaned
 ##
 ## Not touching the makefile itself can be beneficial if the makefile is committed to svn/git
-## Makefile.settings can also accept CUSTOM_CFLAGS and CUSTOM_LDFLAGS if you want to ADD additional flags
+## Makefile.user can also accept CUSTOM_CFLAGS and CUSTOM_LDFLAGS if you want to ADD additional flags
 ##   the custom flags will not overwrite any flags the makefile sets itself
 ##   An example could be you want to define ENABLE_MY_DEBUG_OUTPUT in C++, then you write
 ##     CUSTOM_CFLAGS -DENABLE_MY_DEBUG_OUTPUT
-##     in Makefile.settings and it will be defined for you without the risk of committing active debug output to other people
+##     in Makefile.user and it will be defined for you without the risk of committing active debug output to other people
 ##
 ##     You can write whatever you want after -D and it will work like you write #DEFINE in C++
 ## 
 
 
 #### Paths ####
-# Note: Edit Makefile.settings instead and add it to .gitignore
+# Note: Edit Makefile.user instead and add it to .gitignore
 # Note: $(PROGRAMFILES) converts to "C:\Program Files", "C:\Program Files (x86)" or whatever fits your system.
 # run "nmake.exe /P" in cmd.exe to see what it is on your system
 #
@@ -102,11 +102,11 @@ CUSTOM_LDFLAGS =
 
 
 
-!IF [IF NOT EXIST Makefile.settings EXIT 1] != 0
-!IF [ECHO CUSTOM_CFLAGS = > Makefile.settings]
+!IF [IF NOT EXIST Makefile.user EXIT 1] != 0
+!IF [ECHO CUSTOM_CFLAGS = > Makefile.user]
 !ENDIF
 !ENDIF
-!include Makefile.settings
+!include Makefile.user
 
 PRECOMPILE_DEPENDENCIES =
 PROJECT_CFLAGS =
