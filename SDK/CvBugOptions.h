@@ -25,6 +25,7 @@ void logMsg(const char* format, ...);
 
 bool isBug();
 void setIsBug(bool bIsBug);
+void updateBugGraphics(); // trs.
 
 bool getDefineBOOL(const char* xmlKey, bool bDefault = false);
 int getDefineINT(const char* xmlKey, int iDefault = 0);

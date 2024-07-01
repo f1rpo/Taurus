@@ -37,16 +37,20 @@ void setIsBug(bool bIsBug)
 	g_bIsBug = bIsBug;
 	// <trs.>
 	if (!isBug())
-		return; // </trs.>
-	/*	Hopefully, we can just assume that BUG initialization always happens
-		later than graphics initialization. */
-	FAssert(GC.IsGraphicsInitialized());
-	/*	trs.camdist: (NB: This is too late to affect the distance at the start of a
-		new game, therefore, the update is also run upon graphics being initialized.) */
+		return;
+	updateBugGraphics(); 
+}
+
+// For initialization that requires both graphics and BUG settings to be initialized.
+void updateBugGraphics()
+{
+	// trs.camdist: (Update this one _both_ upon graphics and BUG init)
 	GC.updateDefaultCamDistance();
+	if (!GC.IsGraphicsInitialized() || !isBug())
+		return;
 	GC.updateCamScrollSpeed(); // trs.camspeed
 	GC.getGame().setCityBarWidth(getBugOptionBOOL("Taurus__WideCityBars")); // trs.wcitybars
-}
+} // </trs.>
 
 
 bool getDefineBOOL(const char* xmlKey, bool bDefault)

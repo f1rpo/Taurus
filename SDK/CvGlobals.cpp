@@ -3746,8 +3746,8 @@ void CvGlobals::SetGraphicsInitialized(bool bVal)
 	m_bGraphicsInitialized = bVal;
 	// <trs.>
 	if (!IsGraphicsInitialized())
-		return; // </trs.>
-	updateDefaultCamDistance(); // trs.camdist
+		return;
+	updateBugGraphics(); // </trs.>
 }
 void CvGlobals::setInterface(CvInterface* pVal) { m_interface = pVal; }
 void CvGlobals::setDiplomacyScreen(CvDiplomacyScreen* pVal) { m_diplomacyScreen = pVal; }
