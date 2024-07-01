@@ -36,6 +36,7 @@
 // BUG - Ignore Harmless Barbarians - end
 #include "SelfMod.h" // trs.balloon
 #include "ModName.h" // trs.bat
+#include "UnofficialPatch.h" // trs.fix
 
 
 // Public Functions...
@@ -1040,13 +1041,41 @@ int CvPlayer::startingPlotRange() const
 
 	iRange += std::min(((GC.getMapINLINE().getNumAreas() + 1) / 2), GC.getGameINLINE().countCivPlayersAlive());
 
-	long lResult=0;
-	if (gDLL->getPythonIFace()->callFunction(gDLL->getPythonIFace()->getMapScriptModule(), "minStartingDistanceModifier", NULL, &lResult))
+	/*	<trs.fix> Work around two bugs, neither of which Taurus can easily fix:
+	  - CvUnitAI::AI_foundRange causes found-city values to be calculated with the
+		bStartingLoc flag.
+	  - The Hub map script can't handle the minStartingDistanceModifier queries
+		caused by bStartingLoc unless a Hub map has been generated in the current
+		session. */
+	bool bSkipMinStartingDistanceModifier = false;
+	// Even a workaround will breach network compatibility with BULL, I think.
+	if (!isBULL12Rules() && GC.getGame().getElapsedGameTurns() > 0)
 	{
-		iRange *= std::max<int>(0, (lResult + 100));
-		iRange /= 100;
+		CvInitCore const& kInitCore = GC.getInitCore();
+		// Fix it as narrowly as possible
+		switch(kInitCore.getType())
+		{
+		case GAME_SP_NEW:
+		case GAME_MP_NEW:
+		case GAME_HOTSEAT_NEW:
+		case GAME_PBEM_NEW:
+			/*	Script will only throw exceptions after loading a savegame
+				(and after having exited, which we can't check). */
+			break;
+		default:
+			if (GC.getInitCore().getMapScriptName().compare(L"Hub") == 0)
+				bSkipMinStartingDistanceModifier = true;
+		}
 	}
-
+	if (!bSkipMinStartingDistanceModifier)
+	{	// </trs.fix>
+		long lResult=0;
+		if (gDLL->getPythonIFace()->callFunction(gDLL->getPythonIFace()->getMapScriptModule(), "minStartingDistanceModifier", NULL, &lResult))
+		{
+			iRange *= std::max<int>(0, (lResult + 100));
+			iRange /= 100;
+		}
+	} // trs.fix
 	return std::max(iRange, GC.getDefineINT("MIN_CIV_STARTING_DISTANCE"));
 }
 
