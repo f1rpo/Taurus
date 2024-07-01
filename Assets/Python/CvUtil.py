@@ -159,12 +159,15 @@ def myExceptHook(type, value, tb):
 
 def pyPrint(stuff):
 	stuff = 'PY:' + stuff + "\n"
+	# trs.fix (from AdvCiv): For printing city names with non-ASCII characters
+	stuff = stuff.encode("UTF-8")
 	sys.stdout.write(stuff)
 
 def pyAssert(cond, msg):
 	if (cond==False):
 		sys.stderr.write(msg)
-	assert(cond, msg)
+	#assert(cond, msg)
+	assert cond, msg # trs.fix (from the MNAI-U mod)
 	
 def getScoreComponent(iRawScore, iInitial, iMax, iFactor, bExponential, bFinal, bVictory):
 
@@ -207,7 +210,8 @@ def spawnUnit(iUnit, pPlot, pPlayer):
 	return 1
 
 def findInfoTypeNum(infoGetter, numInfos, typeStr):
-	if (typeStr == 'NONE'):
+	if (not typeStr or # trs.fix: Tolerate empty string (now that pyAssert actually works)
+			typeStr == 'NONE'):
 		return -1
 	idx = gc.getInfoTypeForString(typeStr)
 	pyAssert(idx != -1, "Can't find type enum for type tag %s" %(typeStr,))
