@@ -1,5 +1,5 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C97BB942}") = "CvGameCoreDLL", "CvGameCoreDLL.vcxproj", "{3021AF0E-699D-4232-86F6-FC374A0C7947}"
 EndProject
