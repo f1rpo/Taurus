@@ -1,13 +1,15 @@
 # -*- coding: iso-8859-1 -*-
 #
-#	ORIGINAL MAP FILES:  Archipelago.py, Continents.py, Custom_Continents.py, Fractal.py, Hub.py, Inland_Sea.py, Islands.py, Lakes.py
-#                            Maze.py, Pangaea.py, Ring.py, Shuffle.py, Terra.py, Wheel.py, Big_and_Small.py, Hemispheres.py, Medium_and_Small.py
+#       ORIGINAL MAP FILES:  Archipelago.py, Continents.py, Custom_Continents.py, Fractal.py, Hub.py, Inland_Sea.py, Islands.py, Lakes.py,
+#                            Maze.py, Pangaea.py, Ring.py, Shuffle.py, Terra.py, Wheel.py, Big_and_Small.py, Hemispheres.py, Medium_and_Small.py,
+#                            Tectonics (AUTHOR : Laurent Di Cesare (LDiCesare))
 #	AUTHORS:  Bob Thomas (Sirian), Soren Johnson, Andy Szybalski, Ben Sarsgard
 #
 #-----------------------------------------------------------------------------
-#	Copyright (c) 2004, 2005, 2007 Firaxis Games, Inc. All rights reserved.
+#	Copyright (c) 2004, 2005, 2007, 2008 Firaxis Games, Inc. All rights reserved.
 #-----------------------------------------------------------------------------
 #
+#       PERSONAL MAP FILE :   chess
 #       Customized by : Sto , EMAIL : <<<stoofisme<delete_me>@hotmail.com>>>
 #                           , Forum : http://forums.civfanatics.com/showthread.php?t=151629
 #
@@ -32,7 +34,16 @@
 #
 
 def getVersion():
-        return "3.00"
+        return "3.11"
+
+# list of FfH2 modmods -> to get the FfH2 tab in the screen
+FfH_Mods = ["Fall from Heaven 2"]
+
+# list of FF modmods -> list of FfH2 modmods based on Fall Further that introduce 2 civilizations for barbarians
+FF_Mods = ["Fall Further", "Orbis", "FFH Wild Mana", "Rise from Erebus"]
+
+# list of Rise of Mankind modmodss -> allow march generation
+RoM_Mods = ["Rise of Mankind"]
 
 from CvPythonExtensions import *
 import CvUtil
@@ -46,7 +57,10 @@ import os
 import sys
 import string
 import cPickle as pickle
-import CvEventInterface
+try :
+        import CvEventInterface
+except :
+        pass
 import CvScreensInterface
 import CvOptionsScreen
 import CvOptionsScreenCallbackInterface
@@ -55,8 +69,9 @@ from math import sqrt
 import Popup as PyPopup
 import traceback
 import copy
-import webbrowser
+##import webbrowser
 import urllib
+import time
 
 if (sys.platform == 'darwin'):
         import sets
@@ -75,6 +90,11 @@ bInitDescription = True
 bGeneratingMap = False
 hinted_world = None
 
+# globals for temporaly replace onModNetMessage to launch game options
+iNetData1, iNetData2, iNetData3, iNetData4, iNetData5 = 17824, 12564, 10121, 82515, 62011
+lenNetData = 1
+iTempNetData = 0
+
 ##!_!## map generation
 def beforeInit():
         global selGen
@@ -82,6 +102,9 @@ def beforeInit():
         global bScreen
         global bCanWriteLog
         global bGeneratingMap
+        global original_GAMEOPTION_BARBARIAN_WORLD
+        global original_GAMEOPTION_NO_LAIRS
+        global original_GAMEOPTION_NO_UNIQUE_IMPROVEMENTS
         bGeneratingMap = True
         bScreen = True
         bCanWriteLog = bool(not CyGame().isPbem())
@@ -133,6 +156,28 @@ def beforeInit():
         logList.append("")
         writeLog("", False, logList)
 
+        if is_BtS_FFH2 or is_BtS_FF :
+                original_GAMEOPTION_BARBARIAN_WORLD = -1
+                original_GAMEOPTION_NO_LAIRS = -1
+                original_GAMEOPTION_NO_UNIQUE_IMPROVEMENTS = -1
+
+                i_GAMEOPTION_BARBARIAN_WORLD = gc.getInfoTypeForString("GAMEOPTION_BARBARIAN_WORLD")
+                i_GAMEOPTION_NO_LAIRS = gc.getInfoTypeForString("GAMEOPTION_NO_LAIRS")
+                i_GAMEOPTION_NO_UNIQUE_IMPROVEMENTS = gc.getInfoTypeForString("GAMEOPTION_NO_UNIQUE_IMPROVEMENTS")
+
+                try :
+                        if i_GAMEOPTION_BARBARIAN_WORLD != -1 :
+                                original_GAMEOPTION_BARBARIAN_WORLD = bool(game.isOption(i_GAMEOPTION_BARBARIAN_WORLD))
+                                game.setOption(i_GAMEOPTION_BARBARIAN_WORLD, False)
+                        if i_GAMEOPTION_NO_LAIRS != -1 :
+                                original_GAMEOPTION_NO_LAIRS = bool(game.isOption(i_GAMEOPTION_NO_LAIRS))
+                                game.setOption(i_GAMEOPTION_NO_LAIRS, True)
+                        if i_GAMEOPTION_NO_UNIQUE_IMPROVEMENTS != -1 :
+                                original_GAMEOPTION_NO_UNIQUE_IMPROVEMENTS = bool(game.isOption(i_GAMEOPTION_NO_UNIQUE_IMPROVEMENTS))
+                                game.setOption(i_GAMEOPTION_NO_UNIQUE_IMPROVEMENTS, True)
+                except :
+                        writeLog("", False, [" FfH : error changing the FFH2 options", ""])
+
         listMaps = [sKey for sKey in selGen["maps"].keys() if selGen["maps"][sKey]["selected"]]
         if listMaps == [] :
                 writeLog("", False, [" no map selected ... choose at random"])
@@ -167,7 +212,7 @@ def getGridSize(argsList):
         else :
                 # chess, maze have a custom list . inlandsea, lakes are the smallest maps
                 if idMap in ["hub", "pangaea", "ring", "wheel"] : iWorldSize += 1
-                elif idMap in ["archipelago", "continents", "customcontinents", "fractals", "islands", "shuffle", "bigandsmall", "hemispheres", "mediumandsmall"] : iWorldSize += 2
+                elif idMap in ["archipelago", "continents", "customcontinents", "fractals", "islands", "shuffle", "bigandsmall", "hemispheres", "mediumandsmall", "tectonics"] : iWorldSize += 2
                 elif idMap in ["terra"] : iWorldSize += 3
 
                 tWorldSize = listSize[iWorldSize]
@@ -185,13 +230,15 @@ def getWrapY():
 def getTopLatitude():
         if bGeneratingMap :
                 if idMap == "inlandsea" : return 60
-                else : return 90
+                elif idMap == "tectonics" :
+                        if cmo[0] == 5 : return 65
         return 90
 
 def getBottomLatitude():
         if bGeneratingMap :
                 if idMap == "inlandsea" : return -60
-                else : return -90
+                elif idMap == "tectonics" :
+                        if cmo[0] == 5 : return 25
         return -90
 
 def isBonusIgnoreLatitude(): # warning called by StoAddBonuses
@@ -1310,10 +1357,12 @@ def beforeGeneration():
                         WorldSizeTypes.WORLDSIZE_LARGE:		(5, 10),
                         WorldSizeTypes.WORLDSIZE_HUGE:		(6, 15)
                         }
-                if map_size in sizevalues :
+                if int(map_size) in sizevalues.keys() :
                         (threeVar, twoVar) = sizevalues[map_size]
+                elif int(map_size) == int(WorldSizeTypes.WORLDSIZE_HUGE) + 1 :
+                        (threeVar, twoVar) = (7, 22)
                 else :
-                        (threeVar, twoVar) = (7, 21)
+                        (threeVar, twoVar) = (8, 30)
                 if iPlayers <= threeVar:
                         fVar = 3
                 elif iPlayers <= twoVar:
@@ -2768,13 +2817,57 @@ def generatePlotTypes():
                         if bSuccessFlag :
                                 writeLog("", True, [" Chess generation finished ..."])
                                 return plotTypes
+                elif idMap == "tectonics" :
+                        userInputLandmass = cmo[0]
+                        numPlayers = game.countCivPlayersEverAlive()
+                        surface = iH * iW
+                        numPlayers = (numPlayers + surface / 400) / 2
+                        numContinents = 1
+                        numSeaPlates = 1
+                        hotspotsFrequency = 900
+                        bGenerated = False
+                        if (userInputLandmass == 0):       #                 "Earthlike (70% water)"
+                                numContinents = 1 + numPlayers
+                                numSeaPlates = numPlayers*3
+                        elif (userInputLandmass == 1):       #               "Earthlike (60% water)"
+                                numContinents = 1 + numPlayers*2
+                                numSeaPlates = numPlayers*3 - 1
+                        elif (userInputLandmass == 2):     #                 "Pangaea"
+                                generator = voronoiPangaeaMap(numPlayers)
+                                plotTypes = generator.generate()
+                                bGenerated = True
+                        elif (userInputLandmass == 3):     #                 "Lakes (30% water")
+                                numContinents = 1 + numPlayers*3
+                                numSeaPlates = numPlayers - 1
+                                hotspotsFrequency = 1600
+                        elif (userInputLandmass == 4):     #                 "Islands"
+                                numContinents = numPlayers
+                                numSeaPlates = numPlayers*6 - 1
+                                hotspotsFrequency = 300
+                        elif (userInputLandmass == 5):     #                 "Mediterranean"
+                                generator = voronoiMediterraneanMap(numPlayers)
+                                plotTypes = generator.generate()
+                                bGenerated = True
+                        elif (userInputLandmass == 6 or userInputLandmass == 7): # "Terra"
+                                generator = voronoiTerraMap()
+                                plotTypes = generator.generate()
+                                bGenerated = True
+
+                        if not bGenerated :
+                                #width = gc.getMap().getGridWidth() ??
+                                generator = voronoiMap(numContinents, numSeaPlates, hotspotsFrequency)
+                                plotTypes = generator.generate()
 
                 ## apply options chosen
                 try :
                         remPeak = bool((selGen["terrain"]["peak"]["peakcoast"]) or (idMap in ["archipelago", "maze"]))
                         minIslandTiles = getRandSel(selGen["terrain"]["island"]["nbtilesminisland"], False)
-                        peakPer = getRandSel(selGen["terrain"]["peak"]["peakpercent"], False, "float") / 100.0
-                        hillPer = getRandSel(selGen["terrain"]["hill"]["hillpercent"], False) / 100.0
+                        if selGen["terrain"]["peak"]["peakpercent"] == "standard" : peakPer = "standard"
+                        else : peakPer = getRandSel(selGen["terrain"]["peak"]["peakpercent"], False, "float") / 100.0
+                        if selGen["terrain"]["hill"]["hillpercent"] == "standard" : hillPer = "standard"
+                        else : hillPer = getRandSel(selGen["terrain"]["hill"]["hillpercent"], False) / 100.0
+                        if idMap == "chess" :
+                                minIslandTiles = max(minIslandTiles, 2)
 
                         # debug
                         logList = []
@@ -2801,7 +2894,7 @@ def generatePlotTypes():
                                         for iX in range(iW) :
                                                 tPlots[iX][iY] = pWater
 
-                        # with prevent a long line of plot just near the border of the map for hub
+                        # prevent a long line of plot just near the border of the map for hub, wheel, ring
                         if idMap in ["hub", "wheel", "ring"] :
                                 while True :
                                         bChange = False
@@ -2960,58 +3053,60 @@ def generatePlotTypes():
 
                         if nbTiles > 0 : #all plots are coastal !?
                                 effPeakPer = len(peakPlots) / (nbTiles + 0.001)
-                                if effPeakPer > peakPer : # remove some peak
-                                        while True :
-                                                if (len(peakPlots) / (nbTiles + 0.001)) < peakPer : break
-                                                if len(peakPlots) == 0 : break
-                                                iChoice = getRandNum(len(peakPlots), "FoR : peak remove")
-                                                cPlot = peakPlots[iChoice]
-                                                tPlots[cPlot[0]][cPlot[1]] = pHill
-                                                hillPlots.append(cPlot)
-                                                del peakPlots[iChoice]
-                                else :
-                                        if remPeak :
-                                                ncLandPlots = [item for item in landPlots if not item in coastalPlots]
-                                                ncHillPlots = [item for item in hillPlots if not item in coastalPlots]
+                                if peakPer != "standard" :
+                                        if effPeakPer > peakPer : # remove some peak
+                                                while True :
+                                                        if (len(peakPlots) / (nbTiles + 0.001)) < peakPer : break
+                                                        if len(peakPlots) == 0 : break
+                                                        iChoice = getRandNum(len(peakPlots), "FoR : peak remove")
+                                                        cPlot = peakPlots[iChoice]
+                                                        tPlots[cPlot[0]][cPlot[1]] = pHill
+                                                        hillPlots.append(cPlot)
+                                                        del peakPlots[iChoice]
                                         else :
-                                                ncLandPlots = copy.copy(landPlots)
-                                                ncHillPlots = copy.copy(hillPlots)
-                                        while True :
-                                                if (len(peakPlots) / (nbTiles + 0.001)) >= peakPer : break
-                                                if (len(ncLandPlots) == 0) and (len(ncHillPlots) == 0) : break
-                                                listPlots = copy.copy(ncLandPlots) + copy.copy(ncHillPlots)
-                                                iChoice = getRandNum(len(listPlots), "FoR : peak add")
-                                                cPlot = listPlots[iChoice]
-                                                if canHavePeak(cPlot[0], cPlot[1]) :
-                                                        tPlots[cPlot[0]][cPlot[1]] = pPeak
-                                                        peakPlots.append(cPlot)
-                                                        if cPlot in hillPlots : hillPlots.remove(cPlot)
-                                                        elif cPlot in landPlots : landPlots.remove(cPlot)
-                                                if cPlot in ncHillPlots : ncHillPlots.remove(cPlot)
-                                                elif cPlot in ncLandPlots : ncLandPlots.remove(cPlot)
+                                                if remPeak :
+                                                        ncLandPlots = [item for item in landPlots if not item in coastalPlots]
+                                                        ncHillPlots = [item for item in hillPlots if not item in coastalPlots]
+                                                else :
+                                                        ncLandPlots = copy.copy(landPlots)
+                                                        ncHillPlots = copy.copy(hillPlots)
+                                                while True :
+                                                        if (len(peakPlots) / (nbTiles + 0.001)) >= peakPer : break
+                                                        if (len(ncLandPlots) == 0) and (len(ncHillPlots) == 0) : break
+                                                        listPlots = copy.copy(ncLandPlots) + copy.copy(ncHillPlots)
+                                                        iChoice = getRandNum(len(listPlots), "FoR : peak add")
+                                                        cPlot = listPlots[iChoice]
+                                                        if canHavePeak(cPlot[0], cPlot[1]) :
+                                                                tPlots[cPlot[0]][cPlot[1]] = pPeak
+                                                                peakPlots.append(cPlot)
+                                                                if cPlot in hillPlots : hillPlots.remove(cPlot)
+                                                                elif cPlot in landPlots : landPlots.remove(cPlot)
+                                                        if cPlot in ncHillPlots : ncHillPlots.remove(cPlot)
+                                                        elif cPlot in ncLandPlots : ncLandPlots.remove(cPlot)
 
                         # adjust hill percent
                         nbTiles = len(peakPlots) + len(hillPlots) + len(landPlots)
 
                         effHillPer = len(hillPlots) / (nbTiles + 0.001)
-                        if effHillPer > hillPer :
-                                while True :
-                                        if (len(hillPlots) / (nbTiles + 0.001)) < hillPer : break
-                                        if len(hillPlots) == 0 : break
-                                        iChoice = getRandNum(len(hillPlots), "FoR : hill remove")
-                                        cPlot = hillPlots[iChoice]
-                                        tPlots[cPlot[0]][cPlot[1]] = pLand
-                                        landPlots.append(cPlot)
-                                        del hillPlots[iChoice]
-                        else :
-                                while True :
-                                        if (len(hillPlots) / (nbTiles + 0.001)) >= hillPer : break
-                                        if len(landPlots) == 0 : break
-                                        iChoice = getRandNum(len(landPlots), "FoR : hill add")
-                                        cPlot = landPlots[iChoice]
-                                        tPlots[cPlot[0]][cPlot[1]] = pHill
-                                        hillPlots.append(cPlot)
-                                        del landPlots[iChoice]
+                        if hillPer != "standard" :
+                                if effHillPer > hillPer :
+                                        while True :
+                                                if (len(hillPlots) / (nbTiles + 0.001)) < hillPer : break
+                                                if len(hillPlots) == 0 : break
+                                                iChoice = getRandNum(len(hillPlots), "FoR : hill remove")
+                                                cPlot = hillPlots[iChoice]
+                                                tPlots[cPlot[0]][cPlot[1]] = pLand
+                                                landPlots.append(cPlot)
+                                                del hillPlots[iChoice]
+                                else :
+                                        while True :
+                                                if (len(hillPlots) / (nbTiles + 0.001)) >= hillPer : break
+                                                if len(landPlots) == 0 : break
+                                                iChoice = getRandNum(len(landPlots), "FoR : hill add")
+                                                cPlot = landPlots[iChoice]
+                                                tPlots[cPlot[0]][cPlot[1]] = pHill
+                                                hillPlots.append(cPlot)
+                                                del landPlots[iChoice]
 
                         # debug
                         nbPeak = 0
@@ -3059,6 +3154,704 @@ def generatePlotTypes():
                 fractal_world.initFractal(polar = True)
                 plotTypes = fractal_world.generatePlotTypes()
                 return plotTypes
+
+class voronoiMap:
+	def __init__(self,landPlates,seaPlates,hotspotsF):
+		self.dice = gc.getGame().getMapRand()
+		self.mapWidth = map.getGridWidth()
+		self.mapHeight = map.getGridHeight()
+		self.plotTypes = [PlotTypes.PLOT_OCEAN] * (self.mapWidth*self.mapHeight)
+		self.heightMap = [0] * (self.mapWidth*self.mapHeight)
+		self.plateMap = [0] * (self.mapWidth*self.mapHeight)
+		self.numContinents = landPlates
+		self.hotSpotFrequency = hotspotsF
+		self.numSeaPlates = seaPlates + 1 # plate 0 is for initialisation
+		self.plate = [0] * (self.numContinents + self.numSeaPlates)
+		# plateSize is a random number which gives the probability of growing a plate
+		self.plateSize = [0] * (self.numContinents + self.numSeaPlates)
+		self.altitudeVariation = 2
+		self.peakAltitude = 12
+		self.hillAltitude = 9
+		self.landAltitude = 6
+		for x in range(self.mapWidth):
+			for y in range(self.mapHeight):
+				i = y*self.mapWidth + x
+				self.plotTypes[i] = PlotTypes.PLOT_OCEAN
+
+	def generate(self):
+		self.sowSeeds()
+		self.fillPlates()
+		self.movePlates(true)
+		self.erode()
+		self.movePlates(false)
+		self.blur()
+		self.addFaults()
+		self.hotspots()
+		self.createMap()
+		self.finalizeMap()
+		return self.plotTypes
+
+	def sowSeeds(self):
+		self.mostLands = self.dice.get(2,"mostland hemisphere")
+		for i in range(self.numSeaPlates):
+			self.plate[i] = self.dice.get(3,"Sea altitude")
+		for i in range(self.numContinents):
+			self.plate[self.numSeaPlates + i] = self.landAltitude + self.dice.get(3,"Land altitude")
+		for i in range(self.numContinents + self.numSeaPlates):
+			x, y = self.getCoord(i)
+			while self.plateMap[y*self.mapWidth + x] != 0:
+				x, y = self.getCoord(i)
+			self.plateMap[y*self.mapWidth + x] = i
+			self.plateSize[i] = 2 + self.dice.get(6,"Some randomness in plate sizes")
+
+	def getCoord(self,i):
+		x = self.dice.get(self.mapWidth,"x seed for plate")
+		if (i >= self.numSeaPlates + (self.numContinents/3)):
+			y = 2 + self.dice.get(2*self.mapHeight/3,"y seed for plate")
+			if (i >= self.numSeaPlates + 1 + (self.numContinents/3)):
+				if (self.mostLands == 0):
+					y = self.mapHeight - y - 1
+			elif (self.mostLands == 1):
+				y = self.mapHeight - y - 1
+		else:
+			y = self.dice.get(self.mapHeight,"y seed for plate")
+		return x, y
+
+	def fillPlates(self):
+		filled = False
+		bufferPlateMap = [0] * (self.mapWidth*self.mapHeight)
+		while filled == False:
+			filled = True
+			for x in range(self.mapWidth):
+				for y in range(self.mapHeight):
+					i = y*self.mapWidth + x
+					bufferPlateMap[i] = self.plateMap[i]
+					if (self.plateMap[i] == 0):
+						bufferPlateMap[i] = self.neighbour(x,y)
+			for x in range(self.mapWidth):
+				for y in range(self.mapHeight):
+					i = y*self.mapWidth + x
+					self.plateMap[i] = bufferPlateMap[i]
+					if self.plateMap[i] == 0:
+						filled = False
+		for x in range(self.mapWidth):
+			for y in range(self.mapHeight):
+				i = y*self.mapWidth + x
+				self.heightMap[i] = self.plate[self.plateMap[i]] + self.dice.get(self.altitudeVariation,"Random variation of altitude")
+
+	def movePlates(self,dontMoveSeaPlates):
+		plates = self.numContinents + self.numSeaPlates
+		xMoves = [0] * plates
+		yMoves = [0] * plates
+		subduction = [0] * plates
+		min = 0
+		if dontMoveSeaPlates:
+			min = self.numSeaPlates
+		for i in range(min,plates):
+			xMoves[i] = self.dice.get(3,"moves") - 2
+			yMoves[i] = self.dice.get(3,"moves") - 2
+			subduction[i] = self.dice.get(10,"subduction")
+		self.doMovePlates(xMoves,yMoves,subduction)
+
+	def doMovePlates(self,xMoves,yMoves,subduction):
+		mapSize = self.mapWidth*self.mapHeight
+		#FIXME There must be a clone method somewhere?
+		oldHeightMap = [0] * mapSize
+		for i in range(mapSize):
+			oldHeightMap[i] = self.heightMap[i]
+		for x in range(self.mapWidth):
+			for y in range(self.mapHeight):
+				currentCoord = y*self.mapWidth + x
+				currentPlate = self.plateMap[currentCoord]
+				if (xMoves[currentPlate] != 0 or yMoves[currentPlate] != 0):
+					movedX = x + xMoves[currentPlate]
+					movedY = y + yMoves[currentPlate]
+					if (movedX >= 0 and movedX < self.mapWidth):
+						if (movedY >= 0 and movedY < self.mapHeight):
+							movedCoord = movedY*self.mapWidth + movedX
+							targetPlate = self.plateMap[movedCoord]
+							if (targetPlate != currentPlate):
+								if (subduction[currentPlate] >= 6):
+									sum = oldHeightMap[movedCoord] + oldHeightMap[currentCoord] + 2
+									if (self.heightMap[movedCoord] < sum ):
+										self.heightMap[movedCoord] = sum 
+									self.heightMap[currentCoord] = self.heightMap[currentCoord] -1
+								else:
+									sum = oldHeightMap[movedCoord] + oldHeightMap[currentCoord] -2
+									if (self.heightMap[movedCoord] < sum and self.heightMap[movedCoord] >= self.landAltitude):
+										self.heightMap[movedCoord] = sum
+									if (self.heightMap[currentCoord] < sum and self.heightMap[currentCoord] >= self.landAltitude):
+										self.heightMap[currentCoord] = sum
+
+	def addFaults(self):
+		"Adds faultlines to break up big flat land masses. Think Rift Valley."
+		plates = self.numContinents + self.numSeaPlates
+		width = [0] * plates
+		height = [0] * plates
+		sum = [0] * plates
+		lastPlate = 0
+		for x in range(self.mapWidth):
+			for y in range(self.mapHeight):
+				currentCoord = y*self.mapWidth + x
+				lastPlate = self.checkFault(currentCoord,sum,height,lastPlate)
+		for y in range(self.mapHeight):
+			for x in range(self.mapWidth):
+				currentCoord = y*self.mapWidth + x
+				lastPlate = self.checkFault(currentCoord,sum,width,lastPlate)
+		for i in range(plates):
+			if (width[i] != 0): self.verticalFault(i,width[i])
+			elif (height[i] != 0): self.horizontalFault(i,height[i])
+
+	def checkFault(self,currentCoord,sum,table,lastPlate):
+		plates = self.numContinents + self.numSeaPlates
+		faultLimit = 7
+		if (self.heightMap[currentCoord] <= self.landAltitude):
+			return 0
+		if (self.heightMap[currentCoord] > self.hillAltitude):
+			return 0
+		currentPlate = self.plateMap[currentCoord]
+		if (lastPlate != currentPlate):
+			if (sum[lastPlate] >= 0):
+				sum[lastPlate] = 0
+			lastPlate = currentPlate
+		elif (sum[lastPlate] >= 0):
+			sum[lastPlate] = 1 + sum[lastPlate]
+		if (sum[lastPlate] > faultLimit):
+			table[lastPlate] = currentCoord
+			sum[lastPlate] = -1
+		return lastPlate
+
+	def verticalFault(self,plateNumber,coord):
+		nextCoord = coord - 3 + self.dice.get(6,"Fault position")
+		mapSize = self.mapWidth*self.mapHeight
+		while (nextCoord >= 0 and nextCoord < mapSize):
+			if (self.plateMap[nextCoord] != plateNumber):
+				break
+			self.fault(nextCoord)
+			nextCoord = nextCoord + self.mapWidth + self.dice.get(3,"Fault tilt") - 1
+
+	def horizontalFault(self,plateNumber,coord):
+		nextCoord = coord + (self.dice.get(6,"Fault position") - 3) * self.mapWidth 
+		mapSize = self.mapWidth*self.mapHeight
+		max = coord + self.mapWidth
+		if (max > mapSize):
+			max = mapSize
+		while (nextCoord >= 0 and nextCoord < max):
+			if (self.plateMap[nextCoord] != plateNumber):
+				break
+			self.fault(nextCoord)
+			nextCoord = nextCoord + 1 + (self.dice.get(3,"Fault tilt") - 1)*self.mapWidth
+
+	def fault(self,coord):
+		dieRoll = self.dice.get(20,"Fault line effect")
+		if (dieRoll > 11):
+			self.heightMap[coord] = self.hillAltitude + 1
+		elif (dieRoll > 9):
+			self.heightMap[coord] = 0
+
+	def erode(self):
+		for x in range(self.mapWidth):
+			for y in range(self.mapHeight):
+				i = y*self.mapWidth + x
+				if self.heightMap[i] > self.peakAltitude:
+					self.heightMap[i] -= 2
+				if self.heightMap[i] > self.hillAltitude:
+					self.heightMap[i] -= 1
+				hasSeaNeighbour = False
+				hasHillNeighbour = False
+				leftX = x-1
+				if (leftX < 0):
+					leftX = self.mapWidth - 1
+				left = self.heightMap[leftX + y*self.mapWidth] 
+				if (left < self.landAltitude):
+					hasSeaNeighbour = True
+				elif (left > self.hillAltitude):
+					hasHillNeighbour = True
+				rightX = x+1
+				if (rightX >= self.mapWidth):
+					rightX = 0
+				right = self.heightMap[rightX + y*self.mapWidth] 
+				if (right < self.landAltitude):
+					hasSeaNeighbour = True
+				elif (right > self.hillAltitude):
+					hasHillNeighbour = True
+				if (y>0):
+					top = self.heightMap[x + (y-1)*self.mapWidth] 
+					if (top < self.landAltitude):
+						hasSeaNeighbour = True
+					elif (top > self.hillAltitude):
+						hasHillNeighbour = True
+				if (y<self.mapHeight - 2):
+					bottom = self.heightMap[x + (y+1)*self.mapWidth] 
+					if (bottom < self.landAltitude):
+						hasSeaNeighbour = True
+					elif (bottom > self.hillAltitude):
+						hasHillNeighbour = True
+				if (hasSeaNeighbour):
+					self.heightMap[i] = self.heightMap[i] - 1
+				if (hasHillNeighbour):
+					self.heightMap[i] = self.heightMap[i] - 1
+
+
+	def min( height, left, right, top, bottom ):
+		minHeight = height
+		if ( minHeight > left ):
+			minHeight = left
+		if ( minHeight > right ):
+			minHeight = right
+		if ( minHeight > top ):
+			minHeight = top
+		if ( minHeight > bottom ):
+			minHeight = bottom
+		return minHeight
+
+	def blur(self):
+		#FIXME There must be a clone method somewhere?
+		mapSize = self.mapWidth*self.mapHeight
+		oldHeightMap = [0] * (mapSize)
+		for i in range(mapSize):
+			oldHeightMap[i] = self.heightMap[i]
+		for x in range(self.mapWidth):
+			for y in range(self.mapHeight):
+				i = y*self.mapWidth + x
+				height = self.heightMap[i]
+				leftX = x-1
+				if (leftX < 0):
+					leftX = self.mapWidth - 1
+				left = oldHeightMap[leftX + y*self.mapWidth]
+				rightX = x+1
+				if (rightX >= self.mapWidth):
+					rightX = 0
+				right = oldHeightMap[rightX + y*self.mapWidth]
+				top = height
+				if (y>0):
+					top = oldHeightMap[x + (y-1)*self.mapWidth]
+				bottom = height
+				if (y<self.mapHeight - 2):
+					bottom = oldHeightMap[x + (y+1)*self.mapWidth]
+				self.heightMap[i] = (height * 4 + left + right + top + bottom) / 8
+				minHeight = min(height,left,right,top,bottom)
+				if (minHeight >= self.peakAltitude):
+					oldHeightMap[leftX + y*self.mapWidth] = self.hillAltitude + 1 
+					self.heightMap[leftX + y*self.mapWidth] = self.hillAltitude  + 1
+					oldHeightMap[rightX + y*self.mapWidth] = self.hillAltitude  + 1
+					self.heightMap[rightX + y*self.mapWidth] = self.hillAltitude  + 1
+					if (y>0):
+						oldHeightMap[x + (y-1)*self.mapWidth] = self.hillAltitude  + 1
+						self.heightMap[x + (y-1)*self.mapWidth] = self.hillAltitude  + 1
+					if (y<self.mapHeight - 2):
+						oldHeightMap[x + (y+1)*self.mapWidth] = self.hillAltitude + 1
+						self.heightMap[x + (y+1)*self.mapWidth] = self.hillAltitude + 1
+
+	def hotspots(self):
+		mapSize = self.mapWidth * self.mapHeight
+		hotSpotsNumber = mapSize/self.hotSpotFrequency
+		for hotspot in range(hotSpotsNumber):
+			i = self.dice.get(mapSize,"Hotspot location")
+			self.heightMap[i] = self.heightMap[i] + self.dice.get(self.peakAltitude,"Hotspot altitude")
+
+	def createMap(self):
+		for y in range(self.mapHeight):
+			for x in range(self.mapWidth):
+				i = y*self.mapWidth + x
+				height = self.heightMap[i]
+				if (height > self.peakAltitude):
+					if (self.dice.get(7,"Random pass") == 6):
+						self.plotTypes[i] = PlotTypes.PLOT_HILLS
+					else:
+						self.plotTypes[i] = PlotTypes.PLOT_PEAK
+				elif (height > self.hillAltitude):
+					if (self.dice.get(20,"Random peak") == 19):
+						self.plotTypes[i] = PlotTypes.PLOT_PEAK
+					else:
+						self.plotTypes[i] = PlotTypes.PLOT_HILLS
+				elif (height > self.landAltitude):
+					self.plotTypes[i] = PlotTypes.PLOT_LAND
+				else:
+					self.plotTypes[i] = PlotTypes.PLOT_OCEAN
+
+	def finalizeMap(self):
+		return
+
+	def neighbour(self,x,y):
+		roll = self.dice.get(10,"Some randomness in plate shapes")
+		leftX = x-1
+		if (leftX < 0):
+			leftX = self.mapWidth - 1
+		left = self.plateMap[leftX + y*self.mapWidth]
+		if (left != 0):
+			if (roll <= self.plateSize[left]):
+				return left
+		rightX = x+1
+		if (rightX >= self.mapWidth):
+			rightX = 0
+		right = self.plateMap[rightX + y*self.mapWidth]
+		if (right != 0):
+			if (roll <= self.plateSize[right]):
+				return right
+		if (y>0):
+			top = self.plateMap[x + (y-1)*self.mapWidth]
+			if (top != 0):
+				if (roll <= self.plateSize[top]):
+					return top
+		if (y<self.mapHeight - 2):
+			bottom = self.plateMap[x + (y+1)*self.mapWidth]
+			if (bottom != 0):
+				if (roll <= self.plateSize[bottom]):
+					return bottom
+		return 0
+
+class voronoiMediterraneanMap(voronoiMap):
+	def __init__(self,numPlayers):
+		voronoiMap.__init__(self,numPlayers*5/2, numPlayers,150)
+		self.peakAltitude = 13
+
+	def movePlates(self,dontMoveSeaPlates):
+		if dontMoveSeaPlates:
+			return
+		voronoiMap.movePlates(self,true)
+
+	def getCoord(self,i):
+		mapWidthFraction = self.mapWidth/self.numSeaPlates
+			# Sea plates
+		if (i < self.numSeaPlates): 
+			x = mapWidthFraction*i + self.dice.get(mapWidthFraction,"x seed for sea plate")
+			y = self.mapHeight/3 + self.dice.get(self.mapHeight/3,"y seed for plate")
+		else:
+			# One land plate to the east to link north and south
+			if (i == self.numSeaPlates + self.numContinents - 1):
+				x = self.dice.get(self.mapWidth - 2,"x seed for link land plate")
+				y = self.mapHeight/3 + self.dice.get(self.mapHeight/3,"y seed for land plate")
+			# Other land plates half north half south
+			elif (i < self.numSeaPlates * 2):
+				x = mapWidthFraction * (i - self.numSeaPlates) + self.dice.get(mapWidthFraction,"x seed for land plate")
+				y = self.getLandY(0)
+			elif (i >= self.numSeaPlates * 3):
+				x = mapWidthFraction * (i - 2*self.numSeaPlates) + self.dice.get(mapWidthFraction,"x seed for land plate")
+				y = self.getLandY(1)
+			else:
+				x = self.dice.get(self.mapWidth,"x seed for land plate")
+				y = self.getLandY(i)
+		return x, y
+
+	def getLandY(self,i):
+		y = 1 + self.dice.get(self.mapHeight/4,"y seed for land plate")
+		if (i == 2*(i/2)):
+			y = y + self.mapHeight*3/4 -1
+		return y
+
+	def hotspots(self):
+		mapSize = self.mapWidth * self.mapHeight
+		hotSpotsNumber = mapSize/self.hotSpotFrequency
+		minX = 2
+		maxX = self.mapWidth*9/10
+		minY = self.mapHeight/10
+		yRange = self.mapHeight*8/10
+		for hotspot in range(hotSpotsNumber):
+			x = minX + self.dice.get(maxX,"Hotspot X")
+			y = minY + self.dice.get(yRange,"Hotspot Y")
+			i = y*self.mapWidth + x
+			while (self.plotTypes[i] != PlotTypes.PLOT_OCEAN):
+				x = minX + self.dice.get(maxX,"Hotspot X")
+				y = minY + self.dice.get(yRange,"Hotspot Y")
+				i = y*self.mapWidth + x
+			self.heightMap[i] = self.heightMap[i] + self.dice.get(self.peakAltitude,"Hotspot altitude")
+			self.spreadHotSpot(i)
+
+	def spreadHotSpot(self,i):
+		self.spreadIsland(i+1)
+		self.spreadIsland(i-1)
+		self.spreadIsland(i+self.mapWidth)
+		self.spreadIsland(i-self.mapWidth)
+
+	def spreadIsland(self,i):
+		self.heightMap[i] = self.heightMap[i] + self.dice.get(self.peakAltitude,"Hotspot altitude")
+		if (self.heightMap[i] > self.landAltitude):
+			self.spreadBigIsland(i+1)
+			self.spreadBigIsland(i-1)
+			self.spreadBigIsland(i+self.mapWidth)
+			self.spreadBigIsland(i-self.mapWidth)
+
+	def spreadBigIsland(self,i):
+		if (self.heightMap[i] <= self.landAltitude):
+			self.heightMap[i] = self.dice.get(self.peakAltitude,"Island altitude")
+
+	def finalizeMap(self):
+		# Make sure that the north and south borders are made of land.
+		for y in range(self.mapHeight):
+			for x in range(self.mapWidth):
+				if self.checkY(y):
+					i = y*self.mapWidth + x
+					if (self.plotTypes[i] == PlotTypes.PLOT_OCEAN):
+						self.plotTypes[i] = PlotTypes.PLOT_LAND
+		# Make sure that there's a way north/south by foot or galley
+		minEastWidth = self.mapWidth * 9 /10
+		margin = self.mapWidth/10
+		for y in range(self.mapHeight-1):
+			for x in range(minEastWidth,self.mapWidth):
+				if (x + 3 + self.dice.get(margin,"Border")) > self.mapWidth:
+					i = y*self.mapWidth + x
+					if (self.plotTypes[i] == PlotTypes.PLOT_OCEAN):
+						self.plotTypes[i] = PlotTypes.PLOT_LAND
+
+	def checkY(self,y):
+		if (y > 9*self.mapHeight/10):
+			y = self.mapHeight - y
+		if (y < self.mapHeight/10):
+			if (2 + self.dice.get(self.mapHeight/10,"Border")) > y:
+				return True
+		return False
+
+class voronoiTerraMap(voronoiMap):
+	def __init__(self):
+		voronoiMap.__init__(self,12,8,800)
+		self.altitudeVariation = 3
+
+	def sowSeeds(self):
+		for i in range(0,8):
+			self.plate[i] = 2
+		for i in range(8,20):
+			self.plate[i] = self.landAltitude + 3
+		#Pacific Ocean
+		for i in range(self.mapHeight):
+			self.plateMap[i*self.mapWidth] = 1
+		for i in range(self.mapWidth/10):
+			self.plateMap[self.mapHeight*self.mapWidth/2 -self.mapWidth/20 + i] = 1
+		x = self.mapWidth/10
+		y = self.mapHeight/5
+		self.plateMap[x + y*self.mapWidth] = 1
+		self.plateSize[1] = 7
+		#North Atlantic
+		x = self.mapWidth/3
+		ymin = 2*self.mapHeight/3
+		ymax = 7*self.mapHeight/8
+		for y in range(ymin,ymax):
+			self.plateMap[x + y*self.mapWidth] = 2
+		x = 3*self.mapWidth/10
+		y = 3*self.mapHeight/5
+		self.plateMap[x + y*self.mapWidth] = 2
+		self.plateSize[2] = 7
+		#South Atlantic
+		x = self.mapWidth/3
+		yMin = self.mapHeight/5
+		yMax = self.mapHeight/3
+		for y in range(yMin,yMax):
+			self.plateMap[x + y*self.mapWidth] = 3
+		for x in range(self.mapWidth/4,self.mapWidth/2):
+			self.plateMap[self.mapWidth/3 + self.mapHeight/5*self.mapWidth] = 3
+		x = self.mapWidth/3
+		y= 5*self.mapHeight/12
+		self.plateMap[x + y*self.mapWidth] = 3
+		x = self.mapWidth/4 +1
+		y = self.mapHeight/4
+		self.plateMap[x + y*self.mapWidth] = 3
+		self.plateSize[3] = 7
+		#Arctic Ocean
+		for i in range(self.mapWidth):
+			self.plateMap[self.mapWidth*(self.mapHeight-2) + i] = 4
+		self.plateSize[4] = 3
+		#Mediterranean
+		x = 4*self.mapWidth/9
+		y = 3*self.mapHeight/4
+		self.plateMap[x + y*self.mapWidth] = 5
+		self.plateSize[5] = 4
+		#Indian Ocean
+		x = 3*self.mapWidth/4
+		y = self.mapHeight/3
+		self.plateMap[x + y*self.mapWidth] = 6
+		x = 3*self.mapWidth/5
+		y = self.mapHeight/3
+		self.plateMap[x + y*self.mapWidth] = 6
+		x = 2*self.mapWidth/3
+		y = 9*self.mapHeight/20
+		self.plateMap[x + y*self.mapWidth] = 6
+		self.plateSize[6] = 7
+		#Antarctic Ocean
+		y = self.mapHeight/8
+		for i in range(self.mapWidth):
+			self.plateMap[i+y*self.mapWidth] = 7
+		self.plateSize[7] = 4
+		#North America
+		x = self.mapWidth/5
+		yMin = 4*self.mapHeight/5
+		yMax = 6*self.mapHeight/7
+		for y in range(yMin,yMax):
+			self.plateMap[x + y*self.mapWidth] = 8
+		self.plateMap[self.mapWidth/20 + yMax*self.mapWidth] = 8
+		self.plateSize[8] = 8
+		#South America
+		x = self.mapWidth/5
+		y = self.mapHeight/4
+		self.plateMap[x + y*self.mapWidth] = 9
+		y = self.mapHeight/3
+		self.plateMap[x + y*self.mapWidth] = 9
+		x = self.mapWidth/4 +1
+		y = 2*self.mapHeight/5
+		self.plateMap[x + y*self.mapWidth] = 9
+		self.plateSize[9] = 5
+		#Europe
+		x = self.mapWidth/2
+		y = 6*self.mapHeight/7
+		self.plateMap[x + y*self.mapWidth] = 10
+		x = 3*self.mapWidth/7
+		y = 4*self.mapHeight/5
+		self.plateMap[x + y*self.mapWidth] = 10
+		self.plateSize[10] = 6
+		#Asia
+		x = 3*self.mapWidth/4
+		y = 7*self.mapHeight/10
+		self.plateMap[x + y*self.mapWidth] = 11
+		x = 4*self.mapWidth/5
+		y = 4*self.mapHeight/5
+		self.plateMap[x + y*self.mapWidth] = 11
+		x = 2*self.mapWidth/3
+		y = 4*self.mapHeight/5
+		self.plateMap[x + y*self.mapWidth] = 11
+		self.plateSize[11] = 9
+		#Africa
+		x = 7*self.mapWidth/20
+		y = 2*self.mapHeight/3 -1
+		for i in range(self.mapWidth/12):
+			self.plateMap[x  + i + y*self.mapWidth] = 12
+		x = self.mapWidth/2
+		y = 2*self.mapHeight/5
+		self.plateMap[x + y*self.mapWidth] = 12
+		self.plateSize[12] = 6
+		#India
+		x = 3*self.mapWidth/4
+		y = 5*self.mapHeight/9
+		self.plateMap[x + y*self.mapWidth] = 13
+		self.plateSize[13] = 3
+		#Oceania
+		x = 4*self.mapWidth/5
+		y = self.mapHeight/4 +1
+		self.plateMap[x + y*self.mapWidth] = 14
+		self.plateSize[14] = 4
+		#Middle East
+		x = 3*self.mapWidth/5
+		y = 4*self.mapHeight/7
+		self.plateMap[x + y*self.mapWidth] = 15
+		self.plateSize[15] = 2
+		self.plate[15] = self.landAltitude -1
+		#South East Asia
+		x = 17*self.mapWidth/20
+		y = 4*self.mapHeight/7
+		self.plateMap[x + y*self.mapWidth] = 16
+		self.plateSize[16] = 3
+		self.plate[16] = self.landAltitude
+		#Greenland
+		x = 3*self.mapWidth/10
+		y = 7*self.mapHeight/8
+		self.plateMap[x + y*self.mapWidth] = 17
+		self.plateSize[17] = 4
+		#Scandinavia
+		x = 3*self.mapWidth/7 -1
+		y = 7*self.mapHeight/8
+		self.plateMap[x + y*self.mapWidth] = 18
+		self.plateSize[18] = 3
+		self.plate[18] = self.landAltitude
+		#Bering
+		x = 9*self.mapWidth/10
+		y = 5*self.mapHeight/6
+		self.plateMap[x + y*self.mapWidth] = 19
+		self.plateSize[19] = 5
+
+	def finalizeMap(self):
+		#Force Gibraltar straits
+		x = 4*self.mapWidth/9
+		y = 3*self.mapHeight/4
+		for i in range(self.mapWidth/5):
+			self.plotTypes[x + y*self.mapWidth - i] = PlotTypes.PLOT_OCEAN
+		#Force cut between India and Oceania
+		x = 7*self.mapWidth/10
+		y = 4*self.mapHeight/9 -1
+		for i in range(self.mapWidth/5):
+			self.plotTypes[x + y*self.mapWidth + i] = PlotTypes.PLOT_OCEAN
+		#Force Greenland to be an island
+		for x in range(self.mapWidth):
+			for y in range(self.mapHeight):
+				if (self.plateMap[x + y*self.mapWidth] == 17):
+					if (self.plateMap[x-1 + y*self.mapWidth] != 17):
+						self.plotTypes[x + y*self.mapWidth] = PlotTypes.PLOT_OCEAN
+						self.plotTypes[x + (y-1)*self.mapWidth] = PlotTypes.PLOT_OCEAN
+		#Force Central America
+		baseX = self.mapWidth/6
+		x = baseX
+		width = 2
+		if (width < 4 and self.dice.get(10,"Width variation") > 8):
+			width += 1
+		if (width > 1 and self.dice.get(10,"Width variation") > 8):
+			width -= 1
+		for y in range(self.mapHeight/5,self.mapHeight*3/4):
+			x = x + self.dice.get(3,"Not too straight") - 1
+			if ( x - baseX > 4):
+				x = baseX + 4
+			if ( x - baseX < -4):
+				x = baseX - 4
+			if (self.plotTypes[x + y*self.mapWidth ] == PlotTypes.PLOT_OCEAN):
+				for plot in range( width ):
+					self.plotTypes[x + y*self.mapWidth + plot ] = PlotTypes.PLOT_LAND
+					if (self.dice.get(10,"Some hills") > 5):
+						self.plotTypes[x + y*self.mapWidth + plot ] = PlotTypes.PLOT_HILLS
+
+	def movePlates(self,dontMoveSeaPlates):
+		plates = self.numContinents + self.numSeaPlates
+		if dontMoveSeaPlates:
+			xMoves =     [0, 1, 0, 0, 0, 0, 0, 0,  -1,-1, 0,-1, 0, 0,-1, 0,-1, 1, 1, 0, 0]
+			yMoves =     [0, 0, 0, 0,-1, 1, 1, 0,   0, 1,-1,-1, 0, 1, 0, 0, 0, 1, 0, 0, 0]
+			subduction = [0, 9, 9, 0, 9, 0, 0, 0,   9, 9, 9, 0, 0, 9, 9, 9, 0, 9, 9, 0, 0]
+		else:
+			xMoves =     [0, 1, 0, 0, 0, 1,-1, 0,  -1,-1, 0, 1, 1,-1, 1, 0, 0,-1,-1, 1,-1]
+			yMoves =     [0, 0, 0, 0, 1,-1, 0, 0,  -1, 1,-1,-1, 1,-1,-1,-1,-1,-1, 0, 1, 1]
+			subduction = [0, 9, 9, 0, 9, 9, 9, 0,   9, 9, 9, 9, 0, 9, 9, 9, 0, 0, 9, 0, 0]
+		self.doMovePlates(xMoves,yMoves,subduction)
+
+class voronoiPangaeaMap(voronoiMap):
+	def __init__(self,numPlayers):
+		voronoiMap.__init__(self,numPlayers,1,1600)
+		self.peakAltitude = 11
+		self.hillAltitude = 7
+		self.landAltitude = 3
+		self.altitudeVariation = 3
+
+	def sowSeeds(self):
+		self.yTilt = self.dice.get(4,"YTilt")
+		self.plate[0] = 0
+		self.plate[1] = 0
+		for x in range(self.mapWidth):
+			self.plateMap[x] = 1
+			self.plateMap[self.mapWidth + x] = 1
+			self.plateMap[(self.mapHeight - 2)*self.mapWidth + x] = 1
+			self.plateMap[(self.mapHeight - 1)*self.mapWidth + x] = 1
+		for y in range(self.mapHeight):
+			self.plateMap[y*self.mapWidth] = 1
+			self.plateMap[y*self.mapWidth + 1] = 1
+			self.plateMap[y*self.mapWidth + self.mapWidth - 2] = 1
+			self.plateMap[y*self.mapWidth + self.mapWidth - 1] = 1
+		for i in range(self.numContinents):
+			self.plate[i + self.numSeaPlates] = 4 + self.dice.get(3,"Land altitude")
+			x, y = self.getCoord(i)
+			while self.plateMap[y*self.mapWidth + x] != 0:
+				x, y = self.getCoord(i)
+			self.plateMap[y*self.mapWidth + x] = i + 2
+
+	def getCoord(self,i):
+		step = self.mapWidth/(2*self.numContinents)
+		x = self.mapWidth/4 + i*step + self.dice.get(step,"x seed for plate")
+		quarterHeight = self.mapHeight/4 
+		eigthHeight = self.mapHeight/8 
+		y = quarterHeight + self.dice.get(self.mapHeight/2,"y seed for plate")
+		if (self.yTilt == 0):
+			y += i*(self.mapHeight/(self.numContinents*4)) - eigthHeight
+		elif (self.yTilt == 1):
+			y += eigthHeight - i*quarterHeight/self.numContinents
+		elif (self.yTilt == 2):
+			if (i%2 == 0):
+				y += eigthHeight
+			else:
+				y -= eigthHeight
+		# else: Let it be the way it was generated
+		return x, y
 
 class MnSMultilayeredFractal(CvMapGeneratorUtil.MultilayeredFractal):
 	def generatePlotsByRegion(self):
@@ -3599,7 +4392,8 @@ def generateChessPlotTypes():
 	global userInputBorder
 	try :
                 userInputBorder = getRandSel(selGen["maps"]["chess"]["border"])
-                hillPer = getRandSel(selGen["terrain"]["hill"]["hillpercent"], False)/100.0
+                if selGen["terrain"]["hill"]["hillpercent"] == "standard" : hillPer = 0.17
+                else : hillPer = getRandSel(selGen["terrain"]["hill"]["hillpercent"], False) / 100.0
                 waterPer = getRandSel(selGen["maps"]["chess"]["waterper"], False)
                 plotTypes = [PlotTypes.PLOT_LAND] * (iW*iH)
                 terrainFrac = CyFractal()
@@ -4883,9 +5677,9 @@ class LakesFractalWorld(CvMapGeneratorUtil.FractalWorld):
 		for x in range(self.iNumPlotsX):
 			for y in range(self.iNumPlotsY):
 				i = y*self.iNumPlotsX + x
-				if y == 0 or y == self.iNumPlotsY - 1:
-					self.plotTypes[i] = PlotTypes.PLOT_OCEAN
-					continue
+##				if y == 0 or y == self.iNumPlotsY - 1:
+##					self.plotTypes[i] = PlotTypes.PLOT_OCEAN
+##					continue
 				val = self.continentsFrac.getHeight(x,y)
 				if val <= iWaterThreshold:
 					self.plotTypes[i] = PlotTypes.PLOT_OCEAN
@@ -5360,6 +6154,11 @@ def generateTerrainTypes():
         try :
                 writeLog(" = generateTerrainTypes = ", False, [""])
 
+                isRoMMarch = False
+                if is_BtS_ROM and gc.getInfoTypeForString("TERRAIN_MARSH") != -1 :
+                        isRoMMarch = True
+                        writeLog("", False, [" RoM special impl : march"])
+
                 # pangaea final plot generation
                 if idMap == "pangaea" :
                         generatePangaeaTerrainTypes()
@@ -5410,7 +6209,24 @@ def generateTerrainTypes():
                         logList.append("")
                         writeLog("", False, logList)
 
-                        terraingen = TerrainGenerator(desertPer, plainsPer, snowLatitude, tundraLatitude, grassLatitude, botDesertLatitude, topDesertLatitude, -1, -1, grain)
+                        if isRoMMarch :
+                                iniPer = desertPer + plainsPer
+                                marchPer = int(10.0 / 45.0 * iniPer)
+                                desertPer = max( 0, int(desertPer - desertPer / float(iniPer) * marchPer))
+                                plainsPer = iniPer - marchPer - desertPer
+
+                                #debug
+                                logList = []
+                                logList.append(" desertPer : %r" %desertPer)
+                                logList.append(" plainsPer : %r" %plainsPer)
+                                logList.append(" marchPer : %r" %marchPer)
+                                logList.append("")
+                                writeLog("", False, logList)
+
+                                terraingen = TerrainGenerator(desertPer, plainsPer, marchPer, snowLatitude, tundraLatitude, grassLatitude, botDesertLatitude, topDesertLatitude, -1, -1, grain)
+                        else :
+                                terraingen = TerrainGenerator(desertPer, plainsPer, snowLatitude, tundraLatitude, grassLatitude, botDesertLatitude, topDesertLatitude, -1, -1, grain)
+
                 elif idMap == "inlandsea" : #the same as normal gen , should change with tests ...
                         snowLatitude = min(1.0, 0.9 - userInputSnow*0.093 + 0.016*(userInputDesert + userInputGrass + userInputPlain) )
                         tundraLatitude = max(0.5, min(snowLatitude - 0.1, snowLatitude - userInputTundra*0.05 + 0.01*(userInputDesert + userInputGrass + userInputPlain)))
@@ -5435,7 +6251,24 @@ def generateTerrainTypes():
                         logList.append("")
                         writeLog("", False, logList)
 
-                        terraingen = ISTerrainGenerator(desertPer, plainsPer, snowLatitude, tundraLatitude, grassLatitude, botDesertLatitude, topDesertLatitude, -1, -1, grain)
+                        if isRoMMarch :
+                                iniPer = desertPer + plainsPer
+                                marchPer = int(10.0 / 45.0 * iniPer)
+                                desertPer = max( 0, int(desertPer - desertPer / float(iniPer) * marchPer))
+                                plainsPer = iniPer - marchPer - desertPer
+
+                                #debug
+                                logList = []
+                                logList.append(" desertPer : %r" %desertPer)
+                                logList.append(" plainsPer : %r" %plainsPer)
+                                logList.append(" marchPer : %r" %marchPer)
+                                logList.append("")
+                                writeLog("", False, logList)
+
+                                terraingen = ISTerrainGenerator(desertPer, plainsPer, marchPer, snowLatitude, tundraLatitude, grassLatitude, botDesertLatitude, topDesertLatitude, -1, -1, grain)
+                        else :
+                                terraingen = ISTerrainGenerator(desertPer, plainsPer, snowLatitude, tundraLatitude, grassLatitude, botDesertLatitude, topDesertLatitude, -1, -1, grain)
+
                 elif idMap in ["hub", "ring", "wheel"] :
                         desertPer = 7*userInputDesert + 3 - (userInputGrass*4)
                         plainsPer = 10*userInputPlain + 18 - (userInputGrass*3)
@@ -5454,6 +6287,9 @@ def generateTerrainTypes():
                         writeLog("", False, logList)
 
                         terraingen = HubTerrainGenerator(desertPer, plainsPer, icePer, tundraPer, -1, -1, grain)
+
+                elif idMap == "tectonics" :
+                        terraingen = ClimateGenerator()
 
                 terrainTypes = terraingen.generateTerrain()
 
@@ -5490,6 +6326,224 @@ def generateTerrainTypes():
                 terraingen = TerrainGenerator()
                 terrainTypes = terraingen.generateTerrain()
                 return terrainTypes
+
+class ClimateGenerator:
+	def __init__(self):
+		self.climate = cmo[1]
+		self.map = gc.getMap()
+		self.mapWidth = self.map.getGridWidth()
+		if (self.climate == 0):                          # Arid
+			self.maxWindForce = self.mapWidth / 12
+		elif (self.climate == 1):                        # Normal
+			self.maxWindForce = self.mapWidth / 8
+		elif (self.climate == 2):                        # Wet
+			self.maxWindForce = self.mapWidth / 6
+		elif (self.climate == 3):                        # No ice
+			self.maxWindForce = self.mapWidth / 8
+		self.mapHeight = self.map.getGridHeight()
+		self.terrainDesert = gc.getInfoTypeForString("TERRAIN_DESERT")
+		self.terrainPlains = gc.getInfoTypeForString("TERRAIN_PLAINS")
+		self.terrainIce = gc.getInfoTypeForString("TERRAIN_SNOW")
+		self.terrainTundra = gc.getInfoTypeForString("TERRAIN_TUNDRA")
+		self.terrainGrass = gc.getInfoTypeForString("TERRAIN_GRASS")
+		if is_BtS_ROM and gc.getInfoTypeForString("TERRAIN_MARSH") != -1 : self.terrainMarsh = gc.getInfoTypeForString("TERRAIN_MARSH")
+		if (self.climate == 3):                        # No ice
+			self.terrainIce = gc.getInfoTypeForString("TERRAIN_TUNDRA")
+			self.terrainTundra = gc.getInfoTypeForString("TERRAIN_GRASS")
+		self.terrain = [0] * (self.mapWidth*self.mapHeight)
+		self.moisture = [0] * (self.mapWidth*self.mapHeight)
+		self.dice = gc.getGame().getMapRand()
+
+	def getLatitudeAtPlot(self, iX, iY):
+		"returns a value in the range of 0-90 degrees"
+		if (cmo[0] == 5):         #  "Mediterranean"
+			return 65 - (40 * (self.mapHeight - iY) / self.mapHeight)
+		return self.map.plot(iX,iY).getLatitude()
+
+	def generateTerrain(self):
+		self.blowWinds()
+		self.blur()
+		self.computeTerrain()
+		return self.terrain
+
+	def computeTerrain(self):
+		terrain = [0] * (self.mapWidth*self.mapHeight)
+		for x in range(self.mapWidth):
+			for y in range(self.mapHeight):
+				if (self.map.plot(x,y).isWater()):
+					self.terrain[y*self.mapWidth+x] = self.map.plot(x,y).getTerrainType()
+				else:
+					terrain[y*self.mapWidth+x] = self.getTerrain(self.getLatitudeAtPlot(x,y),self.moisture[y*self.mapWidth + x])
+		for x in range(self.mapWidth):
+			for y in range(self.mapHeight):
+				if (not self.map.plot(x,y).isWater()):
+					i = y*self.mapWidth+x
+					self.terrain[i] = terrain[i]
+					bias = self.dice.get(3,"Random terrain")
+					if bias == 0 and y > 1:
+						self.terrain[i] = terrain[i-self.mapWidth]
+					if bias == 2 and y < self.mapHeight - 1:
+						self.terrain[i] = terrain[i+self.mapWidth]
+		for x in range(self.mapWidth):
+			for y in range(self.mapHeight):
+				if (not self.map.plot(x,y).isWater()):
+					i = y*self.mapWidth+x
+					if self.terrain[i] == self.terrainDesert:
+						if y > 1 and y < self.mapHeight - 1:
+							if self.terrain[i-self.mapWidth] == self.terrainGrass:
+								self.terrain[i-self.mapWidth] = self.terrainPlains
+							if self.terrain[i+self.mapWidth] == self.terrainGrass:
+								self.terrain[i+self.mapWidth] = self.terrainPlains
+							if self.terrain[i-1] == self.terrainGrass:
+								self.terrain[i-1] = self.terrainPlains
+							if self.terrain[i+1] == self.terrainGrass:
+								self.terrain[i+1] = self.terrainPlains
+					
+	def getArcticTerrain(self, climate, latitude, moisture):
+		polar = 0
+		if (latitude > 70):
+			polar = latitude - 70
+			climate.ice += polar * polar * 3
+			climate.tundra += polar * (2 + moisture)
+
+	def getColdTerrain(self, climate, latitude, moisture):
+		if (latitude > 60):
+			polar = latitude - 60
+			climate.tundra += polar * (5 + moisture) + self.dice.get(polar*3,"more tundra")
+			if (moisture > 10):
+				climate.plains += polar * (moisture - 10)
+
+	def getTemperateTerrain(self, climate, latitude, moisture):
+		temperate = 45 - abs(45 - latitude)
+		climate.plains += temperate * (3 + moisture/2)
+		climate.grass += temperate * (1 + moisture) + self.dice.get(temperate,"more grass")
+
+	def getTropicalTerrain(self, climate, latitude, moisture):
+		tropical = 0
+		if (latitude < 40):
+			tropical = 20 - abs(20 - latitude)
+		climate.plains += tropical * (12 - self.climate + moisture/2) + self.dice.get(tropical,"more plains")
+		climate.grass += tropical * (moisture + self.climate)
+		climate.desert += tropical * (4 - self.climate) * 6
+
+	def getEquatorialTerrain(self, climate, latitude, moisture):
+		equator = 0
+		if (latitude < 25):
+			equator = 25 - latitude
+		climate.plains += equator * 7
+		climate.grass += equator * (3 + moisture) + self.dice.get(equator,"more grass")
+
+	#I compute latitude as in the maputil but wtf is there a plot.latitude then?
+	def getTerrain(self, latitude, moisture):
+                if is_BtS_ROM and gc.getInfoTypeForString("TERRAIN_MARSH") != -1 :
+                        class climates:
+                                def __init__(self):
+                                        self.ice = 0
+                                        self.tundra = 0
+                                        self.plains = 0
+                                        self.grass = 0
+                                        self.desert = 0
+                                        self.marsh = 0
+                else :
+                        class climates:
+                                def __init__(self):
+                                        self.ice = 0
+                                        self.tundra = 0
+                                        self.plains = 0
+                                        self.grass = 0
+                                        self.desert = 0
+
+		climate = climates()
+		self.getArcticTerrain(climate, latitude, moisture)
+		self.getColdTerrain(climate, latitude, moisture)
+		self.getTemperateTerrain(climate, latitude, moisture)
+		self.getTropicalTerrain(climate, latitude, moisture)
+		self.getEquatorialTerrain(climate, latitude, moisture)
+
+		if (climate.ice >= climate.tundra) and (climate.ice >= climate.plains) and (climate.ice >= climate.grass) and (climate.ice >= climate.desert):
+			return self.terrainIce
+		if (climate.tundra >= climate.plains) and (climate.tundra >= climate.grass) and (climate.tundra >= climate.desert):
+			return self.terrainTundra
+		if (climate.plains >= climate.grass) and (climate.plains >= climate.desert):
+			return self.terrainPlains
+		if (climate.grass >= climate.desert):
+			return self.terrainGrass
+		return self.terrainDesert
+
+	def blowWinds(self):
+	#Must find where the wind blows from and add moisture from there.
+	#If there is a mountain in between, then terrain must become more arid:
+	# Tundra -> ice (mmmh?), and grass -> plain -> desert.
+		for x in range(self.mapWidth):
+			for y in range(self.mapHeight):
+				if (self.map.plot(x,y).isWater()):
+					self.windBlowsFrom(x,y)
+
+	def windBlowsFrom(self,x,y):
+		latitude = self.getLatitudeAtPlot(x,y)
+		horizontal = 0
+		if (latitude > 80):
+			horizontal = 1
+		elif (latitude > 45):
+			horizontal = -1
+		elif (latitude > 30):
+			horizontal = 1
+		elif (latitude > 10):
+			horizontal = -1
+		else:
+			horizontal = 1
+		vertical = self.getVerticalWind(latitude,y)
+		windForce = 1 + self.dice.get(self.maxWindForce,"Wind force")
+		localMoisture = 5 + self.maxWindForce
+		self.blow(localMoisture,windForce,horizontal,vertical,x,y)
+
+	def getVerticalWind(self,latitude,y):
+		if (latitude>70):
+			vertical = -1
+		elif (latitude>30):
+			vertical = 1
+		else:
+			vertical = -1
+		if (2*y < self.mapHeight):
+			vertical *= -1
+		return vertical
+
+	def blow(self,localMoisture,maxHorizontal,horizontal,vertical,x,y):
+		plotType = self.map.plot(x,y).getPlotType()
+		if (y+vertical > 0 and y+vertical < self.mapHeight):
+			if (plotType != PlotTypes.PLOT_PEAK):
+				if (plotType == PlotTypes.PLOT_HILLS):
+					self.blow(localMoisture - 7,maxHorizontal-2,horizontal,vertical,x,y+vertical)
+				else:
+					self.blow(localMoisture - 1,maxHorizontal-2,horizontal,vertical,x,y+vertical)
+		for i in range(-1,maxHorizontal):
+			adjustedX = x + i*horizontal
+			if (adjustedX < 0):
+				adjustedX += self.mapWidth
+			elif (adjustedX >= self.mapWidth):
+				adjustedX -= self.mapWidth
+			self.moisture[y*self.mapWidth + adjustedX] = self.moisture[y*self.mapWidth + adjustedX] + localMoisture
+			plotType = self.map.plot(adjustedX,y).getPlotType()
+			if (plotType == PlotTypes.PLOT_PEAK):
+				return
+			elif (plotType == PlotTypes.PLOT_HILLS):
+				localMoisture -= 7
+			else:
+				localMoisture -= 1
+			if (localMoisture <= 0):
+				return
+
+	def blur(self):
+		max = 1
+		for y in range(self.mapHeight):
+			for x in range(self.mapWidth):
+				i = y*self.mapWidth + x
+				if (max < self.moisture[i]):
+					max = self.moisture[i]
+		for y in range(1,self.mapHeight-2):
+			for x in range(self.mapWidth):
+				i = y*self.mapWidth + x
+				self.moisture[i] = self.moisture[i]*100/max
 
 class ISTerrainGenerator(CvMapGeneratorUtil.TerrainGenerator):
 	def getLatitudeAtPlot(self, iX, iY):
@@ -5543,6 +6597,7 @@ class HubTerrainGenerator(CvMapGeneratorUtil.TerrainGenerator):
 		self.terrainIce = self.gc.getInfoTypeForString("TERRAIN_SNOW")
 		self.terrainTundra = self.gc.getInfoTypeForString("TERRAIN_TUNDRA")
 		self.terrainGrass = self.gc.getInfoTypeForString("TERRAIN_GRASS")
+		if is_BtS_ROM and gc.getInfoTypeForString("TERRAIN_MARSH") != -1 : self.terrainMarsh = self.gc.getInfoTypeForString("TERRAIN_MARSH")
 
 	def generateTerrainAtPlot(self,iX,iY):
 		if (self.map.plot(iX, iY).isWater()):
@@ -5755,6 +6810,305 @@ def addChessRivers():
                 writeLog("", False, ["", " An error occured during chess river generation ..."])
                 writeError()
 
+class riversFromSea:
+	def __init__(self):
+		self.gc = CyGlobalContext()
+		self.dice = self.gc.getGame().getMapRand()
+		self.map = CyMap()
+		self.width = self.map.getGridWidth()
+		self.height = self.map.getGridHeight()
+		self.straightThreshold = 3
+		if (self.width * self.height > 400):
+			self.straightThreshold = 2
+
+	def seedRivers(self):
+		climate = cmo[1]
+		if (climate == 0):                 # Arid
+			divider = 6
+		elif (climate == 1):               # Normal
+			divider = 3
+		elif (climate == 2):               # Wet
+			divider = 2
+		elif (climate == 3):               # No ice
+			divider = 3
+		maxNumber = (self.width + self.height) / divider
+		userInputLandmass = cmo[0]
+		riversNumber = 1 + maxNumber
+		if (userInputLandmass == 1):       # Pangaea
+			riversNumber = maxNumber/2
+		self.coasts = self.collateCoasts()
+		coastsNumber = len(self.coasts)
+		if (coastsNumber == 0):
+			return
+		coastShare = coastsNumber/riversNumber
+		for i in range(riversNumber):
+			(x,y,flow) = self.generateRiver(i,coastShare)
+			if (flow != CardinalDirectionTypes.NO_CARDINALDIRECTION):
+				riverID = self.gc.getMap().getNextRiverID()
+				self.addRiverFrom(x,y,flow,riverID)
+
+	def collateCoasts(self):
+		result = []
+		for x in range(self.width):
+			for y in range(self.height):
+				plot = self.map.plot(x,y)
+				if (plot.isCoastalLand()):
+					result.append(plot)
+		return result
+
+	def generateRiver(self,i,coastShare):
+		choiceCoast = coastShare * i + self.dice.get(coastShare,"Pick a coast for the river")
+		plot = self.coasts[choiceCoast]
+		FlowDirection = CardinalDirectionTypes.NO_CARDINALDIRECTION
+		x = plot.getX()
+		y = plot.getY()
+		if ((y < 1 or y >= self.height - 1) or plot.isNOfRiver() or plot.isWOfRiver()):
+			return (x,y,FlowDirection)
+		eastX = self.eastX(x)
+		westX = self.westX(x)
+		otherPlot = True
+		eastPlot = self.map.plot(eastX,y)
+		if (eastPlot.isCoastalLand()):
+			seaPlot = self.map.plot(x,y+1)
+			if ((self.map.plot(x,y+1).isWater()) or (self.map.plot(eastX,y+1).isWater())):
+				landPlot1 = self.map.plot(x,y-1)
+				landPlot2 = self.map.plot(eastX,y-1)
+				if (landPlot1.isWater() or landPlot2.isWater()):
+					otherPlot = True
+				else:
+					FlowDirection = CardinalDirectionTypes.CARDINALDIRECTION_NORTH
+					otherPlot = False
+			if (otherPlot == True):
+				if ((self.map.plot(x,y-1).isWater()) or (self.map.plot(eastX,y-1).isWater())):
+					landPlot1 = self.map.plot(x,y+1)
+					landPlot2 = self.map.plot(eastX,y+1)
+					if (landPlot1.isWater() or landPlot2.isWater()):
+						otherPlot = True
+					else:
+						FlowDirection = CardinalDirectionTypes.CARDINALDIRECTION_SOUTH
+						otherPlot = False
+		if (otherPlot == True):
+			southPlot = self.map.plot(x,y-1)
+			if (southPlot.isCoastalLand()):
+				if ((self.map.plot(eastX,y).isWater()) or (self.map.plot(eastX,y-1).isWater())):
+					landPlot1 = self.map.plot(westX,y)
+					landPlot2 = self.map.plot(westX,y-1)
+					if (landPlot1.isWater() or landPlot2.isWater()):
+						otherPlot = True
+					else:
+						FlowDirection = CardinalDirectionTypes.CARDINALDIRECTION_EAST
+						otherPlot = False
+				if (otherPlot == True):
+					if ((self.map.plot(westX,y).isWater()) or (self.map.plot(westX,y-1).isWater())):
+						landPlot1 = self.map.plot(eastX,y)
+						landPlot2 = self.map.plot(eastX,y-1)
+						if (landPlot1.isWater() or landPlot2.isWater()):
+							otherPlot = True
+						else:
+							FlowDirection = CardinalDirectionTypes.CARDINALDIRECTION_WEST
+		return (x,y,FlowDirection)
+
+	# prevent rivers from crossing each other
+	def preventRiversFromCrossing(self,x,y,flow,riverID):
+		plot = self.map.plot(x,y)
+		eastX = self.eastX(x)
+		westX = self.westX(x)
+		if (flow == CardinalDirectionTypes.CARDINALDIRECTION_WEST):
+			if (plot.isNOfRiver()):
+				return true
+			if (self.map.plot(eastX,y).isNOfRiver()):
+				return true
+			southPlot = self.map.plot(x,y-1)
+			if (southPlot.isWOfRiver() and southPlot.getRiverNSDirection() == CardinalDirectionTypes.CARDINALDIRECTION_SOUTH):
+				return true
+			if (plot.isWOfRiver() and plot.getRiverNSDirection() == CardinalDirectionTypes.CARDINALDIRECTION_NORTH):
+				return true
+			if (self.map.plot(eastX,y).isWater()):
+				return true
+			if (self.map.plot(x,y-1).isWater()):
+				return true
+			if (self.map.plot(eastX,y-1).isWater()):
+				return true
+		if (flow == CardinalDirectionTypes.CARDINALDIRECTION_EAST):
+			if (plot.isNOfRiver()):
+				return true
+			if (self.map.plot(westX,y).isNOfRiver()):
+				return true
+			southPlot = self.map.plot(westX,y-1)
+			if (southPlot.isWOfRiver() and southPlot.getRiverNSDirection() == CardinalDirectionTypes.CARDINALDIRECTION_SOUTH):
+				return true
+			westPlot = self.map.plot(westX,y)
+			if (westPlot.isWOfRiver() and westPlot.getRiverNSDirection() == CardinalDirectionTypes.CARDINALDIRECTION_NORTH):
+				return true
+			if (self.map.plot(westX,y).isWater()):
+				return true
+			if (self.map.plot(x,y-1).isWater()):
+				return true
+			if (self.map.plot(westX,y-1).isWater()):
+				return true
+		if (flow == CardinalDirectionTypes.CARDINALDIRECTION_NORTH):
+			if (plot.isWOfRiver()):
+				return true
+			eastPlot = self.map.plot(eastX,y)
+			if (eastPlot.isNOfRiver() and eastPlot.getRiverWEDirection() == CardinalDirectionTypes.CARDINALDIRECTION_EAST):
+				return true
+			if (plot.isNOfRiver() and plot.getRiverWEDirection() == CardinalDirectionTypes.CARDINALDIRECTION_WEST):
+				return true
+			if (self.map.plot(x,y-1).isWOfRiver()):
+				return true
+			if (self.map.plot(x,y-1).isWater()):
+				return true
+			if (self.map.plot(x+1,y).isWater()):
+				return true
+			if (self.map.plot(x+1,y-1).isWater()):
+				return true
+		if (flow == CardinalDirectionTypes.CARDINALDIRECTION_SOUTH):
+			if (plot.isWOfRiver()):
+				return true
+			eastPlot = self.map.plot(eastX,y+1)
+			if (eastPlot.isNOfRiver() and eastPlot.getRiverWEDirection() == CardinalDirectionTypes.CARDINALDIRECTION_EAST):
+				return true
+			northPlot = self.map.plot(x,y+1)
+			if (northPlot.isNOfRiver() and northPlot.getRiverWEDirection() == CardinalDirectionTypes.CARDINALDIRECTION_WEST):
+				return true
+			if (self.map.plot(x,y+1).isWOfRiver()):
+				return true
+			if (self.map.plot(x,y+1).isWater()):
+				return true
+			if (self.map.plot(x+1,y).isWater()):
+				return true
+			if (self.map.plot(x+1,y+1).isWater()):
+				return true
+		return false
+
+
+	def addRiverFrom(self,x,y,flow,riverID):
+		plot = self.map.plot(x,y)
+		if (plot.isWater()):
+			return
+		eastX = self.eastX(x)
+		westX = self.westX(x)
+		if (self.preventRiversFromCrossing(x,y,flow,riverID)):
+			return
+		plot.setRiverID(riverID)
+		if ((flow == CardinalDirectionTypes.CARDINALDIRECTION_WEST) or (flow == CardinalDirectionTypes.CARDINALDIRECTION_EAST)):
+			plot.setNOfRiver(True,flow)
+		else:
+			plot.setWOfRiver(True,flow)
+		xShift = 0
+		yShift = 0
+		if (flow == CardinalDirectionTypes.CARDINALDIRECTION_WEST):
+			xShift = 1
+		if (flow == CardinalDirectionTypes.CARDINALDIRECTION_EAST):
+			xShift = -1
+		if (flow == CardinalDirectionTypes.CARDINALDIRECTION_NORTH):
+			yShift = -1
+		if (flow == CardinalDirectionTypes.CARDINALDIRECTION_SOUTH):
+			yShift = 1
+		nextX = x + xShift
+		nextY = y + yShift
+		if (nextX >= self.width):
+			nextX = 0
+		if (nextY >= self.height):
+			return
+		nextI = nextY*self.width + nextX
+		if (self.canFlowFrom(plot,self.map.plot(nextX,nextY)) == False):
+			return
+		if (plot.getTerrainType() == CyGlobalContext().getInfoTypeForString("TERRAIN_SNOW") and self.dice.get(10,"Stop on ice") > 3):
+			return
+		flatDesert = (plot.getPlotType() == PlotTypes.PLOT_LAND) and (plot.getTerrainType() == CyGlobalContext().getInfoTypeForString("TERRAIN_DESERT"))
+		#Prevent Uturns in rivers
+		turnThreshold = 16
+		if flatDesert:
+			turnThreshold = 18
+		turned = False
+		northY = y + 1
+		southY = y - 1
+		if ((flow == CardinalDirectionTypes.CARDINALDIRECTION_WEST) or (flow == CardinalDirectionTypes.CARDINALDIRECTION_EAST)):
+			if ((northY < self.height) and (self.dice.get(20,"branch from north") > turnThreshold)):
+				nextI = northY*self.width + x
+				if (self.canFlowFrom(plot,self.map.plot(x,northY)) and self.canFlowFrom(self.map.plot(self.eastX(x),y),self.map.plot(self.eastX(x),northY))):
+					turned = True
+					if (flow == CardinalDirectionTypes.CARDINALDIRECTION_WEST):
+						self.addRiverFrom(x,y,CardinalDirectionTypes.CARDINALDIRECTION_SOUTH,riverID)
+					else:
+						westPlot = self.map.plot(westX,y)
+						westPlot.setRiverID(riverID)
+						self.addRiverFrom(westX,y,CardinalDirectionTypes.CARDINALDIRECTION_SOUTH,riverID)
+			if ((not turned) and (southY >= 0) and (self.dice.get(20,"branch from south") > turnThreshold)):
+				nextI = southY*self.width + x
+				if (self.canFlowFrom(plot,self.map.plot(x,southY)) and self.canFlowFrom(self.map.plot(self.eastX(x),y),self.map.plot(self.eastX(x),southY))):
+					turned = True
+					if (flow == CardinalDirectionTypes.CARDINALDIRECTION_WEST):
+						southPlot = self.map.plot(x,y-1)
+						southPlot.setRiverID(riverID)
+						self.addRiverFrom(x,southY,CardinalDirectionTypes.CARDINALDIRECTION_NORTH,riverID)
+					else:
+						westPlot = self.map.plot(westX,southY)
+						westPlot.setRiverID(riverID)
+						self.addRiverFrom(westX,southY,CardinalDirectionTypes.CARDINALDIRECTION_NORTH,riverID)
+		else:
+			nextI = y*self.width + eastX
+			if (self.canFlowFrom(plot,self.map.plot(eastX,y)) and self.canFlowFrom(self.map.plot(x,southY),self.map.plot(eastX,y)) and (self.dice.get(20,"branch from east") > turnThreshold)):
+				turned = True
+				if (flow == CardinalDirectionTypes.CARDINALDIRECTION_NORTH):
+					eastPlot = self.map.plot(eastX,y)
+					eastPlot.setRiverID(riverID)
+					self.addRiverFrom(eastX,y,CardinalDirectionTypes.CARDINALDIRECTION_WEST,riverID)
+				else:
+					northEastPlot = self.map.plot(eastX,y+1)
+					northEastPlot.setRiverID(riverID)
+					self.addRiverFrom(eastX,y+1,CardinalDirectionTypes.CARDINALDIRECTION_WEST,riverID)
+			nextI = y*self.width + westX
+			if ((not turned) and self.canFlowFrom(plot,self.map.plot(westX,y)) and self.canFlowFrom(self.map.plot(x,southY),self.map.plot(westX,southY)) and (self.dice.get(20,"branch from west") > turnThreshold)):
+				turned = True
+				if (flow == CardinalDirectionTypes.CARDINALDIRECTION_NORTH):
+					self.addRiverFrom(x,y,CardinalDirectionTypes.CARDINALDIRECTION_EAST,riverID)
+				else:
+					northPlot = self.map.plot(x,y+1)
+					northPlot.setRiverID(riverID)
+					self.addRiverFrom(x,y+1,CardinalDirectionTypes.CARDINALDIRECTION_EAST,riverID)
+		spawnInDesert = (not turned) and flatDesert
+		if ((self.dice.get(10,"straight river") > self.straightThreshold) or spawnInDesert):
+			self.addRiverFrom(nextX,nextY,flow,riverID)
+		else:
+			if (not turned):
+				plot = self.map.plot(nextX,nextY)
+				if ((plot.getPlotType() == PlotTypes.PLOT_LAND) and (self.dice.get(10,"Rivers start in hills") > 3)):
+					plot.setPlotType(PlotTypes.PLOT_HILLS,true,true)
+					if ((flow == CardinalDirectionTypes.CARDINALDIRECTION_WEST) or (flow == CardinalDirectionTypes.CARDINALDIRECTION_EAST)):
+						if southY > 0:
+							self.map.plot(nextX,southY).setPlotType(PlotTypes.PLOT_HILLS,true,true)
+					else:
+						self.map.plot(eastX,nextY).setPlotType(PlotTypes.PLOT_HILLS,true,true)
+
+	def canFlowFrom(self,plot,upperPlot):
+		if (plot.isWater()):
+			return False
+		if (plot.getPlotType() == PlotTypes.PLOT_PEAK):
+			return False
+		if (plot.getPlotType() == PlotTypes.PLOT_HILLS):
+			if ((upperPlot.getPlotType() == PlotTypes.PLOT_HILLS) or (upperPlot.getPlotType() == PlotTypes.PLOT_PEAK)):
+				return True
+			else:
+				return False
+		if (plot.getPlotType() == PlotTypes.PLOT_LAND):
+			if (upperPlot.isWater()):
+				return False
+		return True
+	
+	def westX(self,x):
+		westX = x - 1
+		if (westX < 0):
+			westX = self.width
+		return westX
+
+	def eastX(self,x):
+		eastX = x + 1
+		if (eastX >= self.width):
+			eastX = 0
+		return eastX
+
 def addLakes():
         try :
                 if idMap == "chess" :
@@ -5766,6 +7120,10 @@ def addLakes():
                 canAddRivers = True
 
                 writeLog(" = addLakes : adding rivers = ", False, [""])
+
+                if idMap == "tectonics" :
+                        riverGenerator = riversFromSea()
+                        riverGenerator.seedRivers()
 
                 # adding river . play with (fresh)water source range to make the longest rivers possible
                 userInputPlotEdge = getRandSel(selGen["terrain"]["river"]["riveredge"], False)
@@ -5799,6 +7157,10 @@ def addLakes():
 
                 bBreak = False
                 while True :
+
+                        if (idMap == "tectonics") and (userInputPlotEdge == 1) :
+                                writeLog("", False, [" tectonics without anymore rivers : break ",""])
+                                break
 
                         idRiver = map.getNextRiverID()
                         if idRiver > 960 :
@@ -5856,7 +7218,7 @@ def addFeatures():
                 bIce = bool(featureIce != -1)
                 bOasis = bool(featureOasis != -1)
 
-                if bIce : userInputIced = selGen["terrain"]["ice"]["iceremove"]
+                if bIce : userInputIced = copy.copy(selGen["terrain"]["ice"]["iceremove"])
                 if bOasis : oasisPer = getRandSel(selGen["terrain"]["oasis"]["oasispercent"], False)
 
                 forestPer = getRandSel(selGen["terrain"]["forest"]["forestpercent"], False)
@@ -5882,6 +7244,12 @@ def addFeatures():
                         forestPer = int(7.0 / 12 * (100 - forestPer) + 16) + 1
                         junglePer = int(5.0 / 16 * junglePer)
                         featuregen = HubFeatureGenerator(junglePer, 100 - forestPer, fGrain)
+                elif idMap == "tectonics" :
+                        if cmo[0] == 5 :         #  "Mediterranean"
+                                userInputIced = 2
+                                featuregen = MediterraneanFeatureGenerator(junglePer, 100 - forestPer, jGrain, fGrain)
+                        else:
+                                featuregen = FeatureGenerator(junglePer, 100 - forestPer, jGrain, fGrain)
 
                 featuregen.addFeatures()
 
@@ -5950,6 +7318,13 @@ def addFeatures():
 
 	return 0
 
+class MediterraneanFeatureGenerator(CvMapGeneratorUtil.FeatureGenerator):
+	def getLatitudeAtPlot(self, iX, iY):
+		"returns 0.0 for tropical, up to 1.0 for polar"
+		# 25/90 to 65/90:
+		lat = 5/float(18) + 4*(self.iGridH - iY)/float(9*self.iGridH)
+		return lat
+	
 class ISFeatureGenerator(CvMapGeneratorUtil.FeatureGenerator):
 	def getLatitudeAtPlot(self, iX, iY):
 		lat = CvMapGeneratorUtil.FeatureGenerator.getLatitudeAtPlot(self, iX, iY)
@@ -6068,7 +7443,7 @@ def StoAddBonuses():
                         if iImprovement == -1 : continue
                         if bGoody :
                                 if iImprovement == iGoody :
-                                        pPlot.setImprovementType(-1)
+                                        pPlot.setImprovementType(ImprovementTypes.NO_IMPROVEMENT)
                                         continue
                         lImprovementPlots.append((iX, iY))
 
@@ -6273,12 +7648,12 @@ def StoAddBonuses():
                                 continue
                         terrainPlot = pPlot.getTerrainType()
                         featurePlot = pPlot.getFeatureType()
-                        bonusPlot = pPlot.getBonusType(-1)
+                        bonusPlot = pPlot.getBonusType(TeamTypes.NO_TEAM)
 
                         if bEraseAll :
                                 if not (iX, iY) in lImprovementPlots :
                                         bonusPlot = -1
-                                        pPlot.setBonusType(-1)
+                                        pPlot.setBonusType(BonusTypes.NO_BONUS)
 
                         mapBonus[iX][iY] = int(bonusPlot)
 
@@ -6287,7 +7662,7 @@ def StoAddBonuses():
 
                         if bonusPlot != -1 :
                                 listPlotBonus[bonusPlot].append((iX, iY))
-                                pPlot.setBonusType(-1)
+                                pPlot.setBonusType(BonusTypes.NO_BONUS)
 
                         for iBonus in lGenRes :
                                 if pPlot.canHaveBonus(iBonus, not bClimate) : lPlotCanHaveBonus[iBonus][iWater].append((iX, iY))
@@ -6777,7 +8152,7 @@ def StoAddBonuses():
                                                                         lPlotToTest.append(wTP)
                 
         def addBonusClose(iB, bWat) :
-                if nbGroup[iB] < int(map.getWorldSize()) + 1 :
+                if nbGroup[iB] < max(0, int(map.getWorldSize()) -1) + 1 :
                         nbGroup[iB] += 1
                         addBonusAway(iB, bWat)
                         return
@@ -6904,105 +8279,6 @@ def StoAddBonuses():
 
         writeLog("", True, logList)
 
-def StoAddGoodies():
-        writeLog(" = StoAddGoodies = ", False, [""])
-
-        iGoody = gc.getInfoTypeForString("IMPROVEMENT_GOODY_HUT")
-        if iGoody == -1 :
-                writeLog("", True, [" There is no goody hut with this mod ..."])
-                return
-                
-        goodyPer = getRandSel(selGen["terrain"]["goodyhut"]["goodypercent"], False, "float")
-        iOptionGoody = gc.getInfoTypeForString("GAMEOPTION_NO_GOODY_HUTS")
-        if iOptionGoody != -1 :
-                if game.isOption(iOptionGoody) :
-                        writeLog("", True, [" the option no goody is selected ..."])
-                        return
-
-        writeLog("", False, [" goody percent : %r" %goodyPer, ""])
-        if goodyPer < 0.01 :
-                writeLog("", True, ["", " goody percent < 0.01 don't launch the function ..."])
-                return
-
-        # store starting locations :
-        listStartPlots = []
-        for iPlayer in startPlots.keys() :
-                listStartPlots.append(startPlots[iPlayer])
-
-        # store all plots that can have a goody or would have a goody
-        lGoodyPlots = []
-        lNGPlots = []
-        for iX in range(iW) :
-                for iY in range(iH) :
-                        pPlot = map.plot(iX, iY)
-
-                        iBonus = pPlot.getBonusType(-1)
-                        if iBonus != -1 : pPlot.setBonusType(-1)
-                        iImprovement = pPlot.getImprovementType()
-                        if iImprovement != -1 : pPlot.setImprovementType(-1)
-
-                        bCanHaveGoody = bool(pPlot.canHaveImprovement(iGoody, -1, True))
-
-                        if (iBonus != -1) or (iImprovement != -1) or ((iX, iY) in listStartPlots) :
-                                if bCanHaveGoody : lNGPlots.append((iX, iY))
-                                pPlot.setBonusType(iBonus)
-                                pPlot.setImprovementType(iImprovement)
-                                continue
-                        
-                        if bCanHaveGoody : lGoodyPlots.append((iX, iY))
-
-        nbGoodyToAdd = int((len(lGoodyPlots) + len(lNGPlots))*goodyPer/100.0) + 1
-
-        #debug
-        logList = []
-        logList.append(" nb tiles that can receive a goody : %r" %(len(lGoodyPlots), ))
-        logList.append(" nb tiles that would receive a goody : %r" %(len(lNGPlots), ))
-        logList.append(" nb Goody To Add : %r" %nbGoodyToAdd)
-        logList.append("")
-        writeLog("", False, logList)
-
-        # assign a value to prevent small islands to ever have a goody
-        dictPlotsPerArea = getAreaPlots()
-        plotValues = [[7 for iY in range(iH)] for iX in range(iW)]
-        for lList in dictPlotsPerArea["land"] :
-                nbGP = 0
-                lTPPlots = []
-                for iX, iY in lList :
-                        if (iX, iY) in lNGPlots :
-                                nbGP += 1
-                        elif (iX, iY) in lGoodyPlots :
-                                nbGP += 1
-                                lTPPlots.append((iX, iY))
-                if nbGP < 3 : #no goody on small islands
-                        for cPlot in lTPPlots :
-                                lGoodyPlots.remove(cPlot)
-                elif nbGP < 11 : #placement penality for medium islands
-                        for iX, iY in lTPPlots :
-                                val = (11 - nbGP) % 2
-                                plotValues[iX][iY] = 7 - val
-
-        rings = generateRings(7)
-        nbGoodyPlaced = 0
-        while True :
-                if nbGoodyPlaced >= nbGoodyToAdd : break
-                if len(lGoodyPlots) == 0 : break
-                val = max([plotValues[iX][iY] for iX, iY in lGoodyPlots])
-                tpList = [(iX, iY) for iX, iY in lGoodyPlots if plotValues[iX][iY] == val]
-                iChoice = getRandNum(len(tpList), " FoR : goody plot rand")
-                iX, iY = tpList[iChoice]
-                areaPlotList = getListPlotsPerArea((iX, iY), dictPlotsPerArea)
-                for iRing in range(1, 8) :
-                        for dX, dY in rings[iRing] :
-                                wTP = toWrap(iX + dX, iY + dY)
-                                if wTP != -1 :
-                                        if wTP in areaPlotList :
-                                                plotValues[wTP[0]][wTP[1]] = min(iRing, plotValues[wTP[0]][wTP[1]])
-                map.plot(iX, iY).setImprovementType(iGoody)
-                lGoodyPlots.remove((iX, iY))
-                nbGoodyPlaced += 1
-
-        writeLog("", True, [" nb goody placed : %r" %nbGoodyPlaced])
-
 def minStartingDistanceModifier():
         # keep original values in case default generation must be run
         if bGeneratingMap :
@@ -7028,7 +8304,19 @@ def minStartingDistanceModifier():
 
 def assignStartingPlots() :
         global bStandardAssignment
+        global oldWorldStart
+        global playerShuffledAssignment
         bStandardAssignment = False
+        oldWorldStart = False
+        playerShuffledAssignment = shuffleList(copy.copy(playerList))
+
+        if "startterra" in selGen["maps"][idMap].keys() :
+                if 2 in selGen["maps"][idMap]["startterra"] : oldWorldStart = True
+        if idMap == "tectonics" :
+                if cmo[0] == 7 : oldWorldStart = True
+        if idMap in ["lakes", "pangaea"] :
+                oldWorldStart = True
+
         try :
                 if StoAssignStartingPlots() :
                         return None
@@ -7037,6 +8325,84 @@ def assignStartingPlots() :
                 writeError()
         writeLog("", False, [" assignStartingPlots : running default impl ....", ""])
         bStandardAssignment = True
+
+        CyPythonMgr().allowDefaultImpl()
+
+def findStartingPlot(argsList):
+	[playerID] = argsList
+        if idMap in ["hub", "ring", "wheel"] :
+                if bSuccessFlag :
+                        pPlayer = gc.getPlayer(playerID)
+                        pPlayer.AI_updateFoundValues(True)
+                        
+                        iRegionIndex = playerShuffledAssignment.index(playerID)
+
+                        [regWestX, regEastX, regSouthY, regNorthY] = region_data[iRegionIndex]
+                        regWidth = regEastX - regWestX + 1
+                        regHeight = regNorthY - regSouthY + 1
+                        iStartX = regWestX + int(regWidth / 2)
+                        iStartY = regSouthY + int(regHeight / 2)
+
+                        map_size = map.getWorldSize()
+                        sizevalues = {
+                                WorldSizeTypes.WORLDSIZE_DUEL:		(2, 3),
+                                WorldSizeTypes.WORLDSIZE_TINY:		(2, 4),
+                                WorldSizeTypes.WORLDSIZE_SMALL:		(3, 6),
+                                WorldSizeTypes.WORLDSIZE_STANDARD:	(4, 10),
+                                WorldSizeTypes.WORLDSIZE_LARGE:		(6, 12),
+                                WorldSizeTypes.WORLDSIZE_HUGE:		(6, 18)
+                                }
+                        iPlotShift = 3
+                        if map_size in sizevalues.keys() :
+                                (threeVar, twoVar) = sizevalues[map_size]
+                                if len(playerList) <= threeVar :
+                                        iPlotShift = 3
+                                elif len(playerList) <= twoVar :
+                                        iPlotShift = 2
+                                else:
+                                        iPlotShift = 1
+
+                        westX = max(2, iStartX - iPlotShift)
+                        eastX = min(iW - 3, iStartX + iPlotShift)
+                        southY = max(2, iStartY - iPlotShift)
+                        northY = min(iH - 3, iStartY + iPlotShift)
+
+                        iBestAreaID = map.findBiggestArea(False).getID()
+
+                        while True :
+                                if iPlotShift > 4 : break
+                                
+                                pBestPlot = None
+                                iBestValue = 0
+                                for iPass in range(2) :
+                                        for dX in range(-1 - iPlotShift, iPlotShift +1) :
+                                                for dY in range(-1 - iPlotShift, iPlotShift +1) :
+                                                        iX = iStartX + dX
+                                                        iY = iStartY + dY
+
+                                                        if iX < 2 : continue
+                                                        if iX > iW - 3 : continue
+                                                        if iY < 2 : continue
+                                                        if iY > iH - 3 : continue
+
+                                                        pLoopPlot = map.plot(iX, iY)
+                                                        if (iPass == 0) and (pLoopPlot.getArea() != iBestAreaID) : continue
+
+                                                        val = pLoopPlot.getFoundValue(playerID)
+
+                                                        if val > iBestValue :
+                                                                val = iBestValue
+                                                                pBestPlot = pLoopPlot
+
+                                        if pBestPlot != None : return map.plotNum(pBestPlot.getX(), pBestPlot.getY())
+
+                                iPlotShift += 1
+
+        CyPythonMgr().allowDefaultImpl()
+        
+def findStartingArea(argsList):
+	[playerID] = argsList
+	if oldWorldStart : return map.findBiggestArea(False).getID()
         CyPythonMgr().allowDefaultImpl()
 
 def StoAssignStartingPlots():
@@ -7053,6 +8419,8 @@ def StoAssignStartingPlots():
                 if 0 in selGen["maps"][idMap]["startterra"] : bCoast = True
                 if 1 in selGen["maps"][idMap]["startterra"] : bInland = True
                 if 2 in selGen["maps"][idMap]["startterra"] : bSameArea = True
+        if idMap == "tectonics" :
+                if cmo[0] == 7 : bSameArea = True
         if (not bCoast) and (not bInland) or (idMap == "lakes") :
                 bCoast = True
                 bInland = True
@@ -7069,17 +8437,7 @@ def StoAssignStartingPlots():
         lPlayers = shuffleList(copy.copy(playerList))
 
         lakeSize = gc.getDefineINT("LAKE_MAX_AREA_SIZE")
-        oceanSize = lakeSize + 1
-        for iBuilding in range(gc.getNumBuildingInfos()) :
-                buildingXML = gc.getBuildingInfo(iBuilding)
-                if buildingXML.isWater() :
-                        size = buildingXML.getMinAreaSize()
-                        if size > oceanSize : oceanSize = int(size)
-        for iUnit in range(gc.getNumUnitInfos()) :
-                unitXML = gc.getUnitInfo(iUnit)
-                if unitXML.getDomainType() == DomainTypes.DOMAIN_SEA :
-                        size = unitXML.getMinAreaSize()
-                        if size > oceanSize : oceanSize = int(size)
+        oceanSize = getOceanMinSize()
 
         logList.append(" lakeSize : %r" %(lakeSize, ))
         logList.append(" oceanSize : %r" %(oceanSize, ))
@@ -7332,13 +8690,13 @@ def StoAssignStartingPlots():
                 elif coastVal > 0 : # default found values already take in count water tiles as bad tiles , increase this effect
                         if coastDist == 1 :
                                 if coastVal > 4 :
-                                        valuePer = 0.92
+                                        valuePer = 0.85
                                 elif coastVal > 7 :
-                                        valuePer = 0.87
+                                        valuePer = 0.77
                                 elif coastVal > 10 :
-                                        valuePer = 0.82
+                                        valuePer = 0.69
                                 elif coastVal > 13 :
-                                        valuePer = 0.70
+                                        valuePer = 0.61
 ##                        elif coastDist == 2 :
 ##                                valuePer -= coastVal*0.05
                 if coastDist == 3 : # Inland start better at at lest 3 tiles from the ocean
@@ -7486,6 +8844,7 @@ def StoAssignStartingPlots():
         if not bAssign :
                 if (bCoast) and (not bInland) :
                         bInland = True
+                        logList.append(" coast start failed : add inland plots")
                         initG()
                         for lPlay, lPlo in areaPlayer :
                                 if lPlay == [] : continue
@@ -7496,6 +8855,21 @@ def StoAssignStartingPlots():
                                         logList.append(" coast start : can't place all players in one area after adding inland plots")
                                         writeLog("", True, logList)
                                         return False
+
+                elif (not bCoast) and (bInland) :
+                        bCoast = True
+                        logList.append(" inland start failed : add coastal plots")
+                        initG()
+                        for lPlay, lPlo in areaPlayer :
+                                if lPlay == [] : continue
+                                if idMap == "chess" :
+                                        lPlo = [plotCoords for plotCoords in lPlo if (plotCoords[0]%6 == 3) and (plotCoords[1]%6 == 2)]
+
+                                if not placePlayersOneArea(lPlay, lPlo) :
+                                        logList.append(" inland start : can't place all players in one area after adding coastal plots")
+                                        writeLog("", True, logList)
+                                        return False
+
                 else :
                         writeLog("", True, logList)
                         return False
@@ -7511,13 +8885,6 @@ def StoAssignStartingPlots():
 def normalizeStartingPlotLocations():
         initPlayerList(True) # store starting locations
 
-        #Done after player assignments to prevent a good place to be skipped in case of lots of goodies
-        try :
-                StoAddGoodies()
-        except :
-                writeLog("", True, ["", " An error occured during goody generation ..."])
-                writeError()
-
         #For MP games , humans are as far away as possible between them
         if isGameMP and selGen["startlocs"]["relocate"]["swaphuman"] :
                 try :
@@ -7525,6 +8892,24 @@ def normalizeStartingPlotLocations():
                                 return None
                 except :
                         writeLog("", False, ["", " An error occured during sawp humans ..."])
+                        writeError()
+
+        #if the player like to be isolated
+        if selGen["startlocs"]["relocate"]["isolatehuman"] :
+                try :
+                        bContinentIsolated = isolateHumanPlayers()
+                        initPlayerList(True) # store starting locations
+
+                        try :
+                                bIsolateHumansPerArea = isolateHumansPerArea()
+                        except :
+                                writeLog("", False, ["", " An error occured during isolate humans per areas..."])
+                                writeError()
+
+                        if bContinentIsolated : return None
+                        if bIsolateHumansPerArea : return None
+                except :
+                        writeLog("", False, ["", " An error occured during isolate humans ..."])
                         writeError()
 
         iNorm = selGen["startlocs"]["normalize"]["startplot"]
@@ -7538,6 +8923,183 @@ def normalizeStartingPlotLocations():
                 else :
                         return None
         CyPythonMgr().allowDefaultImpl()
+
+def isolateHumansPerArea():
+        nbAIPlayer = len(playerAIList)
+        nbHUPlayer = len(playerHUList)
+        writeLog("", False, ["", " isolateHumansPerArea : Impl begin"])
+
+        if nbAIPlayer == 0 :
+                writeLog("", False, ["", " isolateHumansPerArea : no AI players , don't launch the function ..."])
+                return False
+
+        if nbHUPlayer > nbAIPlayer :
+                writeLog("", False, ["", " isolateHumansPerArea : more humans than AI , don't launch the function ..."])
+                return False
+
+        #use path distances, in case one continent is separated in parts by impassable plots.
+        distances = {}
+        playerGroups = []
+        playerTested = []
+        for iPlayer in playerList :
+                for iPlayer2 in playerList :
+                        if iPlayer2 == iPlayer : continue
+                        distL = map.calculatePathDistance( map.plot(startX[iPlayer], startY[iPlayer]), map.plot(startX[iPlayer2], startY[iPlayer2]))
+                        distances[(iPlayer, iPlayer2)] = distL
+                        map.resetPathDistance()
+
+        for iPlayer in playerList :
+                if iPlayer in playerTested : continue
+                playerTested.append(iPlayer)
+                tpGroup = [iPlayer]
+                for iPlayer2 in playerList :
+                        if iPlayer2 in playerTested : continue
+                        dist = distances[(iPlayer, iPlayer2)]
+                        if dist <= 0 : continue
+                        playerTested.append(iPlayer2)
+                        tpGroup.append(iPlayer2)
+                playerGroups.append(tpGroup)
+
+        for group in playerGroups :
+                if len(group) <= 1 : continue
+
+                HUGroup = [iPlayer for iPlayer in group if iPlayer in playerHUList]
+                AIGroup = [iPlayer for iPlayer in group if iPlayer in playerAIList]
+                nbHUGroup = len(HUGroup)
+                nbAIGroup = len(AIGroup)
+
+                if nbHUGroup == 0 : continue
+                if nbHUGroup >= nbAIGroup : continue
+
+                bestCombi = []
+                bestScore = 0
+                for combi in Cnp(len(group), nbHUGroup) :
+                        lCombi = [group[i] for i in combi]
+
+                        if nbHUGroup == 1 :
+                                dist = 1
+                                iPHU = lCombi[0]
+                                for iPlayer in group :
+                                        if iPlayer == iPHU : continue
+                                        dist += distances[(iPlayer, iPHU)]
+                                if dist > bestScore :
+                                        bestScore = dist
+                                        bestCombi = copy.copy(lCombi)
+                                
+                        else :
+                                minDistHU = 100000
+                                for iPlayer in lCombi :
+                                        minDistHU = min([minDistHU, ] + [distances[(iPlayer, iPlayer2)] for iPlayer2 in lCombi if iPlayer != iPlayer2])
+
+                                if minDistHU > bestScore :
+                                        bestScore = minDistHU
+                                        bestCombi = copy.copy(lCombi)
+
+                availablePlace = [iPlayer for iPlayer in group if not iPlayer in bestCombi]
+                bestCombi = list(bestCombi)
+
+                for iPlayer in group :
+                        if iPlayer in HUGroup :
+                                iChoice = getRandNum(len(bestCombi), " FoR : HU place")
+                                iPlayerPlaced = bestCombi[iChoice]
+                                del bestCombi[iChoice]
+                                stPlot = map.plot(startX[iPlayerPlaced], startY[iPlayerPlaced])
+                                gc.getPlayer(iPlayer).setStartingPlot(stPlot, False)
+                        else :
+                                iChoice = getRandNum(len(availablePlace), " FoR : AI place")
+                                iPlayerPlaced = availablePlace[iChoice]
+                                del availablePlace[iChoice]
+                                stPlot = map.plot(startX[iPlayerPlaced], startY[iPlayerPlaced])
+                                gc.getPlayer(iPlayer).setStartingPlot(stPlot, True)
+
+        writeLog("", False, [""])
+        return True
+
+def isolateHumanPlayers():
+        nbAIPlayer = len(playerAIList)
+        nbHUPlayer = len(playerHUList)
+        writeLog("", False, ["", " isolateHumanPlayers : Impl begin"])
+
+        if nbAIPlayer == 0 :
+                writeLog("", False, ["", " isolateHumanPlayers : no AI players , don't launch the function ..."])
+                return False
+
+        if nbHUPlayer > nbAIPlayer :
+                writeLog("", False, ["", " isolateHumanPlayers : more humans than AI , don't launch the function ..."])
+                return False
+
+        #use path distances, in case one continent is separated in parts by impassable plots.
+        distances = {}
+        playerGroups = []
+        playerTested = []
+        for iPlayer in playerList :
+                for iPlayer2 in playerList :
+                        if iPlayer2 == iPlayer : continue
+                        distL = map.calculatePathDistance( map.plot(startX[iPlayer], startY[iPlayer]), map.plot(startX[iPlayer2], startY[iPlayer2]))
+                        distances[(iPlayer, iPlayer2)] = distL
+                        map.resetPathDistance()
+
+        for iPlayer in playerList :
+                if iPlayer in playerTested : continue
+                playerTested.append(iPlayer)
+                tpGroup = [iPlayer]
+                for iPlayer2 in playerList :
+                        if iPlayer2 in playerTested : continue
+                        dist = distances[(iPlayer, iPlayer2)]
+                        if dist <= 0 : continue
+                        playerTested.append(iPlayer2)
+                        tpGroup.append(iPlayer2)
+                playerGroups.append(tpGroup)
+
+        if len(playerGroups) == nbAIPlayer + nbHUPlayer :
+                writeLog("", False, ["", " isolateHumanPlayers : all players are isolated , don't launch the function ..."])
+                return False
+
+        if len(playerGroups) == 1 :
+                writeLog("", False, ["", " isolateHumanPlayers : all players are on the same continent , don't launch the function ..."])
+                return False
+
+        assignGroup = [[] for i in range(len(playerGroups))]
+
+        newPlace = {}
+        assignedPlace = []
+        for iHumanPlayer in shuffleList(copy.copy(playerHUList)) :
+                availableGroups = [playerGroups[i] for i in range(len(playerGroups)) if len(assignGroup[i]) < len(playerGroups[i])]
+
+                if len(availableGroups) == 0 : #how can that be possible ?
+                        writeLog("", False, ["", " isolateHumanPlayers : unexpected error 1"])
+                        return False
+
+                minVal = min([ len(group) + len(assignGroup[playerGroups.index(group)]) for group in availableGroups])
+                lMinGroups = [ group for group in availableGroups if (len(group) + len(assignGroup[playerGroups.index(group)])) == minVal ]
+                
+                minVal = min([ len(assignGroup[playerGroups.index(group)]) for group in lMinGroups])
+                lPotGroups = [ group for group in lMinGroups if len(assignGroup[playerGroups.index(group)]) == minVal ]
+
+                iIndex = playerGroups.index(lPotGroups[getRandNum(len(lPotGroups), " FoR : assgin player to group (isolate)")])
+                assignGroup[iIndex].append(iHumanPlayer)
+
+                lPlayerPlaces = [iPlayer for iPlayer in playerGroups[iIndex] if not iPlayer in assignedPlace]
+                iPlayerChoice = lPlayerPlaces[getRandNum(len(lPlayerPlaces), " FoR : choose player place in group (isolate)")]
+
+                newPlace[iHumanPlayer] = iPlayerChoice
+                assignedPlace.append(iPlayerChoice)
+
+        availablePlace = [ iPlayer for iPlayer in playerList if not iPlayer in assignedPlace ]
+
+        for iPlayer in playerList :
+                if iPlayer in playerHUList :
+                        stPlot = map.plot(startX[newPlace[iPlayer]], startY[newPlace[iPlayer]])
+                        gc.getPlayer(iPlayer).setStartingPlot(stPlot, False)
+                else :
+                        iChoice = getRandNum(len(availablePlace), " FoR : AI swap place")
+                        iPlayerPlaced = availablePlace[iChoice]
+                        del availablePlace[iChoice]
+                        stPlot = map.plot(startX[iPlayerPlaced], startY[iPlayerPlaced])
+                        gc.getPlayer(iPlayer).setStartingPlot(stPlot, True)
+
+        writeLog("", False, [""])
+        return True
 
 def swapHumanPlayers():
         nbAIPlayer = len(playerAIList)
@@ -7752,7 +9314,7 @@ def normalizeRemovePeaks():
                 if pPlot.isWater() : continue
                 if not pPlot.isRiver() : continue
                 if pPlot.getFeatureType() != -1 : continue
-                if pPlot.getBonusType(-1) != -1 : continue
+                if pPlot.getBonusType(TeamTypes.NO_TEAM) != -1 : continue
                 for iFeature in listRiverFeatures :
                         if pPlot.canHaveFeature(iFeature):
                                 pPlot.setFeatureType(iFeature, -1)
@@ -7825,7 +9387,56 @@ def normalizeAddGoodTerrain():
 
 def normalizeAddExtras():
         global bGeneratingMap
+        global bApplyExtraImpl
         bGeneratingMap = False
+        bApplyExtraImpl = True
+
+        try :
+                if canUseGameOptions :
+                        initStoAddEvent()
+
+                        #launch the event ... will be received just after the game will be final initialized before onGameStart
+                        if "sendApplyEvent" in dir(CyMessageControl) :
+                                CyMessageControl().sendApplyEvent(getattr(CvUtil, "Sto_FullOfResources_AddGameElements_EventID"), EventContextTypes.EVENTCONTEXT_SELF, (game.getActivePlayer(),))
+                        elif isNetMP :
+                                if game.getActivePlayer() == min(playerHUList) :
+                                        CyMessageControl().sendModNetMessage(iNetData1, iNetData2, iNetData3, iNetData4, iNetData5)
+                        else :
+                                CyMessageControl().sendModNetMessage(iNetData1, iNetData2, iNetData3, iNetData4, iNetData5)
+        except :
+                writeLog("", True, ["", " Unable to launch addgameelements event ..."])
+                writeError()
+
+        i_GAMEOPTION_ADVANCED_START = gc.getInfoTypeForString("GAMEOPTION_ADVANCED_START")
+        if i_GAMEOPTION_ADVANCED_START != -1 :
+                if game.isOption(i_GAMEOPTION_ADVANCED_START) :
+                        writeLog("", False, ["", " The game is advanced start. Add extra element before normalizeAddExtras ..."])
+                        addExtraElements()
+                        bApplyExtraImpl = False
+
+        iNorm = selGen["startlocs"]["normalize"]["addextra"]
+        if iNorm == 2 :
+                return None
+        elif iNorm == 1 :
+                pass
+	CyPythonMgr().allowDefaultImpl()
+
+def startHumansOnSameTile():
+        global bApplyExtraImpl
+        if bApplyExtraImpl :
+                bApplyExtraImpl = False
+                addExtraElements()
+
+        iNorm = selGen["startlocs"]["normalize"]["startsametile"]
+        if iNorm == 2 :
+                return True
+        elif iNorm == 1 :
+                pass
+        elif idMap == "maze" :
+                return True
+        return False
+
+def addExtraElements():
 
         #add extra starting bonuses
         try :
@@ -7834,16 +9445,768 @@ def normalizeAddExtras():
                 writeLog("", True, ["", " An error occured during start bonus implementation ..."])
                 writeError()
 
-        if canUseGameOptions :
-                initStoAddEvent()
-                CyMessageControl().sendApplyEvent(getattr(CvUtil, "Sto_FullOfResources_AddGameElements_EventID"), EventContextTypes.EVENTCONTEXT_SELF, (game.getActivePlayer(),))
+        # for FFH2 place unique improvements and lairs
+        if is_BtS_FFH2 or is_BtS_FF :
+                try :
+                        restoreFfH2Options()
+                except :
+                        writeLog("", False, ["", " An error occured during restoreFfH2Options ..."])
+                        writeError()
 
-        iNorm = selGen["startlocs"]["normalize"]["addextra"]
-        if iNorm == 2 :
-                return None
-        elif iNorm == 1 :
-                pass
-	CyPythonMgr().allowDefaultImpl()
+                try :
+                        StoAddFFH2UniqueIprovements()
+                except :
+                        writeLog("", True, ["", " An error occured during StoAddFFH2UniqueIprovements implementation ..."])
+                        writeError()
+
+                try :
+                        StoAddFFH2Lairs()
+                except :
+                        writeLog("", True, ["", " An error occured during StoAddFFH2Lairs implementation ..."])
+                        writeError()
+
+        #Done at the very end in case of lots of goodies, to prevent a good start location skipped and other effects
+        try :
+                StoAddGoodies()
+        except :
+                writeLog("", True, ["", " An error occured during goody generation ..."])
+                writeError()
+
+def restoreFfH2Options():
+        # restore unique feature chance after preventing the apparition
+        i_GAMEOPTION_NO_LAIRS = gc.getInfoTypeForString("GAMEOPTION_NO_LAIRS")
+        i_GAMEOPTION_NO_UNIQUE_IMPROVEMENTS = gc.getInfoTypeForString("GAMEOPTION_NO_UNIQUE_IMPROVEMENTS")
+
+        try :
+                if original_GAMEOPTION_NO_LAIRS != -1 :
+                        game.setOption(i_GAMEOPTION_NO_LAIRS, original_GAMEOPTION_NO_LAIRS)
+                if original_GAMEOPTION_NO_UNIQUE_IMPROVEMENTS != -1 :
+                        game.setOption(i_GAMEOPTION_NO_UNIQUE_IMPROVEMENTS, original_GAMEOPTION_NO_UNIQUE_IMPROVEMENTS)
+        except :
+                writeLog("", False, [" restoreFfH2Options : error restoring the FFH2 options", ""])
+
+def StoAddFFH2Lairs() :
+        writeLog(" = StoAddFFH2Lairs = ", False, [""])
+
+        if len(XMLEntriesList["lairs"]) == 0 :
+                writeLog("", True, [" No lairs entries"])
+                return
+
+        NoLairs = gc.getInfoTypeForString("GAMEOPTION_NO_LAIRS")
+        if NoLairs != -1 :
+                if game.isOption(NoLairs) :
+                        writeLog("", True, [" No Lairs option selected, continue"])
+                        return
+
+        logList = []
+        minStartDist = getRandSel(selGen["ffh2"]["lairs"]["mindistlairstart"], False)
+        logList.append("minStartDist : %d" %minStartDist)
+        lOptions = selGen["ffh2"]["lairs"].keys()
+        logList.append("lOptions : %r" %lOptions)
+        lLairPercents = []
+        for sType in XMLEntriesList["lairs"] :
+                sOptionType = getTypeForm(sType)
+                fPercent = parsedXMLValuesEntries[sType]["iAppearanceProbability"] / 10000.0
+                if selGen["ffh2"]["lairs"][sOptionType] != "standard" : fPercent = getRandSel(selGen["ffh2"]["lairs"][sOptionType], False, "float") / 100.0
+
+                if fPercent > 0.0001 : lLairPercents.append((sType, fPercent))
+                logList.append("lair %s : %r" %(sType, fPercent))
+
+        logList.append("")
+        writeLog("", False, logList)
+                
+        if len(lLairPercents) == 0 :
+                writeLog("", True, [" No Lair improvements to place ... continue"])
+                return
+
+        dictPlotsPerArea = getAreaPlots()
+        rings = generateRings(6)
+
+        valPlotPenality = [[ 0 for iY in range(iH) ] for iX in range(iW)] # penality for small islands for lair placements
+        for lList in dictPlotsPerArea["land"] :
+                nbTiles = len(lList)
+                if nbTiles < 3 : #no lair on small islands
+                        for iX, iY in lList :
+                                valPlotPenality[iX][iY] = 6
+                elif nbTiles < 11 : #placement penality for medium islands
+                        val = (11 - nbTiles) / 2 + 1
+                        for iX, iY in lList :
+                                valPlotPenality[iX][iY] = val
+
+        lImpChokePlots = []
+        for lList in dictPlotsPerArea["water"] : lImpChokePlots += lList
+
+        listStartPlots = []
+        for iPlayer in startPlots.keys() :
+                listStartPlots.append(startPlots[iPlayer])
+
+        lNoImprCoords = []
+        for coord in listStartPlots :
+                iX, iY = coord
+                for iRing in range(minStartDist + 1) :
+                        for dX, dY in rings[iRing] :
+                                wTP = toWrap(iX + dX, iY + dY)
+                                if wTP == -1 : continue
+                                lNoImprCoords.append(wTP)
+
+        lImprovementType = [ gc.getInfoTypeForString(item[0]) for item in lLairPercents ]
+        lImprTypePlots = {}
+        for iImpr in lImprovementType : lImprTypePlots[iImpr] = []
+        lHillPlots = []
+        lLandPlots = []
+
+        for iX in range(iW) :
+                for iY in range(iH) :
+                        coord = (iX, iY)
+                        pPlot = map.plot(iX, iY)
+
+                        if pPlot.isImpassable() :
+                                if not pPlot.isWater() : lImpChokePlots.append(coord)
+                                continue
+
+                        if not pPlot.isWater() : lLandPlots.append(coord)
+
+                        if coord in lNoImprCoords : continue
+
+                        if pPlot.getBonusType(TeamTypes.NO_TEAM) != -1 : continue
+                        if pPlot.getImprovementType() != -1 : continue
+
+                        if pPlot.isHills() : lHillPlots.append(coord)
+
+                        for iImpr in lImprovementType :
+                                if pPlot.canHaveImprovement(iImpr, TeamTypes.NO_TEAM, True) :
+                                        lImprTypePlots[iImpr].append(coord)
+
+        nbLairToPlace = {}
+        for sType, fPercent in lLairPercents :
+                iImpr = gc.getInfoTypeForString(sType)
+                nbLairToPlace[iImpr] = int(len(lImprTypePlots[iImpr]) * fPercent) + 1
+
+        bTower = False
+        if "IMPROVEMENT_TOWER" in XMLEntriesList["lairs"] :
+                if gc.getInfoTypeForString("IMPROVEMENT_TOWER") in nbLairToPlace.keys() :
+                        bTower = True
+
+        lImpr = lImprTypePlots.keys()
+
+        if bTower :
+                iImpr = gc.getInfoTypeForString("IMPROVEMENT_TOWER")
+                writeLog("", False, ["", " Place tower %d" %(nbLairToPlace[iImpr], )])
+
+                lTowerPlots = [ [] for i in range(4) ]
+                lPlotsToRemove = []
+
+                # determine choke points. very simple implementation since a few map scripts got some True choke points
+                for coord in lImprTypePlots[iImpr] :
+                        iX, iY = coord
+
+                        if not wrapX :
+                                if (iX <= 2) or (iX >= iW - 3) :
+                                        lPlotsToRemove.append(coord)
+                                        continue
+
+                        if not wrapY :
+                                if (iY <= 2) or (iY >= iH - 3) :
+                                        lPlotsToRemove.append(coord)
+                                        continue
+
+                        # check if the plot is a choke point :
+                        bChokePoint = True
+                        for dX, dY in [(-1, 0), (1, 0)] :
+                                wTP = toWrap(iX + dX, iY + dY)
+                                if wTP == -1 :
+                                        bChokePoint = False
+                                        break
+                                else :
+                                        if not wTP in lImpChokePlots :
+                                                bChokePoint = False
+                                                break
+
+                        if bChokePoint :
+                                bFoundLand = False
+                                for dX, dY in [(-1, 2), (0, 2), (1, 2)] :
+                                        wTP = toWrap(iX + dX, iY + dY)
+                                        if wTP == -1 :
+                                                bChokePoint = False
+                                                break
+                                        else :
+                                                if wTP in lLandPlots :
+                                                        bFoundLand = True
+
+                                if not bFoundLand :
+                                        bChokePoint = False
+
+                                if bChokePoint :
+                                        bFoundLand = False
+                                        for dX, dY in [(-1, -2), (0, -2), (1, -2)] :
+                                                wTP = toWrap(iX + dX, iY + dY)
+                                                if wTP == -1 :
+                                                        bChokePoint = False
+                                                        break
+                                                else :
+                                                        if wTP in lLandPlots :
+                                                                bFoundLand = True
+
+                                        if not bFoundLand :
+                                                bChokePoint = False
+
+                        if not bChokePoint :
+                                bChokePoint = True
+                                for dX, dY in [(0, -1), (0, 1)] :
+                                        wTP = toWrap(iX + dX, iY + dY)
+                                        if wTP == -1 :
+                                                bChokePoint = False
+                                                break
+                                        else :
+                                                if not wTP in lImpChokePlots :
+                                                        bChokePoint = False
+                                                        break
+
+                                if bChokePoint :
+                                        bFoundLand = False
+                                        for dX, dY in [(-2, -1), (-2, 0), (-2, 1)] :
+                                                wTP = toWrap(iX + dX, iY + dY)
+                                                if wTP == -1 :
+                                                        bChokePoint = False
+                                                        break
+                                                else :
+                                                        if wTP in lLandPlots :
+                                                                bFoundLand = True
+
+                                        if not bFoundLand :
+                                                bChokePoint = False
+
+                                        if bChokePoint :
+                                                bFoundLand = False
+                                                for dX, dY in [(2, -1), (2, 0), (2, 1)] :
+                                                        wTP = toWrap(iX + dX, iY + dY)
+                                                        if wTP == -1 :
+                                                                bChokePoint = False
+                                                                break
+                                                        else :
+                                                                if wTP in lLandPlots :
+                                                                        bFoundLand = True
+
+                                                if not bFoundLand :
+                                                        bChokePoint = False
+
+                        if bChokePoint :
+                                lTowerPlots[0].append(coord)
+                                continue
+
+                        if coord in lHillPlots :
+                                bTopHill = True
+                                for dX, dY in rings[1] :
+                                        wTP = toWrap(iX + dX, iY + dY)
+                                        if wTP == -1 :
+                                                bTopHill = False
+                                                break
+
+                                        pPlot = map.plot(wTP[0], wTP[1])
+
+                                        if pPlot.isWater() or pPlot.isFlatlands() : continue
+                                        bTopHill = False
+                                        break
+
+                                if bTopHill :
+                                        lTowerPlots[1].append(coord)
+                                else :
+                                        lTowerPlots[2].append(coord)
+                                continue
+                        lTowerPlots[3].append(coord)
+
+                for coord in lPlotsToRemove : lImprTypePlots[iImpr].remove(coord)
+
+                # place towers :
+                plotValues = [[ 6 - valPlotPenality[iX][iY] for iY in range(iH) ] for iX in range(iW)] # penality for small islands for lair placements
+                                        
+                nbTowerPlaced = 0
+                while True :
+                        if nbTowerPlaced >= nbLairToPlace[iImpr] : break
+                        if len(lImprTypePlots[iImpr]) == 0 : break
+
+                        maxVal = max([plotValues[iX][iY] for iX, iY in lImprTypePlots[iImpr]])
+                        tpList = [(iX, iY) for iX, iY in lImprTypePlots[iImpr] if plotValues[iX][iY] == maxVal]
+
+                        for i in range(4) :
+                                tpList2 = [coord for coord in tpList if coord in lTowerPlots[i]]
+                                if len(tpList2) > 0 : break
+
+                        iChoice = getRandNum(len(tpList2), " FoR : tower plot rand")
+                        coord = tpList2[iChoice]
+                        iX, iY = coord
+                        for iRing in range(1, 7) :
+                                for dX, dY in rings[iRing] :
+                                        wTP = toWrap(iX + dX, iY + dY)
+                                        if wTP == -1 : continue
+                                        plotValues[wTP[0]][wTP[1]] = min(iRing, plotValues[wTP[0]][wTP[1]])
+
+                        map.plot(iX, iY).setImprovementType(iImpr)
+                        nbTowerPlaced += 1
+
+                        # debug
+                        #CyEngine().addSign(map.plot(iX, iY), 0, "TOWER")
+
+                        for i in lImpr :
+                                if coord in lImprTypePlots[i] : lImprTypePlots[i].remove(coord)
+
+                lImpr.remove(iImpr)
+                writeLog("", False, [" nb tower placed : %d" %nbTowerPlaced])
+
+        # place lair without unit spawn
+        lImprNoUnit = [iI for iI in lImpr if parsedXMLValuesEntries[gc.getImprovementInfo(iI).getType()]["SpawnUnitType"] == ""]
+
+        if len(lImprNoUnit) == 0:
+                writeLog("", False, ["", " No Lair without spawn unit to place ..."])
+        else :
+                for iImpr in lImprNoUnit :
+                        sType = gc.getImprovementInfo(iImpr).getType()
+                        writeLog("", False, ["", " Place %s : %d" %(sType, nbLairToPlace[iImpr])])
+
+                        plotValues = [[ 6 - valPlotPenality[iX][iY] for iY in range(iH) ] for iX in range(iW)] # penality for small islands for lair placements
+                                                
+                        nbImprPlaced = 0
+                        while True :
+                                if nbImprPlaced >= nbLairToPlace[iImpr] : break
+                                if len(lImprTypePlots[iImpr]) == 0 : break
+
+                                maxVal = max([plotValues[iX][iY] for iX, iY in lImprTypePlots[iImpr]])
+                                tpList = [(iX, iY) for iX, iY in lImprTypePlots[iImpr] if plotValues[iX][iY] == maxVal]
+
+                                iChoice = getRandNum(len(tpList), " FoR : no unit plot rand")
+                                coord = tpList[iChoice]
+                                iX, iY = coord
+                                for iRing in range(1, 7) :
+                                        for dX, dY in rings[iRing] :
+                                                wTP = toWrap(iX + dX, iY + dY)
+                                                if wTP == -1 : continue
+                                                plotValues[wTP[0]][wTP[1]] = min(iRing, plotValues[wTP[0]][wTP[1]])
+
+                                map.plot(iX, iY).setImprovementType(iImpr)
+                                nbImprPlaced += 1
+
+                                # debug
+                                #CyEngine().addSign(map.plot(iX, iY), 0, sType[12:])
+
+                                for i in lImpr :
+                                        if coord in lImprTypePlots[i] : lImprTypePlots[i].remove(coord)
+
+                        lImpr.remove(iImpr)
+                        writeLog("", False, [" nb %s placed : %d" %(sType, nbImprPlaced)])
+
+        # place lair with unit spawn, like if all are the same type to prevent a package of different lair type
+        if len(lImpr) == 0:
+                writeLog("", True, ["", " No Lair with spawn unit to place ..."])
+                return
+
+        writeLog("", False, [""])
+        lTypes = []
+        for iImpr in lImpr :
+                sType = gc.getImprovementInfo(iImpr).getType()
+                lTypes.append(sType)
+                writeLog("", False, [" Place %s ( %s ) : %d" %(sType, parsedXMLValuesEntries[sType]["SpawnUnitType"], nbLairToPlace[iImpr])])
+
+        plotValues = [[ 6 - valPlotPenality[iX][iY] for iY in range(iH) ] for iX in range(iW)] # penality for small islands for lair placements
+                                
+        writeLog("", False, [""])
+
+        nbImprPlaced = [0 for i in range(len(lImpr))]
+        iCount = 0
+        while True :
+                if len(lImpr) == 0 : break
+
+                iIndex = iCount % len(lImpr)
+                iImpr = lImpr[iIndex]
+
+                if (nbImprPlaced[iIndex] >= nbLairToPlace[iImpr]) or (len(lImprTypePlots[iImpr]) == 0) :
+                        writeLog("", False, [" nb placed %s : %d" %(lTypes[iIndex], nbImprPlaced[iIndex])])
+                        del lImpr[iIndex]
+                        del lTypes[iIndex]
+                        del nbImprPlaced[iIndex]
+                        continue
+
+                maxVal = max([plotValues[iX][iY] for iX, iY in lImprTypePlots[iImpr]])
+                tpList = [(iX, iY) for iX, iY in lImprTypePlots[iImpr] if plotValues[iX][iY] == maxVal]
+
+                iChoice = getRandNum(len(tpList), " FoR : unit lair plot rand")
+                coord = tpList[iChoice]
+                iX, iY = coord
+                for iRing in range(1, 7) :
+                        for dX, dY in rings[iRing] :
+                                wTP = toWrap(iX + dX, iY + dY)
+                                if wTP == -1 : continue
+                                plotValues[wTP[0]][wTP[1]] = min(iRing, plotValues[wTP[0]][wTP[1]])
+
+                map.plot(iX, iY).setImprovementType(iImpr)
+                nbImprPlaced[iIndex] += 1
+
+                # debug
+                #CyEngine().addSign(map.plot(iX, iY), 0, lTypes[iIndex][12:])
+
+                for i in lImpr :
+                        if coord in lImprTypePlots[i] : lImprTypePlots[i].remove(coord)
+
+                iCount += 1
+
+        writeLog("", True, [""])
+
+def StoAddFFH2UniqueIprovements():
+        global unitsToPlaceOnImprovements
+        unitsToPlaceOnImprovements = []
+
+        writeLog(" = StoAddFFH2UniqueIprovements = ", False, [""])
+
+        if len(XMLEntriesList["uniqueimprovements"]) == 0 :
+                writeLog("", True, [" No unique improvements entries"])
+                return
+
+        NoUniqueImprovements = gc.getInfoTypeForString("GAMEOPTION_NO_UNIQUE_IMPROVEMENTS")
+        if NoUniqueImprovements != -1 :
+                if game.isOption(NoUniqueImprovements) :
+                        writeLog("", True, [" No unique improvements option selected, continue"])
+                        return
+
+        AllUniqueImprovements = gc.getInfoTypeForString("GAMEOPTION_ALL_UNIQUE_IMPROVEMENTS")
+        AllImprs = False
+        if AllUniqueImprovements != -1 :
+                if game.isOption(AllUniqueImprovements) :
+                        writeLog("", False, [" All unique improvements placed by game option"])
+                        AllImprs = True
+
+        logList = []
+        minStartDist = getRandSel(selGen["ffh2"]["uniqueimprovements"]["mindistuniquestart"], False)
+
+        baseChance = gc.getDefineINT("IMPROVEMENT_UNIQUE_CHANCE")
+        baseChance += parsedXMLValuesEntries[gc.getWorldInfo(int(map.getWorldSize())).getType()]["iUniqueFeatureChance"]
+
+        lOptions = selGen["ffh2"]["uniqueimprovements"].keys()
+
+        logList.append("minStartDist : %d" %minStartDist)
+        logList.append("baseChance : %d" %baseChance)
+        logList.append("listOptions : %r" %lOptions)
+
+        pl = {
+            0 : "Anywhere" ,
+            1 : "Far" ,
+            2 : "deserted Island only"
+            }
+
+        lImprs = []
+        for sType in XMLEntriesList["uniqueimprovements"] :
+                iChance = copy.copy(baseChance)
+                sOptionType = getTypeForm(sType)
+                if selGen["ffh2"]["uniqueimprovements"][sOptionType] != "standard" : iChance = getRandSel(selGen["ffh2"]["uniqueimprovements"][sOptionType], False)
+
+                if not AllImprs :
+                        if getRandNum(100, " FoR : FFH2 unique improvement") >= iChance :
+                                continue
+
+                iPlacement = 0
+                if getTypeForm(sType) + "placement" in lOptions : iPlacement = copy.copy(selGen["ffh2"]["uniqueimprovements"][getTypeForm(sType) + "placement"])
+
+                lImprs.append([sType, iPlacement])
+                logList.append(" %s will be placed %s" %(sType, pl[iPlacement]))
+
+        logList.append("")
+        writeLog("", False, logList)
+
+        if len(lImprs) == 0 :
+                writeLog("", True, [" No unique improvements to place ... continue"])
+                return
+
+        buffValueStartDist = [[ 31 for iY in range(iH) ] for iX in range(iW)]
+        buffValueImprDist = [[ 6 for iY in range(iH) ] for iX in range(iW)] # garanty a minimum distance between unique improvement
+
+        dictPlotsPerArea = getAreaPlots()
+        rings = generateRings(30)
+        minOceanSize = getOceanMinSize()
+
+        listStartPlots = []
+        for iPlayer in startPlots.keys() :
+                listStartPlots.append(startPlots[iPlayer])
+
+        dictLandAreas = {}
+        iAreaLand = 0
+        for lPlots in dictPlotsPerArea["land"] :
+                if len(lPlots) < 3 : continue
+                dictLandAreas[iAreaLand] = {}
+                dictLandAreas[iAreaLand]["plots"] = copy.copy(lPlots)
+                bIsolated = True
+                for coord in listStartPlots :
+                        if coord in lPlots :
+                                bIsolated = False
+                                break
+
+                dictLandAreas[iAreaLand]["isolated"] = bIsolated
+                dictLandAreas[iAreaLand]["nbFeatures"] = 0
+
+                iAreaLand += 1
+
+        dictWaterAreas = {}
+        iAreaWater = 0
+        for lPlots in dictPlotsPerArea["water"] :
+                dictWaterAreas[iAreaWater] = {}
+                dictWaterAreas[iAreaWater]["plots"] = copy.copy(lPlots)
+                bOcean = True
+                if len(lPlots) < minOceanSize : bOcean = False
+                dictWaterAreas[iAreaWater]["bocean"] = bOcean
+                dictWaterAreas[iAreaWater]["nbFeatures"] = 0
+
+                iAreaWater += 1
+
+        lNoImprCoords = []
+        for coord in listStartPlots :
+                iX, iY = coord
+                for iRing in range(31) :
+                        for dX, dY in rings[iRing] :
+                                wTP = toWrap(iX + dX, iY + dY)
+                                if wTP == -1 : continue
+
+                                if iRing <= minStartDist : lNoImprCoords.append(wTP)
+                                iXX, iYY = wTP
+                                buffValueStartDist[iXX][iYY] = min(buffValueStartDist[iXX][iYY], iRing)
+
+        lImprovementType = [ gc.getInfoTypeForString(item[0]) for item in lImprs ]
+        lImprTypePlots = {}
+        for iImpr in lImprovementType : lImprTypePlots[iImpr] = []
+
+        for iX in range(iW) :
+                for iY in range(iH) :
+                        coord = (iX, iY)
+                        if coord in lNoImprCoords : continue
+
+                        pPlot = map.plot(iX, iY)
+                        if pPlot.getBonusType(TeamTypes.NO_TEAM) != -1 : continue
+                        if pPlot.getImprovementType() != -1 : continue
+
+                        if idMap == "chess" :
+                                if (iX%6 == 3) and (iY%6 == 2) and (not pPlot.isWater()) : continue
+
+                        for iImpr in lImprovementType :
+                                if pPlot.canHaveImprovement(iImpr, TeamTypes.NO_TEAM, True) :
+                                        lImprTypePlots[iImpr].append(coord)
+
+        for iPass in range(3) :
+                for sType, iPlacement in lImprs :
+                        if iPlacement != iPass : continue
+
+                        writeLog("", False, ["", " attempt to place %s, %s :" %(sType, pl[iPlacement])])
+
+                        iImpr = gc.getInfoTypeForString(sType)
+
+                        lAPlots = []
+                        if gc.getImprovementInfo(iImpr).isWater() :
+                                if sType == "IMPROVEMENT_MAELSTROM" :
+                                        lID = [ (len(dictWaterAreas[iWat]["plots"]), iWat) for iWat in range(iAreaWater) if (dictWaterAreas[iWat]["bocean"])]
+
+                                        if len(lID) > 1 :
+                                                lID.sort()
+                                                bigID = copy.copy(lID[-1][1])
+                                                lID = lID[0 : -1]
+                                                lID = [item[1] for item in lID]
+                                                while True :
+                                                        if len(lID) == 0 : break
+                                                        cID = lID[0]
+                                                        lTPPlots = [coord for coord in dictWaterAreas[cID]["plots"] if coord in lImprTypePlots[iImpr]]
+
+                                                        if len(lTPPlots) > 0 :
+                                                                lAPlots = copy.copy(lTPPlots)
+                                                                break
+
+                                                        del lID[0]
+
+                                                if len(lAPlots) == 0 :
+                                                        lTPPlots = [coord for coord in dictWaterAreas[bigID]["plots"] if coord in lImprTypePlots[iImpr]]
+
+                                                        if len(lTPPlots) > 0 :
+                                                                lAPlots = copy.copy(lTPPlots)
+
+                                        elif len(lID) == 1 :
+                                                lTPPlots = [coord for coord in dictWaterAreas[lID[0][1]]["plots"] if coord in lImprTypePlots[iImpr]]
+
+                                                if len(lTPPlots) > 0 :
+                                                        lAPlots = copy.copy(lTPPlots)
+
+                                        if len(lAPlots) == 0 :
+                                                lAPlots = copy.copy(lImprTypePlots[iImpr])
+
+                                else :
+                                        lID = [ (len(dictWaterAreas[iWat]["plots"])/(dictWaterAreas[iWat]["nbFeatures"] + 1), iWat) for iWat in range(iAreaWater)]
+
+                                        if len(lID) > 0 :
+                                                lID.sort()
+                                                lID.reverse()
+                                                lID = [item[1] for item in lID]
+                                                while True :
+                                                        if len(lID) == 0 : break
+                                                        cID = lID[0]
+                                                        lTPPlots = [coord for coord in dictWaterAreas[cID]["plots"] if coord in lImprTypePlots[iImpr]]
+
+                                                        if len(lTPPlots) > 0 :
+                                                                lAPlots = copy.copy(lTPPlots)
+                                                                break
+
+                                                        del lID[0]
+                                
+                        else :
+                                lID = [ (len(dictLandAreas[iLand]["plots"])/(dictLandAreas[iLand]["nbFeatures"] + 1), iLand) for iLand in range(iAreaLand)]
+                                if len(lID) > 0 :
+                                        lID.sort()
+                                        lID.reverse()
+                                        lID = [item[1] for item in lID]
+                                if iPlacement == 2 :
+                                        lID = [item for item in lID if dictLandAreas[item]["isolated"]]
+                                
+                                while True :
+                                        if len(lID) == 0 : break
+                                        cID = lID[0]
+                                        lTPPlots = [coord for coord in dictLandAreas[cID]["plots"] if coord in lImprTypePlots[iImpr]]
+
+                                        if len(lTPPlots) > 0 :
+                                                lAPlots = copy.copy(lTPPlots)
+                                                break
+
+                                        del lID[0]
+
+                        if len(lAPlots) == 0 :
+                                writeLog("", False, [" no available place ... continue to next improvement"])
+                                continue
+
+                        if iPlacement == 1 :
+                                maxDist = max([buffValueStartDist[iX][iY] for iX, iY in lAPlots])
+                                maxDist -= 2
+                                lAPlots = [ coord for coord in lAPlots if buffValueStartDist[coord[0]][coord[1]] > maxDist ]
+
+                        maxDist = max([buffValueImprDist[iX][iY] for iX, iY in lAPlots])
+                        lAPlots = [ coord for coord in lAPlots if buffValueImprDist[coord[0]][coord[1]] == maxDist ]
+
+                        imprCoord = lAPlots[getRandNum(len(lAPlots), " FoR : FFH2 unique improvement placement")]
+                        iX, iY = imprCoord
+
+                        map.plot(iX, iY).setImprovementType(iImpr)
+                        writeLog("", False, [" improvement placed : %d, %d" %(iX, iY)])
+                        if parsedXMLValuesEntries[sType]["SpawnUnitType"] != "" : unitsToPlaceOnImprovements.append((gc.getInfoTypeForString(parsedXMLValuesEntries[sType]["SpawnUnitType"]), iX, iY))
+        
+                        # debug
+                        #CyEngine().addSign(map.plot(iX, iY), 0, sType[12:])
+
+                        for iImpr2 in lImprovementType :
+                                if imprCoord in lImprTypePlots[iImpr2] : lImprTypePlots[iImpr2].remove(imprCoord)
+                                
+                        for iRing in range(6) :
+                                for dX, dY in rings[iRing] :
+                                        wTP = toWrap(iX + dX, iY + dY)
+                                        if wTP == -1 : continue
+
+                                        iXX, iYY = wTP
+                                        buffValueImprDist[iXX][iYY] = min(buffValueImprDist[iXX][iYY], iRing)
+
+                        if gc.getImprovementInfo(iImpr).isWater() :
+                                for iWat in range(iAreaWater) :
+                                        if imprCoord in dictWaterAreas[iWat]["plots"] :
+                                                dictWaterAreas[iWat]["nbFeatures"] += 1
+                                                break
+                        else :
+                                for iLand in range(iAreaLand) :
+                                        if imprCoord in dictLandAreas[iLand]["plots"] :
+                                                dictLandAreas[iLand]["nbFeatures"] += 1
+                                                break
+
+        writeLog("", True, [""])
+
+def StoAddGoodies():
+        writeLog(" = StoAddGoodies = ", False, [""])
+
+        iGoody = gc.getInfoTypeForString("IMPROVEMENT_GOODY_HUT")
+        if iGoody == -1 :
+                writeLog("", True, [" There is no goody hut with this mod ..."])
+                return
+                
+        goodyPer = getRandSel(selGen["terrain"]["goodyhut"]["goodypercent"], False, "float")
+        iOptionGoody = gc.getInfoTypeForString("GAMEOPTION_NO_GOODY_HUTS")
+        if iOptionGoody != -1 :
+                if game.isOption(iOptionGoody) :
+                        writeLog("", True, [" the option no goody is selected ..."])
+                        return
+
+        writeLog("", False, [" goody percent : %r" %goodyPer, ""])
+        if goodyPer < 0.01 :
+                writeLog("", True, ["", " goody percent < 0.01 don't launch the function ..."])
+                return
+
+        # store starting locations :
+        listStartPlots = []
+        for iPlayer in startPlots.keys() :
+                listStartPlots.append(startPlots[iPlayer])
+
+        # store all plots that can have a goody or would have a goody
+        lGoodyPlots = []
+        lNGPlots = []
+        for iX in range(iW) :
+                for iY in range(iH) :
+                        pPlot = map.plot(iX, iY)
+
+                        iImprovement = pPlot.getImprovementType()
+
+                        bCanHaveGoody = bool(pPlot.canHaveImprovement(iGoody, TeamTypes.NO_TEAM, True))
+
+                        if (iImprovement != -1) or ((iX, iY) in listStartPlots) or (pPlot.isUnit()) or (pPlot.isOwned()) :
+                                if bCanHaveGoody : lNGPlots.append((iX, iY))
+                                continue
+                        
+                        if bCanHaveGoody : lGoodyPlots.append((iX, iY))
+
+        nbGoodyToAdd = int((len(lGoodyPlots) + len(lNGPlots))*goodyPer/100.0) + 1
+
+        #debug
+        logList = []
+        logList.append(" nb tiles that can receive a goody : %r" %(len(lGoodyPlots), ))
+        logList.append(" nb tiles that would receive a goody : %r" %(len(lNGPlots), ))
+        logList.append(" nb Goody To Add : %r" %nbGoodyToAdd)
+        logList.append("")
+        writeLog("", False, logList)
+
+        # assign a value to prevent small islands to ever have a goody
+        dictPlotsPerArea = getAreaPlots()
+        plotValues = [[7 for iY in range(iH)] for iX in range(iW)]
+        for lList in dictPlotsPerArea["land"] :
+                nbGP = 0
+                lTPPlots = []
+                for iX, iY in lList :
+                        if (iX, iY) in lNGPlots :
+                                nbGP += 1
+                        elif (iX, iY) in lGoodyPlots :
+                                nbGP += 1
+                                lTPPlots.append((iX, iY))
+                if nbGP < 3 : #no goody on small islands
+                        for cPlot in lTPPlots :
+                                lGoodyPlots.remove(cPlot)
+                elif nbGP < 11 : #placement penality for medium islands
+                        for iX, iY in lTPPlots :
+                                val = (11 - nbGP) / 2
+                                plotValues[iX][iY] = 7 - val
+
+        rings = generateRings(7)
+        nbGoodyPlaced = 0
+        while True :
+                if nbGoodyPlaced >= nbGoodyToAdd : break
+                if len(lGoodyPlots) == 0 : break
+                val = max([plotValues[iX][iY] for iX, iY in lGoodyPlots])
+                tpList = [(iX, iY) for iX, iY in lGoodyPlots if plotValues[iX][iY] == val]
+                iChoice = getRandNum(len(tpList), " FoR : goody plot rand")
+                iX, iY = tpList[iChoice]
+                areaPlotList = getListPlotsPerArea((iX, iY), dictPlotsPerArea)
+                for iRing in range(1, 8) :
+                        for dX, dY in rings[iRing] :
+                                wTP = toWrap(iX + dX, iY + dY)
+                                if wTP != -1 :
+                                        if wTP in areaPlotList :
+                                                plotValues[wTP[0]][wTP[1]] = min(iRing, plotValues[wTP[0]][wTP[1]])
+                map.plot(iX, iY).setImprovementType(iGoody)
+                lGoodyPlots.remove((iX, iY))
+                nbGoodyPlaced += 1
+
+        writeLog("", True, [" nb goody placed : %r" %nbGoodyPlaced])
 
 def StoAddStartBonuses():
         global lBonusExtend
@@ -7911,16 +10274,11 @@ def StoAddStartBonuses():
                         dictBonus[iPlayer]["nbBonus1"][iBonus] = 0
                         dictBonus[iPlayer]["nbBonus2"][iBonus] = 0
                         dictBonus[iPlayer]["nbBonus3"][iBonus] = 0
-                dictBonus[iPlayer]["nbGoodies"] = 0
 
-        iGoody = gc.getInfoTypeForString("IMPROVEMENT_GOODY_HUT")
-        bGoody = bool(iGoody != -1)
         lImprovementPlots = []
         for iX in range(iW) :
                 for iY in range(iH) :
-                        pPlot = map.plot(iX, iY)
-                        iImprovement = pPlot.getImprovementType()
-                        if iImprovement in [-1, iGoody] : continue
+                        if map.plot(iX, iY).getImprovementType() == -1 : continue
                         lImprovementPlots.append((iX, iY))
 
         bOneCityChallenge = bool(game.isOption(gc.getInfoTypeForString("GAMEOPTION_ONE_CITY_CHALLENGE")))
@@ -7951,10 +10309,10 @@ def StoAddStartBonuses():
         bLakes = copy.copy(selGen["resources"]["resourcesgen"]["resspreadlake"])
 
         for iPlayer in playerList :
-                iBonus = map.plot(startX[iPlayer], startY[iPlayer]).getBonusType(-1)
+                iBonus = map.plot(startX[iPlayer], startY[iPlayer]).getBonusType(TeamTypes.NO_TEAM)
                 if iBonus != -1 :
                         if bEraseAll :
-                                map.plot(startX[iPlayer], startY[iPlayer]).setBonusType(-1)
+                                map.plot(startX[iPlayer], startY[iPlayer]).setBonusType(BonusTypes.NO_BONUS)
                         else :
                                 dictBonus[iPlayer]["nbBonus1"][iBonus] += 1
                                 dictBonus[iPlayer]["nbBonus2"][iBonus] += 1
@@ -7972,20 +10330,15 @@ def StoAddStartBonuses():
                                 if pPlot.isPeak() : continue
                                 if pPlot.isImpassable() : continue
 
-                                iBonus = pPlot.getBonusType(-1)
+                                iBonus = pPlot.getBonusType(TeamTypes.NO_TEAM)
                                 if iBonus != -1 :
                                         if bEraseAll :
-                                                pPlot.setBonusType(-1)
+                                                pPlot.setBonusType(BonusTypes.NO_BONUS)
                                         else :
                                                 dictBonus[iPlayer]["nbBonus1"][iBonus] += 1
                                                 dictBonus[iPlayer]["nbBonus2"][iBonus] += 1
                                                 dictBonus[iPlayer]["nbBonus3"][iBonus] += 1
                                                 continue
-
-                                iImprovement = pPlot.getImprovementType()
-                                if (bGoody) and (iImprovement == iGoody) :
-                                        dictBonus[iPlayer]["nbGoodies"] += 1
-                                        pPlot.setImprovementType(-1)
 
                                 if pPlot.isWater() :
                                         bConnectedSL = True
@@ -8034,7 +10387,7 @@ def StoAddStartBonuses():
                                                 distB = calculateAirDistance(wTP, startPlots[iPlayer2])
                                                 if distA <= distB :
                                                         dictBonus[iPlayer2]["zone2"].remove(wTP)
-                                                        iBonus = pPlot.getBonusType(-1)
+                                                        iBonus = pPlot.getBonusType(TeamTypes.NO_TEAM)
                                                         if iBonus != -1 :
                                                                 dictBonus[iPlayer2]["nbBonus2"][iBonus] -= 1
                                                                 dictBonus[iPlayer2]["nbBonus3"][iBonus] -= 1
@@ -8042,14 +10395,10 @@ def StoAddStartBonuses():
                                                         bValid = False
                                 if not bValid : continue
 
-                                iBonus = pPlot.getBonusType(-1)
+                                iBonus = pPlot.getBonusType(TeamTypes.NO_TEAM)
                                 if iBonus != -1 :
                                         dictBonus[iPlayer]["nbBonus2"][iBonus] += 1
                                         dictBonus[iPlayer]["nbBonus3"][iBonus] += 1
-                                        continue
-
-                                iImprovement = pPlot.getImprovementType()
-                                if (bGoody) and (iImprovement == iGoody) :
                                         continue
 
                                 if pPlot.isWater() :
@@ -8093,7 +10442,7 @@ def StoAddStartBonuses():
                                         if bSameArea :
                                                 if wTP in dictBonus[iPlayer2]["zone3_2"] :
                                                         dictBonus[iPlayer2]["zone3_2"].remove(wTP)
-                                                        iBonus = pPlot.getBonusType(-1)
+                                                        iBonus = pPlot.getBonusType(TeamTypes.NO_TEAM)
                                                         if iBonus != -1 :
                                                                 dictBonus[iPlayer2]["nbBonus3"][iBonus] -= 1
                                                 elif wTP in dictBonus[iPlayer2]["zone3_1"] :
@@ -8104,7 +10453,7 @@ def StoAddStartBonuses():
 
                                                         if distA <= distB :
                                                                 dictBonus[iPlayer2]["zone3_1"].remove(wTP)
-                                                                iBonus = pPlot.getBonusType(-1)
+                                                                iBonus = pPlot.getBonusType(TeamTypes.NO_TEAM)
                                                                 if iBonus != -1 :
                                                                         dictBonus[iPlayer2]["nbBonus3"][iBonus] -= 1
                                                         if distA >= distB :
@@ -8118,20 +10467,16 @@ def StoAddStartBonuses():
 
                                                         if distA <= distB :
                                                                 dictBonus[iPlayer2]["zone3_2"].remove(wTP)
-                                                                iBonus = pPlot.getBonusType(-1)
+                                                                iBonus = pPlot.getBonusType(TeamTypes.NO_TEAM)
                                                                 if iBonus != -1 :
                                                                         dictBonus[iPlayer2]["nbBonus3"][iBonus] -= 1
                                                         if distA >= distB :
                                                                 bValid = False
                                 if not bValid : continue
 
-                                iBonus = pPlot.getBonusType(-1)
+                                iBonus = pPlot.getBonusType(TeamTypes.NO_TEAM)
                                 if iBonus != -1 :
                                         dictBonus[iPlayer]["nbBonus3"][iBonus] += 1
-                                        continue
-
-                                iImprovement = pPlot.getImprovementType()
-                                if (bGoody) and (iImprovement == iGoody) :
                                         continue
 
                                 if pPlot.isWater() :
@@ -8184,7 +10529,7 @@ def StoAddStartBonuses():
                                         if pPlot.canHaveBonus(iBonus, True) : dictBonus[iPlayer][sNewTag][iBonus][0].append(coord)
                                         elif pPlacement in lBonusExtend[iBonus] : dictBonus[iPlayer][sNewTag][iBonus][1].append(coord)
 
-##        # verifie region
+##        # verify region
 ##        for iPlayer in playerList :
 ##                for sTag in ["zone1", "zone2", "zone3_1", "zone3_2"] :
 ##                        sText = "Z" + sTag[4:] + "_P" + str(iPlayer)
@@ -8547,16 +10892,6 @@ def StoAddStartBonuses():
 
         writeLog("", True, logList)
 
-def startHumansOnSameTile():
-        iNorm = selGen["startlocs"]["normalize"]["startsametile"]
-        if iNorm == 2 :
-                return True
-        elif iNorm == 1 :
-                pass
-        elif idMap == "maze" :
-                return True
-	return False
-
 ##!_!## additional functions for map generation
 def StoAddGameElements():
         global dice
@@ -8572,6 +10907,13 @@ def StoAddGameElements():
         except :
                 writeLog("", False, ["", " message standart assignment : Error ..."])
                 writeError()
+
+        if is_BtS_FFH2 or is_BtS_FF :
+                try :
+                        addFFH2Units()
+                except :
+                        writeLog("", False, ["", " addFFH2Units : Error ..."])
+                        writeError()
 
         try :
                 addGold()
@@ -8611,6 +10953,11 @@ def StoAddGameElements():
 
         writeLog("", True, [""])
 
+def addFFH2Units():
+        barbPlayerID = gc.getBARBARIAN_PLAYER()
+        for iUnit, iX, iY in unitsToPlaceOnImprovements :
+                pUnit = spawnUnit(barbPlayerID, iUnit, iX, iY)
+
 def addAnimals():
         animPer = getRandSel(selGen["game"]["animals"]["animalspercent"], False)
 
@@ -8642,7 +10989,22 @@ def addAnimals():
                 writeLog("", False, ["", " addAnimals() : no animals to place ...", ""])
                 return
 
-        iBarbPlayer = gc.getBARBARIAN_PLAYER()
+        iAnimPlayer = gc.getBARBARIAN_PLAYER()
+        iRealBarbPlayer = gc.getBARBARIAN_PLAYER() # FF impl : prevent anim at range with barb units
+
+        if is_BtS_FF :
+                iAnimalCiv = -1
+                try :
+                        iAnimalCiv = gc.getDefineINT("ANIMAL_CIVILIZATION")
+                except :
+                        writeLog("", False, ["", " addAnimals() : FF running, don t find ANIMAL_CIVILIZATION", ""])
+                if iAnimalCiv != -1 :
+                        for iPlayer in range(gc.getMAX_PLAYERS()) :
+                                pPlayer = gc.getPlayer(iPlayer)
+                                if pPlayer.isNone() : continue
+                                if pPlayer.getCivilizationType() == iAnimalCiv :
+                                        iAnimPlayer = iPlayer
+                                        break
 
         powerAnim = {}
         maxPower = -1
@@ -8670,7 +11032,7 @@ def addAnimals():
                                 pUnit = pPlot.getUnit(0)
                                 if pUnit.isNone() :
                                         pass
-                                elif pUnit.getOwner() != iBarbPlayer :
+                                elif not pUnit.getOwner() in [iAnimPlayer, iRealBarbPlayer] :
                                         for dX in range(-1*animUnitRange, animUnitRange + 1) :
                                                 for dY in range(-1*animUnitRange, animUnitRange + 1) :
                                                         wTP = toWrap(iX + dX, iY + dY)
@@ -8719,7 +11081,7 @@ def addAnimals():
                                 if wTP != -1 :
                                         plotValues[wTP[0]][wTP[1]] = max(powerAnim[iAnimal] - iRing + 1, plotValues[wTP[0]][wTP[1]])
 
-                pUnit = spawnUnit(iBarbPlayer, iAnimal, iX, iY)
+                pUnit = spawnUnit(iAnimPlayer, iAnimal, iX, iY)
                 if pUnit != -1 :
                         if (animXP > 0) and (pUnit.canAcquirePromotionAny()) :
                                 pUnit.setExperience(animXP, -1)
@@ -8734,8 +11096,15 @@ def addAnimals():
 def addBarbCities():
         cityPer = getRandSel(selGen["game"]["barbcities"]["cityper"], False)
 
+        minBarbCities = 0
+        if is_BtS_FFH2 or is_BtS_FF :
+                i_GAMEOPTION_BARBARIAN_WORLD = gc.getInfoTypeForString("GAMEOPTION_BARBARIAN_WORLD")
+                if i_GAMEOPTION_BARBARIAN_WORLD != -1 :
+                        game.setOption(i_GAMEOPTION_BARBARIAN_WORLD, original_GAMEOPTION_BARBARIAN_WORLD)
+                        if game.isOption(i_GAMEOPTION_BARBARIAN_WORLD) : minBarbCities = len(playerList)
+
         logList = [""]
-        if cityPer == 0 :
+        if (cityPer == 0) and (minBarbCities == 0) :
                 writeLog("", False, ["", " addBarbCities : city percent = 0 ...", ""])
                 return
 
@@ -8752,6 +11121,7 @@ def addBarbCities():
         nbTilesMin = copy.copy(selGen["game"]["barbcities"]["nbtilesminisland"][0])
 
         logList.append(" addBarbCities : cityPer %r" %cityPer)
+        logList.append(" addBarbCities : minBarbCities %r" %minBarbCities)
         logList.append(" addBarbCities : cityBuildings %r" %cityBuildings)
         logList.append(" addBarbCities : BBRange %r" %BBRange)
         logList.append(" addBarbCities : BHRange %r" %BHRange)
@@ -8906,7 +11276,7 @@ def addBarbCities():
         areaCity = 0
         for iRing in range(BBRange) : areaCity += len(rings[iRing])
 
-        nbCityBarbEstim = max(1.0, (nbCountAreaPlots*cityPer/areaCity) - len(playerList))
+        nbCityBarbEstim = max(1.0, (nbCountAreaPlots*cityPer/areaCity) - len(playerList), minBarbCities)
         nbCityPerPlot = nbCityBarbEstim/len(lPlotsCity)
 
         # step calculation, in order to have a good region separation 
@@ -8967,7 +11337,7 @@ def addBarbCities():
                                                 wTP = toWrap(iX + dX, iY + dY)
                                                 if wTP != -1 :
                                                         pTempPlot = map.plot(wTP[0], wTP[1])
-                                                        if pTempPlot.getImprovementType() in lGoodyImprovements : pTempPlot.setImprovementType(-1)
+                                                        if pTempPlot.getImprovementType() in lGoodyImprovements : pTempPlot.setImprovementType(ImprovementTypes.NO_IMPROVEMENT)
 
                                 try :
                                         pCity = pPlayer.initCity(iX, iY)
@@ -8994,7 +11364,7 @@ def addBarbCities():
 
         # place the rest of the cities
         while True:
-                if lenPlotsToReach >= len(lPlotsCity) : break
+                if (lenPlotsToReach >= len(lPlotsCity)) and (minBarbCities <= nbCityPlaced) : break
                 if len(lPlotsCity) == 0 : break
 
                 iChoice = getRandNum(len(lPlotsCity), " FoR : barb city placement")
@@ -9006,7 +11376,7 @@ def addBarbCities():
                                 wTP = toWrap(iX + dX, iY + dY)
                                 if wTP != -1 :
                                         pTempPlot = map.plot(wTP[0], wTP[1])
-                                        if pTempPlot.getImprovementType() in lGoodyImprovements : pTempPlot.setImprovementType(-1)
+                                        if pTempPlot.getImprovementType() in lGoodyImprovements : pTempPlot.setImprovementType(ImprovementTypes.NO_IMPROVEMENT)
 
                 try :
                         pCity = pPlayer.initCity(iX, iY)
@@ -9118,12 +11488,20 @@ def addUnits():
         logList.append("")
         writeLog("", False, logList)
 
-def spawnUnit(iPlayer, iUnit, iX, iY):
+def spawnUnit(iPlayer, iUnit, iX, iY, lProms = []):
         pUnit = -1
         try :
                 pPlayer = gc.getPlayer(iPlayer)
-                if BtS : pUnit = pPlayer.initUnit(iUnit, iX, iY, UnitAITypes.NO_UNITAI, DirectionTypes.NO_DIRECTION)
-                else : pUnit = pPlayer.initUnit(iUnit, iX, iY, UnitAITypes.NO_UNITAI)
+                if BtS :
+                        pUnit = pPlayer.initUnit(iUnit, iX, iY, UnitAITypes.NO_UNITAI, DirectionTypes.NO_DIRECTION)
+                        for iProm in lProms : pUnit.setHasPromotion(iProm, True)
+                        if is_BtS_FFH2 :
+                                if gc.getUnitInfo(iUnit).getType() in XMLEntriesList["units"]["animland"] :
+                                        iHN = gc.getInfoTypeForString("PROMOTION_HIDDEN_NATIONALITY")
+                                        if iHN != 1 : pUnit.setHasPromotion(iHN, True)
+                else :
+                        pUnit = pPlayer.initUnit(iUnit, iX, iY, UnitAITypes.NO_UNITAI)
+                        for iProm in lProms : pUnit.setHasPromotion(iProm, True)
         except :
                 writeLog("", False, [" spawnUnit : init unit Error : player %r , unit %r , coords (%r, %r)" %(iPlayer, gc.getUnitInfo(iUnit).getType(), iX, iY)])
                 writeError()
@@ -9458,6 +11836,20 @@ def getListPlotsPerArea(cPlot, areaDict):
                         if cPlot in lList : return lList
         return []
 
+def getOceanMinSize() :
+        sizeMin = gc.getDefineINT("LAKE_MAX_AREA_SIZE") + 1
+        for iBuilding in range(gc.getNumBuildingInfos()) :
+                buildingXML = gc.getBuildingInfo(iBuilding)
+                if buildingXML.isWater() :
+                        size = buildingXML.getMinAreaSize()
+                        if size > sizeMin : sizeMin = int(size)
+        for iUnit in range(gc.getNumUnitInfos()) :
+                unitXML = gc.getUnitInfo(iUnit)
+                if unitXML.getDomainType() == DomainTypes.DOMAIN_SEA :
+                        size = unitXML.getMinAreaSize()
+                        if size > sizeMin : sizeMin = int(size)
+        return sizeMin
+
 def shuffleList(lList):
         if len(lList) <= 1 : return lList
         newList = []
@@ -9520,11 +11912,16 @@ def initWrap():
         global wrapX
         global wrapY
 
-        iWrap = getRandSel(selGen["maps"][idMap]["wrap"])
-	wrapX = False
-	if iWrap in [1, 2] : wrapX = True
-	wrapY = False
-	if iWrap == 2 : wrapY = True
+        if idMap == "tectonics" :
+                wrapX = True
+                if cmo[0] == 5 : wrapX = False
+                wrapY = False
+        else :
+                iWrap = getRandSel(selGen["maps"][idMap]["wrap"])
+                wrapX = False
+                if iWrap in [1, 2] : wrapX = True
+                wrapY = False
+                if iWrap == 2 : wrapY = True
 
         logList = []
         logList.append(" wrapX : %r" %wrapX)
@@ -9605,9 +12002,16 @@ def initPlayerList(bStartPlot = False):
         startPlots = {}
         startX = {}
         startY = {}
+
+        # for FF & Orbis -> not include in player.isEverAlive()
+        nb_Players = game.countCivPlayersEverAlive()
+        nb_tp = 0
+
         for iPlayer in range(gc.getMAX_PLAYERS()):
                 pPlayer = gc.getPlayer(iPlayer)
                 if pPlayer.isEverAlive() and (iPlayer != gc.getBARBARIAN_PLAYER()):
+                        nb_tp += 1
+                        if nb_tp > nb_Players : break
                         if bStartPlot :
                                 startPlot = pPlayer.getStartingPlot()
                                 if startPlot.isNone() : continue
@@ -9728,31 +12132,16 @@ def Cnp(n, p, l = None, res = None):
         return res
 
 ##!_!## globals set up
-def getXMLInfosMap():
-        XMLInfoTemp = {	"bonus": {"NUM": gc.getNumBonusInfos, "GET": gc.getBonusInfo, "DIR": "Terrain", "FILE": "CIV4BonusInfos.xml"},
-                        "improvement": {"NUM": gc.getNumImprovementInfos, "GET": gc.getImprovementInfo, "DIR": "Terrain", "FILE": "CIV4ImprovementInfos.xml"},
-                        "feature" : {"NUM": gc.getNumFeatureInfos, "GET": gc.getFeatureInfo, "DIR": "Terrain", "FILE": "CIV4FeatureInfos.xml"},
-                        "terrain": {"NUM": gc.getNumTerrainInfos, "GET": gc.getTerrainInfo, "DIR": "Terrain", "FILE": "CIV4TerrainInfos.xml"},
-                        "religion": {"NUM": gc.getNumReligionInfos, "GET": gc.getReligionInfo, "DIR": "GameInfo", "FILE": "CIV4ReligionInfo.xml"},
-                        "civic": {"NUM": gc.getNumCivicInfos, "GET": gc.getCivicInfo, "DIR": "GameInfo", "FILE": "CIV4CivicInfos.xml"},
-                        "tech": {"NUM": gc.getNumTechInfos, "GET": gc.getTechInfo, "DIR": "Technologies", "FILE": "CIV4TechInfos.xml"},
-                        "building": {"NUM": gc.getNumBuildingInfos, "GET": gc.getBuildingInfo, "DIR": "Buildings", "FILE": "CIV4BuildingInfos.xml"},
-                        "civilization": {"NUM": gc.getNumCivilizationInfos, "GET": gc.getCivilizationInfo, "DIR": "Civilizations", "FILE": "CIV4CivilizationInfos.xml"},
-                        "leader": {"NUM": gc.getNumLeaderHeadInfos, "GET": gc.getLeaderHeadInfo, "DIR": "Civilizations", "FILE": "CIV4LeaderHeadInfos.xml"},
-                        "trait": {"NUM": gc.getNumTraitInfos, "GET": gc.getTraitInfo, "DIR": "Civilizations", "FILE": "CIV4TraitInfos.xml"},
-                        "unit": {"NUM": gc.getNumUnitInfos, "GET": gc.getUnitInfo, "DIR": "Units", "FILE": "CIV4UnitInfos.xml"},
-                        "promotion": {"NUM":gc.getNumPromotionInfos, "GET": gc.getPromotionInfo, "DIR": "Units", "FILE": "CIV4PromotionInfos.xml"}
-                        }
-        return XMLInfoTemp
-
 def initMOD():
         global modName
         global modXMLPath
         global modPath
+        global modModularPath
         global XMLCustomAssetsPath
         modName = "None"
         modXMLPath = ""
         modPath = ""
+        modModularPath = ""
         XMLCustomAssetsPath = ""
 
         try :
@@ -9777,13 +12166,13 @@ def initMOD():
                                         if Wrds:
                                                 civFolder = "Civilization IV Warlords"
                                         if BtS:
-                                                civFolder = "Civilization IV Beyond the Sword" #!! need to be checked
+                                                civFolder = "Civilization IV Beyond the Sword"
                                         docPath = os.path.join(basePath, civFolder)
                                 else:
                                         userFolder = regRead(_winreg.HKEY_CURRENT_USER,"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders","Personal")
                                         civFolder = os.path.basename(regRead(_winreg.HKEY_LOCAL_MACHINE,"Software\\Firaxis Games\\Sid Meier's Civilization 4","INSTALLDIR"))
                                         if Wrds:
-                                                civFolder = "Warlords" #!! need to be checked
+                                                civFolder = "Warlords"
                                         if BtS:
                                                 civFolder = "Beyond the Sword"
                                         docPath = os.path.join(basePath, civFolder)
@@ -9831,26 +12220,36 @@ def initMOD():
                                         modINIFile = os.path.join(modPathTP, "%s.ini" %item)
                                         if os.path.isfile(modINIFile) :
                                                 iPublicMaps = parseINIFile(modINIFile, "AllowPublicMaps")
-                                                if iPublicMaps != 0 :
-                                                        modsInfo[item] = {}
-                                                        modsInfo[item]["modPath"] = modPathTP
 
-                                                        modsInfo[item]["modXMLPath"] = ""
-                                                        xmlFolder = os.path.join(modPathTP, "Assets", "XML")
-                                                        if os.path.isdir(xmlFolder) :
-                                                                modsInfo[item]["modXMLPath"] = xmlFolder
+                                                modsInfo[item] = {}
+                                                modsInfo[item]["modPath"] = modPathTP
+                                                modsInfo[item]["iPublicMaps"] = iPublicMaps
 
-                                                        modsInfo[item]["isCustomAssets"] = True
-                                                        iCustomAssets = parseINIFile(modINIFile, "NoCustomAssets")
-                                                        if iCustomAssets == 1 :
-                                                                modsInfo[item]["isCustomAssets"] = False
+                                                modsInfo[item]["modXMLPath"] = ""
+                                                xmlFolder = os.path.join(modPathTP, "Assets", "XML")
+                                                if os.path.isdir(xmlFolder) :
+                                                        modsInfo[item]["modXMLPath"] = xmlFolder
+
+                                                modsInfo[item]["isCustomAssets"] = True
+                                                iCustomAssets = parseINIFile(modINIFile, "NoCustomAssets")
+                                                if iCustomAssets == 1 :
+                                                        modsInfo[item]["isCustomAssets"] = False
+
+                                                modsInfo[item]["modModulesPath"] = ""
+                                                iModular = parseINIFile(modINIFile, "ModularLoading")
+                                                if iModular == 1 :
+                                                        modulesFolder = os.path.join(modPathTP, "Assets", "Modules")
+                                                        if os.path.isdir(modulesFolder) :
+                                                                modsInfo[item]["modModulesPath"] = modulesFolder
 
                 logList = [""]
                 for item in modsInfo.keys() :
                         logList.append(" mod : %r" %item)
-                        logList.append(" modPath      : %r" %modsInfo[item]["modPath"])
-                        logList.append(" modXMLPath   : %r" %modsInfo[item]["modXMLPath"])
-                        logList.append(" CustomAssets : %r" %modsInfo[item]["isCustomAssets"])
+                        logList.append(" modPath        : %r" %modsInfo[item]["modPath"])
+                        logList.append(" bPublicMaps    : %r" %modsInfo[item]["iPublicMaps"])
+                        logList.append(" modXMLPath     : %r" %modsInfo[item]["modXMLPath"])
+                        logList.append(" modModulesPath : %r" %modsInfo[item]["modModulesPath"])
+                        logList.append(" CustomAssets   : %r" %modsInfo[item]["isCustomAssets"])
                         logList.append("")
                 logList.append("")
                 writeLog("", False, logList)
@@ -9877,6 +12276,7 @@ def initMOD():
                                         modName = modNameTP
                                         modXMLPath = modsInfo[modName]["modXMLPath"]
                                         modPath = modsInfo[modName]["modPath"]
+                                        modModularPath = modsInfo[modName]["modModulesPath"]
                                         if modsInfo[modName]["isCustomAssets"] : XMLCustomAssetsPath = XMLCustomAssetsFolder
                                         writeLog("", True, ["", " MOD name recognized : %s" %modName])
                                 else :
@@ -9945,20 +12345,23 @@ def initMOD():
                         writeLog("", False, ["", " Check info : %s" %info, ""])
 
                         elementList = [getSText(XMLInfosMap[info]["GET"](i).getType()) for i in range(XMLInfosMap[info]["NUM"]())]
+                        elementList.sort()
 
                         xmlDir = XMLInfosMap[info]["DIR"]
                         xmlFile = XMLInfosMap[info]["FILE"]
 
-                        parsedElementList = []
+                        parsedElementDict = {}
                         bDefaultElementList = False
 
                         #first check if the list of elements is default
                         for pathDef in defaultXMLFolders :
                                 pathTP = os.path.join(pathDef, xmlDir, xmlFile)
                                 if os.path.isfile(pathTP) :
-                                        parsedElementList = parseXMLFile(pathTP)
+                                        parsedElementDict = parseXMLFile(pathTP)
                                         break
 
+                        parsedElementList = parsedElementDict.keys()
+                        parsedElementList.sort()
                         if elementList == parsedElementList :
                                 bDefaultElementList = True
                                 writeLog("", False, [" default settings for %s" %info, ""])
@@ -9969,7 +12372,9 @@ def initMOD():
                         if XMLCustomAssetsFolder != "" :
                                 pathTP = os.path.join(XMLCustomAssetsFolder, xmlDir, xmlFile)
                                 if os.path.isfile(pathTP) :
-                                        parsedElementList = parseXMLFile(pathTP)
+                                        parsedElementDict = parseXMLFile(pathTP)
+                                        parsedElementList = parsedElementDict.keys()
+                                        parsedElementList.sort()
 
                                         if elementList == parsedElementList :
                                                 bDefaultElementList = True
@@ -9991,7 +12396,12 @@ def initMOD():
                                         continue
                                 pathTP = os.path.join(xmlFolder, xmlDir, xmlFile)
                                 if os.path.isfile(pathTP) :
-                                        parsedElementList = parseXMLFile(pathTP)
+                                        CAPath = ""
+                                        if modsInfo[modNameTP]["isCustomAssets"] : CAPath = XMLCustomAssetsFolder
+
+                                        parsedElementDict = getXMLValues(info, "", "", CAPath, xmlFolder, modsInfo[modNameTP]["modModulesPath"])
+                                        parsedElementList = parsedElementDict.keys()
+                                        parsedElementList.sort()
 
                                         if elementList == parsedElementList :
                                                 writeLog("", False, [" mod %s settings for %s" %(modNameTP, info)])
@@ -10010,6 +12420,7 @@ def initMOD():
                                 modXMLPath = modsInfo[modName]["modXMLPath"]
                                 modPath = modsInfo[modName]["modPath"]
                                 if modsInfo[modName]["isCustomAssets"] : XMLCustomAssetsPath = XMLCustomAssetsFolder
+                                modModularPath = modsInfo[modName]["modModulesPath"]
                                 writeLog("", True, ["", " MOD name recognized with xml : %s" %modName])
                         elif len(modList) > 1 :
                                 writeLog("", True, ["", " multiple mods match xml files , mod not chosen : %r" %modList])
@@ -10026,15 +12437,48 @@ def initMOD():
 
 def recognizeMOD() :
         global is_BtS_FFH2
+        global is_BtS_FF
+        global is_BtS_ROM
 
-        is_BtS_FFH2 = False
-        if BtS and "Fall from Heaven 2" in modName : is_BtS_FFH2 = True
-        writeLog("", False, ["", " recognizeMOD : running BtS FFH2 : %r" %is_BtS_FFH2, ""])
+        if BtS :
+
+                is_BtS_FFH2 = False
+                for mod_den in FfH_Mods :
+                        if mod_den in modName : is_BtS_FFH2 = True
+                        
+                is_BtS_FF = False
+                for mod_den in FF_Mods :
+                        if mod_den in modName : is_BtS_FF = True
+                        
+                is_BtS_ROM = False
+                for mod_den in RoM_Mods :
+                        if mod_den in modName : is_BtS_ROM = True
+
+        writeLog("", False, ["", " recognizeMOD : running BtS FFH2 : %r" %is_BtS_FFH2, " recognizeMOD : running BtS FF : %r" %is_BtS_FF, " recognizeMOD : running BtS Rise of Mankind : %r" %is_BtS_ROM, ""])
         
+def getXMLInfosMap():
+        XMLInfoTemp = {	"bonus": {"NUM": gc.getNumBonusInfos, "GET": gc.getBonusInfo, "DIR": "Terrain", "FILE": "CIV4BonusInfos.xml"},
+                        "improvement": {"NUM": gc.getNumImprovementInfos, "GET": gc.getImprovementInfo, "DIR": "Terrain", "FILE": "CIV4ImprovementInfos.xml"},
+                        "feature" : {"NUM": gc.getNumFeatureInfos, "GET": gc.getFeatureInfo, "DIR": "Terrain", "FILE": "CIV4FeatureInfos.xml"},
+                        "terrain": {"NUM": gc.getNumTerrainInfos, "GET": gc.getTerrainInfo, "DIR": "Terrain", "FILE": "CIV4TerrainInfos.xml"},
+                        "religion": {"NUM": gc.getNumReligionInfos, "GET": gc.getReligionInfo, "DIR": "GameInfo", "FILE": "CIV4ReligionInfo.xml"},
+                        "civic": {"NUM": gc.getNumCivicInfos, "GET": gc.getCivicInfo, "DIR": "GameInfo", "FILE": "CIV4CivicInfos.xml"},
+                        "tech": {"NUM": gc.getNumTechInfos, "GET": gc.getTechInfo, "DIR": "Technologies", "FILE": "CIV4TechInfos.xml"},
+                        "building": {"NUM": gc.getNumBuildingInfos, "GET": gc.getBuildingInfo, "DIR": "Buildings", "FILE": "CIV4BuildingInfos.xml"},
+                        "civilization": {"NUM": gc.getNumCivilizationInfos, "GET": gc.getCivilizationInfo, "DIR": "Civilizations", "FILE": "CIV4CivilizationInfos.xml"},
+                        "leader": {"NUM": gc.getNumLeaderHeadInfos, "GET": gc.getLeaderHeadInfo, "DIR": "Civilizations", "FILE": "CIV4LeaderHeadInfos.xml"},
+                        "trait": {"NUM": gc.getNumTraitInfos, "GET": gc.getTraitInfo, "DIR": "Civilizations", "FILE": "CIV4TraitInfos.xml"},
+                        "unit": {"NUM": gc.getNumUnitInfos, "GET": gc.getUnitInfo, "DIR": "Units", "FILE": "CIV4UnitInfos.xml"},
+                        "promotion": {"NUM":gc.getNumPromotionInfos, "GET": gc.getPromotionInfo, "DIR": "Units", "FILE": "CIV4PromotionInfos.xml"} ,
+                        "world": {"NUM":gc.getNumWorldInfos, "GET": gc.getWorldInfo, "DIR": "GameInfo", "FILE": "CIV4WorldInfo.xml"}
+                        }
+        return XMLInfoTemp
+
 def parseINIFile(filePath, sTag):
         try :
                 Sfile = open(filePath, "r")
                 lLinesFile = Sfile.readlines()
+                Sfile.close()
                 for item in lLinesFile :
                         if item[0:len(sTag)] == sTag :
                                 if "1" in item[len(sTag):] : return 1
@@ -10045,36 +12489,62 @@ def parseINIFile(filePath, sTag):
                 writeError()
         return -1
 
-def getXMLValues(XMLinfo, sTagBegin, sTagEnd):
+def getXMLValues(XMLinfo, sTagBegin, sTagEnd, XMLCAPath = -1, MXMLPath = -1, MMPath = -1):
         rDict = {}
         try :
                 XMLInfosMap = getXMLInfosMap()
                 xmlDir = XMLInfosMap[XMLinfo]["DIR"]
                 xmlFile = XMLInfosMap[XMLinfo]["FILE"]
-                if XMLCustomAssetsPath != "" :
-                        pathTP = os.path.join(XMLCustomAssetsPath, xmlDir, xmlFile)
+
+                if XMLCAPath == -1 : XMLCAPath = XMLCustomAssetsPath
+                if MXMLPath == -1 : MXMLPath = modXMLPath
+                if MMPath == -1 : MMPath = modModularPath
+
+                if XMLCAPath != "" :
+                        pathTP = os.path.join(XMLCAPath, xmlDir, xmlFile)
                         if os.path.isfile(pathTP) :
                                 rDict = parseXMLFile(pathTP, sTagBegin, sTagEnd)
-                elif modXMLPath != "" :
-                        pathTP = os.path.join(modXMLPath, xmlDir, xmlFile)
+                                writeLog("", False, [" getXMLValues : use custom assets file (%s , %r , %r, %r, %r, %r)" %(XMLinfo, sTagBegin, sTagEnd, XMLCAPath, MXMLPath, MMPath)])
+
+                if (MXMLPath != "") and (rDict == {}) :
+                        pathTP = os.path.join(MXMLPath, xmlDir, xmlFile)
                         if os.path.isfile(pathTP) :
                                 rDict = parseXMLFile(pathTP, sTagBegin, sTagEnd)
+                                writeLog("", False, [" getXMLValues : use mod xml file (%s , %r , %r, %r, %r, %r)" %(XMLinfo, sTagBegin, sTagEnd, XMLCAPath, MXMLPath, MMPath)])
+
+                if MMPath != "" :
+                        writeLog("", False, [" getXMLValues : use modular search (%s , %r , %r, %r, %r, %r)" %(XMLinfo, sTagBegin, sTagEnd, XMLCAPath, MXMLPath, MMPath)])
+                        def loopOverFiles(basePath):
+                                listDir = [ folder for folder in os.listdir(basePath) if os.path.isdir(os.path.join(basePath, folder)) ]
+                                listDir = [ getSText(folder) for folder in listDir ]
+                                listDir.sort()
+                                for folder in listDir :
+                                        loopOverFiles(os.path.join(basePath, folder))
+                                listFiles = [ files for files in os.listdir(basePath) if os.path.isfile(os.path.join(basePath, files)) ]
+                                listFiles = [ getSText(files) for files in listFiles ]
+                                listFiles.sort()
+                                for files in listFiles :
+                                        if not xmlFile in files : continue
+                                        rResTemp = parseXMLFile(os.path.join(basePath, files), sTagBegin, sTagEnd)
+                                        for item in rResTemp.keys() :
+                                                rDict[item] = copy.copy(rResTemp[item])
+                        loopOverFiles(MMPath)
         except :
-                writeLog("", False, [" getXMLValues ERROR : %s , %s , %s" %(XMLinfo, sTagBegin, sTagEnd)])
+                writeLog("", False, [" getXMLValues ERROR : %s , %r , %r, %r, %r, %r" %(XMLinfo, sTagBegin, sTagEnd, XMLCAPath, MXMLPath, MMPath)])
                 writeError()
         return rDict
 
 def parseXMLFile(filePath, sTagBegin="", sTagEnd=""):
-        if sTagBegin == "" : result = []
-        else : result = {}
+        result = {}
         try :
                 Sfile = open(filePath, "r")
                 sTextFile = Sfile.read()
+                Sfile.close()
                 textList = sTextFile.split("<Type>")[1:]
                 for item in textList :
                         elementType = item[0:item.index("</Type>")]
                         if sTagBegin == "" :
-                                result.append(elementType)
+                                result[elementType] = ""
                         else :
                                 if sTagBegin in item :
                                         itemTp = item.split(sTagBegin)[1]
@@ -10089,9 +12559,12 @@ def parseXMLFile(filePath, sTagBegin="", sTagEnd=""):
 
 def initXMLLists(bForce = False):
         global XMLEntriesList
+        global parsedXMLValuesEntries
 
         # make the list of xml values for resources , units , tech , etc ...
         if (XMLEntriesList != {}) and (not bForce) : return
+
+        parsedXMLValuesEntries = {}
 
         # resources lists
         XMLEntriesList["list"] = []
@@ -10103,7 +12576,12 @@ def initXMLLists(bForce = False):
         XMLEntriesList["land"] = []
         XMLEntriesList["water"] = []
 
-        barbarianCivXML = gc.getCivilizationInfo( gc.getInfoTypeForString("CIVILIZATION_BARBARIAN") )
+        iBarbCiv = gc.getDefineINT("BARBARIAN_CIVILIZATION")
+
+        bBarbCiv = bool(iBarbCiv != -1)
+
+        if bBarbCiv :
+                barbarianCivXML = gc.getCivilizationInfo(iBarbCiv)
 
 	for iBonus in range(gc.getNumBonusInfos()) :
                 bonusXML = gc.getBonusInfo(iBonus)
@@ -10145,24 +12623,25 @@ def initXMLLists(bForce = False):
         # building lists
         XMLEntriesList["buildingsbarb"] = []
 
-        for iBuildingClass in range(gc.getNumBuildingClassInfos()) :
-                buildingClassXML = gc.getBuildingClassInfo(iBuildingClass)
+        if bBarbCiv :
+                for iBuildingClass in range(gc.getNumBuildingClassInfos()) :
+                        buildingClassXML = gc.getBuildingClassInfo(iBuildingClass)
 
-                if buildingClassXML.getMaxGlobalInstances() != -1 : continue
-                if buildingClassXML.getMaxPlayerInstances() != -1 : continue
+                        if buildingClassXML.getMaxGlobalInstances() != -1 : continue
+                        if buildingClassXML.getMaxPlayerInstances() != -1 : continue
 
-                iBuilding = barbarianCivXML.getCivilizationBuildings(iBuildingClass)
+                        iBuilding = barbarianCivXML.getCivilizationBuildings(iBuildingClass)
 
-                if iBuilding == -1 : continue
+                        if iBuilding == -1 : continue
 
-                buildingXML = gc.getBuildingInfo(iBuilding)
+                        buildingXML = gc.getBuildingInfo(iBuilding)
 
-                if buildingXML.getDefenseModifier() <= 0 : continue
-                if buildingXML.getProductionCost() <= 0 : continue
+                        if buildingXML.getDefenseModifier() <= 0 : continue
+                        if buildingXML.getProductionCost() <= 0 : continue
 
-                buildingType = getSText(buildingXML.getType())
-                XMLEntriesList["list"].append(str(buildingType))
-                XMLEntriesList["buildingsbarb"].append(str(buildingType))
+                        buildingType = getSText(buildingXML.getType())
+                        XMLEntriesList["list"].append(str(buildingType))
+                        XMLEntriesList["buildingsbarb"].append(str(buildingType))
 
         # tech lists
         XMLEntriesList["techslist"] = []
@@ -10343,14 +12822,15 @@ def initXMLLists(bForce = False):
                         elif unitDomain == DomainTypes.DOMAIN_AIR : XMLEntriesList["units"]["airdd"].append(str(unitType))
                         else : XMLEntriesList["units"]["otherdd"].append(str(unitType))
 
-                        if (not bPeaceUnit) and (unitDomain == DomainTypes.DOMAIN_LAND) and (not unitXML.isAnimal()):
-                                if barbarianCivXML.getCivilizationUnits(iUnitClass) == iUnit :
-                                        if unitDefaultAI == UnitAITypes.UNITAI_CITY_DEFENSE :
-                                                XMLEntriesList["units"]["barbdefender"].append(str(unitType))
-                                        elif unitXML.getUnitAIType(UnitAITypes.UNITAI_CITY_DEFENSE) :
-                                                XMLEntriesList["units"]["barbfight"].append(str(unitType))
-                                        else :
-                                                tempBarbList.append(str(unitType))
+                        if bBarbCiv :
+                                if (not bPeaceUnit) and (unitDomain == DomainTypes.DOMAIN_LAND) and (not unitXML.isAnimal()):
+                                        if barbarianCivXML.getCivilizationUnits(iUnitClass) == iUnit :
+                                                if unitDefaultAI == UnitAITypes.UNITAI_CITY_DEFENSE :
+                                                        XMLEntriesList["units"]["barbdefender"].append(str(unitType))
+                                                elif unitXML.getUnitAIType(UnitAITypes.UNITAI_CITY_DEFENSE) :
+                                                        XMLEntriesList["units"]["barbfight"].append(str(unitType))
+                                                else :
+                                                        tempBarbList.append(str(unitType))
 
         if XMLEntriesList["units"]["barbdefender"] == [] :
                 XMLEntriesList["units"]["barbdefender"] = copy.deepcopy(XMLEntriesList["units"]["barbfight"])
@@ -10359,7 +12839,128 @@ def initXMLLists(bForce = False):
         if XMLEntriesList["units"]["barbfight"] == [] :
                 XMLEntriesList["units"]["barbfight"] = copy.deepcopy(tempBarbList)
 
+        if is_BtS_FFH2 or is_BtS_FF :
+                # lairs and unique improvements list for FfH 2
+                XMLEntriesList["improvements"] = []
+                XMLEntriesList["lairs"] = []
+                XMLEntriesList["uniqueimprovements"] = []
+                XMLEntriesList["uniqueimprovementswater"] = []
+                XMLEntriesList["bonusconvert"] = [] # description only
+                XMLEntriesList["unitspawn"] = [] # decription only
+
+                dictLairs = getXMLValues("improvement", "<iAppearanceProbability>", "</iAppearanceProbability>")
+                dictUnitsSpawn = getXMLValues("improvement", "<SpawnUnitType>", "</SpawnUnitType>")
+                dictBonuses = getXMLValues("improvement", "<BonusConvert>", "</BonusConvert>")
+                for sType in dictLairs.keys() :
+                        if gc.getInfoTypeForString(sType) == -1 :
+                                writeLog("", False, [" XMLEntriesList ERROR, lairs : sType not recognized %r" %sType])
+                                continue
+                        if dictLairs[sType] == "" : continue
+
+                        try :
+                                iProb = int(dictLairs[sType])
+                        except :
+                                writeLog("", False, [" XMLEntriesList ERROR, lairs : prob can't be converted to int %r" %(dictLairs[sType], )])
+                                continue
+
+                        if iProb > 0 :
+                                XMLEntriesList["improvements"].append(str(sType))
+                                XMLEntriesList["lairs"].append(str(sType))
+                                XMLEntriesList["list"].append(str(sType))
+                                parsedXMLValuesEntries[sType] = {}
+                                parsedXMLValuesEntries[sType]["iAppearanceProbability"] = int(iProb)
+                                parsedXMLValuesEntries[sType]["SpawnUnitType"] = ""
+                                parsedXMLValuesEntries[sType]["BonusConvert"] = ""
+                                
+                                if sType in dictUnitsSpawn.keys() :
+                                        if dictUnitsSpawn[sType] == "" : pass
+                                        if gc.getInfoTypeForString(dictUnitsSpawn[sType]) == -1 : pass
+                                        else :
+                                                if not dictUnitsSpawn[sType] in XMLEntriesList["list"] :
+                                                        XMLEntriesList["list"].append(str(dictUnitsSpawn[sType]))
+                                                        XMLEntriesList["unitspawn"].append(str(dictUnitsSpawn[sType]))
+
+                                                parsedXMLValuesEntries[sType]["SpawnUnitType"] = copy.copy(dictUnitsSpawn[sType])
+
+                                if sType in dictBonuses.keys() :
+                                        if dictBonuses[sType] == "" : pass
+                                        if gc.getInfoTypeForString(dictBonuses[sType]) == -1 : pass
+                                        else :
+                                                if not dictBonuses[sType] in XMLEntriesList["list"] :
+                                                        XMLEntriesList["list"].append(str(dictBonuses[sType]))
+                                                        XMLEntriesList["bonusconvert"].append(str(dictBonuses[sType]))
+
+                                                parsedXMLValuesEntries[sType]["BonusConvert"] = copy.copy(dictBonuses[sType])
+
+                dictUniques = getXMLValues("improvement", "<bUnique>", "</bUnique>")
+                for sType in dictUniques.keys() :
+                        if gc.getInfoTypeForString(sType) == -1 :
+                                writeLog("", False, [" XMLEntriesList ERROR, uniqueimprovements : sType not recognized %r" %sType])
+                                continue
+                        if dictUniques[sType] == "" : continue
+
+                        try :
+                                iUnique = int(dictUniques[sType])
+                        except :
+                                writeLog("", False, [" XMLEntriesList ERROR, uniqueimprovements : iUnique can't be converted to int %r" %(dictUniques[sType], )])
+                                continue
+
+                        if iUnique == 1 :
+                                XMLEntriesList["uniqueimprovements"].append(str(sType))
+                                if sType in XMLEntriesList["improvements"] : continue
+                                XMLEntriesList["improvements"].append(str(sType))
+                                XMLEntriesList["list"].append(str(sType))
+                                if gc.getImprovementInfo(gc.getInfoTypeForString(sType)).isWater() : XMLEntriesList["uniqueimprovementswater"].append(str(sType))
+                                parsedXMLValuesEntries[sType] = {}
+                                parsedXMLValuesEntries[sType]["iAppearanceProbability"] = 0
+                                parsedXMLValuesEntries[sType]["SpawnUnitType"] = ""
+                                parsedXMLValuesEntries[sType]["BonusConvert"] = ""
+                                
+                                if sType in dictUnitsSpawn.keys() :
+                                        if dictUnitsSpawn[sType] == "" : pass
+                                        if gc.getInfoTypeForString(dictUnitsSpawn[sType]) == -1 : pass
+                                        else :
+                                                if not dictUnitsSpawn[sType] in XMLEntriesList["list"] :
+                                                        XMLEntriesList["list"].append(str(dictUnitsSpawn[sType]))
+                                                        XMLEntriesList["unitspawn"].append(str(dictUnitsSpawn[sType]))
+
+                                                parsedXMLValuesEntries[sType]["SpawnUnitType"] = copy.copy(dictUnitsSpawn[sType])
+
+                                if sType in dictBonuses.keys() :
+                                        if dictBonuses[sType] == "" : pass
+                                        if gc.getInfoTypeForString(dictBonuses[sType]) == -1 : pass
+                                        else :
+                                                if not dictBonuses[sType] in XMLEntriesList["list"] :
+                                                        XMLEntriesList["list"].append(str(dictBonuses[sType]))
+                                                        XMLEntriesList["bonusconvert"].append(str(dictBonuses[sType]))
+
+                                                parsedXMLValuesEntries[sType]["BonusConvert"] = copy.copy(dictBonuses[sType])
+
+                # world infos for unique features chances
+                XMLEntriesList["worldinfos"] = []
+                dictUniqueChances = getXMLValues("world", "<iUniqueFeatureChance>", "</iUniqueFeatureChance>")
+                for iWorldInfo in range(gc.getNumWorldInfos()) :
+                        worldInfoXML = gc.getWorldInfo(iWorldInfo)
+                        worldInfoType = getSText(worldInfoXML.getType())
+                        XMLEntriesList["list"].append(str(worldInfoType))
+                        XMLEntriesList["worldinfos"].append(str(worldInfoType))
+                        parsedXMLValuesEntries[worldInfoType] = {}
+                        parsedXMLValuesEntries[worldInfoType]["iUniqueFeatureChance"] = 0
+
+                        if worldInfoType in dictUniqueChances.keys() :
+
+                                if dictUniqueChances[worldInfoType] == "" : continue
+
+                                try :
+                                        iUniqueChance = int(dictUniqueChances[worldInfoType])
+                                except :
+                                        writeLog("", False, [" XMLEntriesList ERROR, worldinfos : iUniqueChance can't be converted to int %r" %(dictUniqueChances[worldInfoType], )])
+                                        continue
+
+                                parsedXMLValuesEntries[worldInfoType]["iUniqueFeatureChance"] = int(iUniqueChance)
+
         logList = []
+        logList.append("")
         for iKey in XMLEntriesList.keys() :
                 if type(XMLEntriesList[iKey]) is types.DictType :
                         logList.append("")
@@ -10367,7 +12968,7 @@ def initXMLLists(bForce = False):
                                 logList.append(" %s , %s : %r" %(iKey, iKey2, XMLEntriesList[iKey][iKey2]))
                         logList.append("")
                 else :
-                                logList.append(" %s : %r" %(iKey, XMLEntriesList[iKey]))
+                        logList.append(" %s : %r" %(iKey, XMLEntriesList[iKey]))
         writeLog("initXMLLists", True, logList)
 
 def initXMLDescriptions() :
@@ -10399,6 +13000,42 @@ def initXMLDescriptions() :
         if initialLanguage != language :
                 CyGame().setCurrentLanguage(language)
 
+        # improvement descriptions
+        if is_BtS_FFH2 or is_BtS_FF :
+                for improvementType in XMLEntriesList["improvements"] :
+
+                        improvementXML = gc.getImprovementInfo(gc.getInfoTypeForString(improvementType))
+
+                        try :
+                                sDescription = getSText(improvementXML.getDescription())
+                        except :
+                                writeLog("", False, ["an error to convert description , language : %d , type : %s" %(language, improvementType), ""])
+                                sDescription = ""
+
+                        if (sDescription == "") or (sDescription[0:8] == "TXT_KEY_"):
+                                sDescription = str(improvementType)[12:]
+                                sDescription = sDescription.replace("_", " ")
+                                sDescription = sDescription.capitalize()
+                        XMLDescriptions[str(improvementType)] = str(sDescription)
+
+        # world info descriptions
+        if is_BtS_FFH2 or is_BtS_FF :
+                for worldInfoType in XMLEntriesList["worldinfos"] :
+
+                        worldInfoXML = gc.getWorldInfo(gc.getInfoTypeForString(worldInfoType))
+
+                        try :
+                                sDescription = getSText(worldInfoXML.getDescription())
+                        except :
+                                writeLog("", False, ["an error to convert description , language : %d , type : %s" %(language, worldInfoType), ""])
+                                sDescription = ""
+
+                        if (sDescription == "") or (sDescription[0:8] == "TXT_KEY_"):
+                                sDescription = str(worldInfoType)[10:]
+                                sDescription = sDescription.replace("_", " ")
+                                sDescription = sDescription.capitalize()
+                        XMLDescriptions[str(worldInfoType)] = str(sDescription)
+
         # resources descriptions
         for bonusType in XMLEntriesList["reslist"] :
 
@@ -10410,11 +13047,28 @@ def initXMLDescriptions() :
                         writeLog("", False, ["an error to convert description , language : %d , type : %s" %(language, bonusType), ""])
                         sDescription = ""
 
-                if (sDescription == "") or (sDescription[0:9] == "TXT_KEY_"):
+                if (sDescription == "") or (sDescription[0:8] == "TXT_KEY_"):
                         sDescription = str(bonusType)[6:]
                         sDescription = sDescription.replace("_", " ")
                         sDescription = sDescription.capitalize()
                 XMLDescriptions[str(bonusType)] = str(sDescription)
+
+        if is_BtS_FFH2 or is_BtS_FF :
+                for bonusType in XMLEntriesList["bonusconvert"] :
+
+                        bonusXML = gc.getBonusInfo(gc.getInfoTypeForString(bonusType))
+
+                        try :
+                                sDescription = getSText(bonusXML.getDescription())
+                        except :
+                                writeLog("", False, ["an error to convert description , language : %d , type : %s" %(language, bonusType), ""])
+                                sDescription = ""
+
+                        if (sDescription == "") or (sDescription[0:8] == "TXT_KEY_"):
+                                sDescription = str(bonusType)[6:]
+                                sDescription = sDescription.replace("_", " ")
+                                sDescription = sDescription.capitalize()
+                        XMLDescriptions[str(bonusType)] = str(sDescription)
 
         # building descriptions
         for buldingType in XMLEntriesList["buildingsbarb"] :
@@ -10427,7 +13081,7 @@ def initXMLDescriptions() :
                         writeLog("", False, ["an error to convert description , language : %d , type : %s" %(language, buldingType), ""])
                         sDescription = ""
 
-                if (sDescription == "") or (sDescription[0:9] == "TXT_KEY_"):
+                if (sDescription == "") or (sDescription[0:8] == "TXT_KEY_"):
                         sDescription = str(buldingType)[9:]
                         sDescription = sDescription.replace("_", " ")
                         sDescription = sDescription.capitalize()
@@ -10444,7 +13098,7 @@ def initXMLDescriptions() :
                         writeLog("", False, ["an error to convert description , language : %d , type : %s" %(language, techType), ""])
                         sDescription = ""
 
-                if (sDescription == "") or (sDescription[0:9] == "TXT_KEY_"):
+                if (sDescription == "") or (sDescription[0:8] == "TXT_KEY_"):
                         sDescription = str(techType)[5:]
                         sDescription = sDescription.replace("_", " ")
                         sDescription = sDescription.capitalize()
@@ -10461,7 +13115,7 @@ def initXMLDescriptions() :
                         writeLog("", False, ["an error to convert description , language : %d , type : %s" %(language, combatType), ""])
                         sDescription = ""
 
-                if (sDescription == "") or (sDescription[0:9] == "TXT_KEY_"):
+                if (sDescription == "") or (sDescription[0:8] == "TXT_KEY_"):
                         sDescription = str(combatType)[11:]
                         sDescription = sDescription.replace("_", " ")
                         sDescription = sDescription.capitalize()
@@ -10478,7 +13132,7 @@ def initXMLDescriptions() :
                         writeLog("", False, ["an error to convert description , language : %d , type : %s" %(language, unitClassType), ""])
                         sDescription = ""
 
-                if (sDescription == "") or (sDescription[0:9] == "TXT_KEY_"):
+                if (sDescription == "") or (sDescription[0:8] == "TXT_KEY_"):
                         sDescription = str(unitClassType)[10:]
                         sDescription = sDescription.replace("_", " ")
                         sDescription = sDescription.capitalize()
@@ -10495,7 +13149,7 @@ def initXMLDescriptions() :
                         writeLog("", False, ["an error to convert description , language : %d , type : %s" %(language, unitType), ""])
                         sDescription = ""
 
-                if (sDescription == "") or (sDescription[0:9] == "TXT_KEY_"):
+                if (sDescription == "") or (sDescription[0:8] == "TXT_KEY_"):
                         sDescription = str(unitType)[5:]
                         sDescription = sDescription.replace("_", " ")
                         sDescription = sDescription.capitalize()
@@ -10528,6 +13182,23 @@ def initXMLDescriptions() :
                         sDescription += "(%s)" %" , ".join(sList)
                         
                 XMLDescriptions[str(unitType)] = str(sDescription)
+
+        if is_BtS_FFH2 or is_BtS_FF :
+                for unitType in XMLEntriesList["unitspawn"] :
+
+                        unitXML = gc.getUnitInfo(gc.getInfoTypeForString(unitType))
+
+                        try :
+                                sDescription = getSText(unitXML.getDescription())
+                        except :
+                                writeLog("", False, ["an error to convert description , language : %d , type : %s" %(language, unitType), ""])
+                                sDescription = ""
+
+                        if (sDescription == "") or (sDescription[0:8] == "TXT_KEY_"):
+                                sDescription = str(unitType)[5:]
+                                sDescription = sDescription.replace("_", " ")
+                                sDescription = sDescription.capitalize()
+                        XMLDescriptions[str(unitType)] = str(sDescription)
 
         if initialLanguage != language :
                 CyGame().setCurrentLanguage(initialLanguage)
@@ -10727,14 +13398,9 @@ def initVersions():
         global Wrds
         global BorW
 
-        BtS = False
-        if (os.path.basename(os.getcwd()) == "Beyond the Sword") : BtS = True
-
-        Wrds = False
-        if (os.path.basename(os.getcwd()) == "Warlords") : Wrds = True
-        
-        BorW = False
-        if BtS or Wrds : BorW = True
+        BtS = bool(os.path.basename(os.getcwd()).lower() == "beyond the sword")
+        Wrds = bool(os.path.basename(os.getcwd()).lower() == "warlords")
+        BorW = bool(BtS or Wrds)
 
 def Sto_FullOfResources_AddGameElements_Event_Begin(argsList):
         return
@@ -10743,35 +13409,108 @@ def Sto_FullOfResources_AddGameElements_Event_Apply(playerID, userData, popupRet
         StoAddGameElements()
         return initStoRemoveEvent()
 
+def Sto_FullOfResources_AddGameElements_Event_OnModNetMessage(argsList):
+        global iTempNetData
+
+        i1, i2, i3, i4, i5 = argsList
+        objEventHandlerMap = getattr(CvEventInterface.getEventManager(), 'EventHandlerMap')
+
+        # just in case, shouldn't have another mod net message called before mine
+        if (i1 != iNetData1) or (i2 != iNetData2) or (i3 != iNetData3) or (i4 != iNetData4) or (i5 != iNetData5) :
+                if type(objEventHandlerMap['ModNetMessage']) is types.ListType :
+                        objEventHandlerMap['Sto_FoR_ModNetMessage_Original'][iTempNetData](argsList)
+                        if lenNetData > 1 : iTempNetData += 1
+                else :
+                        objEventHandlerMap['Sto_FoR_ModNetMessage_Original'](argsList)
+                return
+                
+        StoAddGameElements()
+        if type(objEventHandlerMap['ModNetMessage']) is types.ListType :
+                if lenNetData == 1 : return initStoRemoveEvent()
+        else :
+                return initStoRemoveEvent()
+        return
+
+def Sto_FullOfResources_AddGameElements_Event_OnModNetMessage_Null(argsList):
+        global iTempNetData
+
+        i1, i2, i3, i4, i5 = argsList
+
+        if (i1 != iNetData1) or (i2 != iNetData2) or (i3 != iNetData3) or (i4 != iNetData4) or (i5 != iNetData5) :
+                objEventHandlerMap = getattr(CvEventInterface.getEventManager(), 'EventHandlerMap')
+                objEventHandlerMap['Sto_FoR_ModNetMessage_Original'][iTempNetData](argsList)
+                iTempNetData += 1
+        return
+
+def Sto_FullOfResources_AddGameElements_Event_OnModNetMessage_RestoreEvents(argsList):
+        global iTempNetData
+
+        i1, i2, i3, i4, i5 = argsList
+
+        if (i1 != iNetData1) or (i2 != iNetData2) or (i3 != iNetData3) or (i4 != iNetData4) or (i5 != iNetData5) :
+                objEventHandlerMap = getattr(CvEventInterface.getEventManager(), 'EventHandlerMap')
+                objEventHandlerMap['Sto_FoR_ModNetMessage_Original'][iTempNetData](argsList)
+                iTempNetData = 0
+                return
+        return initStoRemoveEvent()
+
 def initStoAddEvent():
-        # search for all event id
-        listEventInteger = []
-        for item in dir(CvUtil) :
-                objTemp = getattr(CvUtil, item)
-                if type(objTemp) is types.IntType : listEventInteger.append(int(objTemp))
+        global iTempNetData
+        global lenNetData
+        try :
+                if "sendApplyEvent" in dir(CyMessageControl) :
+                        # search for all event id
+                        listEventInteger = []
+                        for item in dir(CvUtil) :
+                                objTemp = getattr(CvUtil, item)
+                                if type(objTemp) is types.IntType : listEventInteger.append(int(objTemp))
 
-        # all checks done , add the event
-        popUpID = -1
-        for i in range(5000, 10000) :
-                if not i in listEventInteger :
-                        popUpID = i
-                        break
+                        # all checks done , add the event
+                        popUpID = -1
+                        for i in range(5000, 10000) :
+                                if not i in listEventInteger :
+                                        popUpID = i
+                                        break
 
-        setattr(CvUtil , "Sto_FullOfResources_AddGameElements_EventID", popUpID)
-        CvUtil.SilentEvents.append(getattr(CvUtil, "Sto_FullOfResources_AddGameElements_EventID"))
-        setattr(CvEventInterface.getEventManager(), "__Sto_FullOfResources_AddGameElements_Event_Begin", Sto_FullOfResources_AddGameElements_Event_Begin)
-        setattr(CvEventInterface.getEventManager(), "__Sto_FullOfResources_AddGameElements_Event_Apply", Sto_FullOfResources_AddGameElements_Event_Apply)
-        objEvents = getattr(CvEventInterface.getEventManager(), 'Events')
-        objEvents[getattr(CvUtil, "Sto_FullOfResources_AddGameElements_EventID")] = "Sto_FullOfResources_AddGameElements_EventID", getattr(CvEventInterface.getEventManager(), "__Sto_FullOfResources_AddGameElements_Event_Apply"), getattr(CvEventInterface.getEventManager(), "__Sto_FullOfResources_AddGameElements_Event_Begin")
+                        setattr(CvUtil , "Sto_FullOfResources_AddGameElements_EventID", popUpID)
+                        CvUtil.SilentEvents.append(getattr(CvUtil, "Sto_FullOfResources_AddGameElements_EventID"))
+                        setattr(CvEventInterface.getEventManager(), "__Sto_FullOfResources_AddGameElements_Event_Begin", Sto_FullOfResources_AddGameElements_Event_Begin)
+                        setattr(CvEventInterface.getEventManager(), "__Sto_FullOfResources_AddGameElements_Event_Apply", Sto_FullOfResources_AddGameElements_Event_Apply)
+                        objEvents = getattr(CvEventInterface.getEventManager(), 'Events')
+                        objEvents[getattr(CvUtil, "Sto_FullOfResources_AddGameElements_EventID")] = "Sto_FullOfResources_AddGameElements_EventID", getattr(CvEventInterface.getEventManager(), "__Sto_FullOfResources_AddGameElements_Event_Apply"), getattr(CvEventInterface.getEventManager(), "__Sto_FullOfResources_AddGameElements_Event_Begin")
+                else :
+                        objEventHandlerMap = getattr(CvEventInterface.getEventManager(), 'EventHandlerMap')
+                        objEventHandlerMap['Sto_FoR_ModNetMessage_Original'] = objEventHandlerMap['ModNetMessage']
+                        if type(objEventHandlerMap['ModNetMessage']) is types.ListType :
+                                lenNetData = len(objEventHandlerMap['ModNetMessage'])
+                                iTempNetData = 0
+
+                                lRepList = [Sto_FullOfResources_AddGameElements_Event_OnModNetMessage, ]
+                                if lenNetData > 1 :
+                                        for i in range(lenNetData-2) :
+                                                lRepList.append(Sto_FullOfResources_AddGameElements_Event_OnModNetMessage_Null)
+                                        lRepList.append(Sto_FullOfResources_AddGameElements_Event_OnModNetMessage_RestoreEvents)
+                                objEventHandlerMap['ModNetMessage'] = lRepList
+                        else :
+                                objEventHandlerMap['ModNetMessage'] = Sto_FullOfResources_AddGameElements_Event_OnModNetMessage
+        except :
+                writeLog("", True, ["", " initStoAddEvent ..."])
+                writeError()
 
 def initStoRemoveEvent():
-        objEvents = getattr(CvEventInterface.getEventManager(), 'Events')
-        del objEvents[getattr(CvUtil, "Sto_FullOfResources_AddGameElements_EventID")]
-        delattr(CvEventInterface.getEventManager(), "__Sto_FullOfResources_AddGameElements_Event_Begin")
-        delattr(CvEventInterface.getEventManager(), "__Sto_FullOfResources_AddGameElements_Event_Apply")
-        CvUtil.SilentEvents.remove(getattr(CvUtil, "Sto_FullOfResources_AddGameElements_EventID"))
-        delattr(CvUtil , "Sto_FullOfResources_AddGameElements_EventID")
-        return 0
+        if "sendApplyEvent" in dir(CyMessageControl) :
+                objEvents = getattr(CvEventInterface.getEventManager(), 'Events')
+                del objEvents[getattr(CvUtil, "Sto_FullOfResources_AddGameElements_EventID")]
+                delattr(CvEventInterface.getEventManager(), "__Sto_FullOfResources_AddGameElements_Event_Begin")
+                delattr(CvEventInterface.getEventManager(), "__Sto_FullOfResources_AddGameElements_Event_Apply")
+                CvUtil.SilentEvents.remove(getattr(CvUtil, "Sto_FullOfResources_AddGameElements_EventID"))
+                delattr(CvUtil , "Sto_FullOfResources_AddGameElements_EventID")
+                return 0
+        else :
+                objEventHandlerMap = getattr(CvEventInterface.getEventManager(), 'EventHandlerMap')
+                objEventHandlerMap['ModNetMessage'] = objEventHandlerMap['Sto_FoR_ModNetMessage_Original']
+                del objEventHandlerMap['Sto_FoR_ModNetMessage_Original']
+                objEventHandlerMap = getattr(CvEventInterface.getEventManager(), 'EventHandlerMap')
 
 def initCanUseGameOptions():
         global canUseGameOptions
@@ -10779,43 +13518,92 @@ def initCanUseGameOptions():
         ## check if the additionnal game options can be added at the beginning of the game
         canUseGameOptions = False
 
-        # check if CvEventManager have Events .
-        if not hasattr(CvEventInterface.getEventManager(), 'Events'):
-                writeLog("", False, [" initCanUseGameOptions : CvEventManager don't have Events", ""])
+        # check if CvEventInterface have getEventManager .
+        try :
+                if not hasattr(CvEventInterface, 'getEventManager'):
+                        writeLog("", False, [" initCanUseGameOptions : CvEventInterface don't have getEventManager", ""])
+                        return
+        except :
+                writeLog("", False, [" initCanUseGameOptions : CvEventInterface probably not imported ...", ""])
                 return
 
-        objEvents = getattr(CvEventInterface.getEventManager(), 'Events')
+        try :
+                if "sendApplyEvent" in dir(CyMessageControl) :
 
-        # check if Events is a dictionnary.
-        if not type(objEvents) is types.DictType :
-                writeLog("", False, [" initCanUseGameOptions : Events is not a dictionnary", ""])
-                return
+                        # check if CvEventManager have Events .
+                        if not hasattr(CvEventInterface.getEventManager(), 'Events'):
+                                writeLog("", False, [" initCanUseGameOptions : CvEventManager don't have Events", ""])
+                                return
 
-        # search for all event id
-        listEventInteger = []
-        for item in dir(CvUtil) :
-                objTemp = getattr(CvUtil, item)
-                if type(objTemp) is types.IntType : listEventInteger.append(int(objTemp))
+                        objEvents = getattr(CvEventInterface.getEventManager(), 'Events')
 
-        # search an ID for each event to add :
-        popUpID=-1
-        for i in range(5000, 10000):
-                if not i in listEventInteger :
-                        popUpID = i
-                        break
+                        # check if Events is a dictionnary.
+                        if not type(objEvents) is types.DictType :
+                                writeLog("", False, [" initCanUseGameOptions : Events is not a dictionnary", ""])
+                                return
 
-        if popUpID == -1 :
-                writeLog("", False, [" initCanUseGameOptions : No popup id available", ""])
-                return
+                        # search for all event id
+                        listEventInteger = []
+                        for item in dir(CvUtil) :
+                                objTemp = getattr(CvUtil, item)
+                                if type(objTemp) is types.IntType : listEventInteger.append(int(objTemp))
 
-        # check if CvUtil have SilentEvents.
-        if not "SilentEvents" in dir(CvUtil) :
-                writeLog("", False, [" initCanUseGameOptions : CvUtil don t have SilentEvents", ""])
-                return
+                        # search an ID for each event to add :
+                        popUpID=-1
+                        for i in range(5000, 10000):
+                                if not i in listEventInteger :
+                                        popUpID = i
+                                        break
 
-        # check if SilentEvents is a list.
-        if not type(CvUtil.SilentEvents) is types.ListType :
-                writeLog("", False, [" initCanUseGameOptions : SilentEvents is not a list", ""])
+                        if popUpID == -1 :
+                                writeLog("", False, [" initCanUseGameOptions : No popup id available", ""])
+                                return
+
+                        # check if CvUtil have SilentEvents.
+                        if not "SilentEvents" in dir(CvUtil) :
+                                writeLog("", False, [" initCanUseGameOptions : CvUtil don t have SilentEvents", ""])
+                                return
+
+                        # check if SilentEvents is a list.
+                        if not type(CvUtil.SilentEvents) is types.ListType :
+                                writeLog("", False, [" initCanUseGameOptions : SilentEvents is not a list", ""])
+                                return
+
+                else :
+
+                        # check if CvEventManager have EventHandlerMap .
+                        if not hasattr(CvEventInterface.getEventManager(), 'EventHandlerMap'):
+                                writeLog("", False, [" initCanUseGameOptions : CvEventManager don't have EventHandlerMap", ""])
+                                return
+
+                        objEventHandlerMap = getattr(CvEventInterface.getEventManager(), 'EventHandlerMap')
+
+                        # check if EventHandlerMap is a dictionnary.
+                        if not type(objEventHandlerMap) is types.DictType :
+                                writeLog("", False, [" initCanUseGameOptions : EventHandlerMap is not a dictionnary", ""])
+                                return
+
+                        # check if EventHandlerMap has the key ModNetMessage.
+                        if not objEventHandlerMap.has_key('ModNetMessage') :
+                                writeLog("", False, [" initCanUseGameOptions : EventHandlerMap don t have ModNetMessage key", ""])
+                                return
+
+                        # check if EventHandlerMap attribute is a function or a list of function.
+                        bAccept = False
+                        if type(objEventHandlerMap['ModNetMessage']) is types.ListType :
+                                if len(objEventHandlerMap['ModNetMessage']) :
+                                        bAccept2 = True
+                                        for item in objEventHandlerMap['ModNetMessage'] :
+                                                if not type(item) is types.MethodType :
+                                                        bAccept2 = False
+                                        if bAccept2 : bAccept = True
+                        elif type(objEventHandlerMap['ModNetMessage']) is types.MethodType :
+                                bAccept = True
+
+                        if not bAccept : return
+
+        except :
+                writeLog("", False, [" initCanUseGameOptions : An error occured ...", ""])
                 return
 
         canUseGameOptions = True
@@ -10873,8 +13661,8 @@ def launchSetUpScreen():
         global isNetMP
         global isGameMP
         global isPbemOrHseat
-        global isBtSFFH
         global bCanWriteLog
+        global bFfH2Tab
 
         isNetMP = CyGame().isNetworkMultiPlayer()
         isGameMP = CyGame().isGameMultiPlayer()
@@ -10924,6 +13712,10 @@ def launchSetUpScreen():
                 sortMultiBox()
         else :
                 selection = checkSettings(selection) #use if you change the game type (MP,SP) for the writelog option
+
+        bFfH2Tab = False
+        if "ffh2" in selection.keys() : bFfH2Tab = True
+        logList.append(" bFfH2Tab %r" %bFfH2Tab)
 
         if not "optionsScreen" in dir(CvScreensInterface) :
                 logList.append(" optionsScreen is not in CvScreensInterface : don't launch the screen")
@@ -11277,31 +14069,36 @@ def initDefaultSelection():
                 "start" : [0,1] ,
                 "border" : [0]
                 }
-        if BtS :
-                defaultSelMaps["bigandsmall"] = {
-                        "selected" : False ,
-                        "continentsize" : [1] ,
-                        "islandsize" : [0] ,
-                        "islandoverlap" : [0] ,
-                        "wrap" : [1] ,
-                        "start" : [0,1]
-                        }
-                defaultSelMaps["hemispheres"] = {
-                        "selected" : False ,
-                        "hemcontinentsize" : [1] ,
-                        "islandsize" : [1] ,
-                        "hemnumbercontinents" : [0] ,
-                        "wrap" : [1] ,
-                        "start" : [0,1]
-                        }
-                defaultSelMaps["mediumandsmall"] = {
-                        "selected" : False ,
-                        "mascontinentsize" : [4] ,
-                        "islandsize" : [1] ,
-                        "islandoverlap" : [0] ,
-                        "wrap" : [1] ,
-                        "start" : [0,1]
-                        }
+        defaultSelMaps["bigandsmall"] = {
+                "selected" : False ,
+                "continentsize" : [1] ,
+                "islandsize" : [0] ,
+                "islandoverlap" : [0] ,
+                "wrap" : [1] ,
+                "start" : [0,1]
+                }
+        defaultSelMaps["hemispheres"] = {
+                "selected" : False ,
+                "hemcontinentsize" : [1] ,
+                "islandsize" : [1] ,
+                "hemnumbercontinents" : [0] ,
+                "wrap" : [1] ,
+                "start" : [0,1]
+                }
+        defaultSelMaps["mediumandsmall"] = {
+                "selected" : False ,
+                "mascontinentsize" : [4] ,
+                "islandsize" : [1] ,
+                "islandoverlap" : [0] ,
+                "wrap" : [1] ,
+                "start" : [0,1]
+                }
+        defaultSelMaps["tectonics"] = {
+                "selected" : False ,
+                "teclandmass" : [0] ,
+                "tecaridity" : [1] ,
+                "start" : [0,1]
+                }
 
         defSel["maps"] = dict(defaultSelMaps)
 
@@ -11321,11 +14118,11 @@ def initDefaultSelection():
                 "junglepercent" : [80]
                 }
         defaultSelTerrain["peak"] = {
-                "peakpercent" : [5] ,
+                "peakpercent" : "standard" ,
                 "peakcoast" : False
                 }
         defaultSelTerrain["hill"] = {
-                "hillpercent" : [17]
+                "hillpercent" : "standard"
                 }
         defaultSelTerrain["river"] = {
                 "riveredge" : [int(gc.getDefineINT("PLOTS_PER_RIVER_EDGE"))]
@@ -11394,7 +14191,8 @@ def initDefaultSelection():
                 "startsametile" : 0
                 }
         defaultSelStart["relocate"] = {
-                "swaphuman" : True
+                "swaphuman" : False ,
+                "isolatehuman" : False
                 }
         defSel["startlocs"] = dict(defaultSelStart)
 
@@ -11446,6 +14244,22 @@ def initDefaultSelection():
                 "startunitplayers-0" : [0, 1]
                 }
         defSel["game"] = dict(defaultSelGame)
+
+        if is_BtS_FFH2 or is_BtS_FF :
+                defaultSelFFH2 = {}
+                if len(XMLEntriesList["lairs"]) > 0 :
+                        defaultSelFFH2["lairs"] = { "mindistlairstart" : [2] }
+                        for sType in XMLEntriesList["lairs"] : defaultSelFFH2["lairs"][getTypeForm(sType)] = "standard"
+        
+                if len(XMLEntriesList["uniqueimprovements"]) > 0 :
+                        defaultSelFFH2["uniqueimprovements"] = { "mindistuniquestart" : [3] }
+                        for sType in XMLEntriesList["uniqueimprovements"] :
+                                defaultSelFFH2["uniqueimprovements"][getTypeForm(sType)] = "standard"
+                                if not sType in XMLEntriesList["uniqueimprovementswater"] :
+                                        defaultSelFFH2["uniqueimprovements"][getTypeForm(sType) + "placement"] = 0
+
+                if defaultSelFFH2 != {} :
+                        defSel["ffh2"] = dict(defaultSelFFH2)
         
 ## return the limit of the values that the user of the script can enter in the screen .
 def initValueLimits():
@@ -11507,9 +14321,125 @@ def initValueLimits():
                         "nbperline" : None
                         }
                 }
+        limitMaps["bigandsmall"] = {
+                "description" : "Big and Small" ,
+                "porder" : 1 ,
+                "continentsize" : {
+                        "porder"    : 0 ,
+                        "parent"    : "" ,
+                        "limit"     : 3 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_CONTINENTS_SIZE" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "islandsize" : {
+                        "porder"    : 1 ,
+                        "parent"    : "" ,
+                        "limit"     : 2 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_ISLANDS_SIZE" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "islandoverlap" : {
+                        "porder"    : 2 ,
+                        "parent"    : "" ,
+                        "limit"     : 2 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_ISLAND_OVERLAP" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "wrap" : {
+                        "porder"    : 3 ,
+                        "parent"    : "" ,
+                        "limit"     : 3 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_WRAP" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "start" : {
+                        "porder"    : 4 ,
+                        "parent"    : "" ,
+                        "limit"     : 2 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_START" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        }
+                }
+        limitMaps["chess"] = {
+                "description" : "Chess" ,
+                "porder" : 2 ,
+                "waterper" : {
+                        "porder"    : 0 ,
+                        "parent"    : "" ,
+                        "limit"     : [0, 50] ,
+                        "drawfunc"  : "ValueRandom" ,
+                        "txttag"    : "TXT_MAPS_WATER_PERCENT" ,
+                        "cbfunc"    : "Sto_Value_Random" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "wrap" : {
+                        "porder"    : 1 ,
+                        "parent"    : "" ,
+                        "limit"     : 3 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_WRAP" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "start" : {
+                        "porder"    : 2 ,
+                        "parent"    : "" ,
+                        "limit"     : 2 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_START" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "border" : {
+                        "porder"    : 3 ,
+                        "parent"    : "" ,
+                        "limit"     : 4 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_CHESS_BORDER" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        }
+                }
         limitMaps["continents"] = {
                 "description" : "Continents" ,
-                "porder" : 1 ,
+                "porder" : 3 ,
                 "waterper" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -11549,7 +14479,7 @@ def initValueLimits():
                 }
         limitMaps["customcontinents"] = {
                 "description" : "Custom Continents" ,
-                "porder" : 2 ,
+                "porder" : 4 ,
                 "numbercontinents" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -11589,7 +14519,7 @@ def initValueLimits():
                 }
         limitMaps["fractals"] = {
                 "description" : "Fractals" ,
-                "porder" : 3 ,
+                "porder" : 5 ,
                 "waterper" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -11627,9 +14557,73 @@ def initValueLimits():
                         "nbperline" : None
                         }
                 }
+        limitMaps["hemispheres"] = {
+                "description" : "Hemispheres" ,
+                "porder" : 6 ,
+                "hemcontinentsize" : {
+                        "porder"    : 0 ,
+                        "parent"    : "" ,
+                        "limit"     : 4 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_HEM_CONTINENTS_SIZE" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "islandsize" : {
+                        "porder"    : 1 ,
+                        "parent"    : "" ,
+                        "limit"     : 2 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_ISLANDS_SIZE" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "hemnumbercontinents" : {
+                        "porder"    : 2 ,
+                        "parent"    : "" ,
+                        "limit"     : 5 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_HEM_NB_CONTINENTS" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "wrap" : {
+                        "porder"    : 3 ,
+                        "parent"    : "" ,
+                        "limit"     : 3 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_WRAP" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "start" : {
+                        "porder"    : 4 ,
+                        "parent"    : "" ,
+                        "limit"     : 2 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_START" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        }
+                }
         limitMaps["hub"] = {
                 "description" : "Hub" ,
-                "porder" : 4 ,
+                "porder" : 7 ,
                 "areaperplayer" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -11705,7 +14699,7 @@ def initValueLimits():
                 }
         limitMaps["inlandsea"] = {
                 "description" : "Inland Sea" ,
-                "porder" : 5 ,
+                "porder" : 8 ,
                 "wrap" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -11733,7 +14727,7 @@ def initValueLimits():
                 }
         limitMaps["islands"] = {
                 "description" : "Islands" ,
-                "porder" : 6 ,
+                "porder" : 9 ,
                 "largeislands" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -11785,7 +14779,7 @@ def initValueLimits():
                 }
         limitMaps["lakes"] = {
                 "description" : "Lakes" ,
-                "porder" : 7 ,
+                "porder" : 10 ,
                 "waterper" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -11825,7 +14819,7 @@ def initValueLimits():
                 }
         limitMaps["maze"] = {
                 "description" : "Maze" ,
-                "porder" : 8 ,
+                "porder" : 11 ,
                 "mazewidth" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -11863,9 +14857,73 @@ def initValueLimits():
                         "nbperline" : None
                         }
                 }
+        limitMaps["mediumandsmall"] = {
+                "description" : "Medium and Small" ,
+                "porder" : 12 ,
+                "mascontinentsize" : {
+                        "porder"    : 0 ,
+                        "parent"    : "" ,
+                        "limit"     : 5 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_MAS_CONTINENTS_SIZE" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "islandsize" : {
+                        "porder"    : 1 ,
+                        "parent"    : "" ,
+                        "limit"     : 2 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_ISLANDS_SIZE" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "islandoverlap" : {
+                        "porder"    : 2 ,
+                        "parent"    : "" ,
+                        "limit"     : 2 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_ISLAND_OVERLAP" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "wrap" : {
+                        "porder"    : 3 ,
+                        "parent"    : "" ,
+                        "limit"     : 3 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_WRAP" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "start" : {
+                        "porder"    : 4 ,
+                        "parent"    : "" ,
+                        "limit"     : 2 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_START" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        }
+                }
         limitMaps["pangaea"] = {
                 "description" : "Pangaea" ,
-                "porder" : 9 ,
+                "porder" : 13 ,
                 "shoreline" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -11905,7 +14963,7 @@ def initValueLimits():
                 }
         limitMaps["ring"] = {
                 "description" : "Ring" ,
-                "porder" : 10 ,
+                "porder" : 14 ,
                 "areaperplayer" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -11981,7 +15039,7 @@ def initValueLimits():
                 }
         limitMaps["shuffle"] = {
                 "description" : "Shuffle" ,
-                "porder" : 11 ,
+                "porder" : 15 ,
                 "waterper" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -12019,9 +15077,49 @@ def initValueLimits():
                         "nbperline" : None
                         }
                 }
+        limitMaps["tectonics"] = {
+                "description" : "Tectonics" ,
+                "porder" : 16 ,
+                "teclandmass" : {
+                        "porder"    : 0 ,
+                        "parent"    : "" ,
+                        "limit"     : 8 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_TECTONICS_LANDMASS" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "tecaridity" : {
+                        "porder"    : 1 ,
+                        "parent"    : "" ,
+                        "limit"     : 4 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_TECTONICS_ARIDITY" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        } ,
+                "start" : {
+                        "porder"    : 2 ,
+                        "parent"    : "" ,
+                        "limit"     : 2 ,
+                        "drawfunc"  : "Selection" ,
+                        "txttag"    : "TXT_MAPS_START" ,
+                        "cbfunc"    : "Sto_Selection_MultiCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
+                        }
+                }
         limitMaps["terra"] = {
                 "description" : "Terra" ,
-                "porder" : 12 ,
+                "porder" : 17 ,
                 "wrap" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -12049,7 +15147,7 @@ def initValueLimits():
                 }
         limitMaps["wheel"] = {
                 "description" : "Wheel" ,
-                "porder" : 13 ,
+                "porder" : 18 ,
                 "areaperplayer" : {
                         "porder"    : 0 ,
                         "parent"    : "" ,
@@ -12123,251 +15221,6 @@ def initValueLimits():
                         "nbperline" : None
                         }
                 }
-        limitMaps["chess"] = {
-                "description" : "Chess" ,
-                "porder" : 14 ,
-                "waterper" : {
-                        "porder"    : 0 ,
-                        "parent"    : "" ,
-                        "limit"     : [0, 50] ,
-                        "drawfunc"  : "ValueRandom" ,
-                        "txttag"    : "TXT_MAPS_WATER_PERCENT" ,
-                        "cbfunc"    : "Sto_Value_Random" ,
-                        "tooltip"   : "" ,
-                        "listitem"  : None ,
-                        "listcomp"  : None ,
-                        "nbperline" : None
-                        } ,
-                "wrap" : {
-                        "porder"    : 1 ,
-                        "parent"    : "" ,
-                        "limit"     : 3 ,
-                        "drawfunc"  : "Selection" ,
-                        "txttag"    : "TXT_MAPS_WRAP" ,
-                        "cbfunc"    : "Sto_Selection_MultiCB" ,
-                        "tooltip"   : "" ,
-                        "listitem"  : None ,
-                        "listcomp"  : None ,
-                        "nbperline" : None
-                        } ,
-                "start" : {
-                        "porder"    : 2 ,
-                        "parent"    : "" ,
-                        "limit"     : 2 ,
-                        "drawfunc"  : "Selection" ,
-                        "txttag"    : "TXT_MAPS_START" ,
-                        "cbfunc"    : "Sto_Selection_MultiCB" ,
-                        "tooltip"   : "" ,
-                        "listitem"  : None ,
-                        "listcomp"  : None ,
-                        "nbperline" : None
-                        } ,
-                "border" : {
-                        "porder"    : 3 ,
-                        "parent"    : "" ,
-                        "limit"     : 4 ,
-                        "drawfunc"  : "Selection" ,
-                        "txttag"    : "TXT_MAPS_CHESS_BORDER" ,
-                        "cbfunc"    : "Sto_Selection_MultiCB" ,
-                        "tooltip"   : "" ,
-                        "listitem"  : None ,
-                        "listcomp"  : None ,
-                        "nbperline" : None
-                        }
-                }
-        if BtS :
-                limitMaps["bigandsmall"] = {
-                        "description" : "Big and Small" ,
-                        "porder" : 15 ,
-                        "continentsize" : {
-                                "porder"    : 0 ,
-                                "parent"    : "" ,
-                                "limit"     : 3 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_CONTINENTS_SIZE" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                } ,
-                        "islandsize" : {
-                                "porder"    : 1 ,
-                                "parent"    : "" ,
-                                "limit"     : 2 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_ISLANDS_SIZE" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                } ,
-                        "islandoverlap" : {
-                                "porder"    : 2 ,
-                                "parent"    : "" ,
-                                "limit"     : 2 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_ISLAND_OVERLAP" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                } ,
-                        "wrap" : {
-                                "porder"    : 3 ,
-                                "parent"    : "" ,
-                                "limit"     : 3 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_WRAP" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                } ,
-                        "start" : {
-                                "porder"    : 4 ,
-                                "parent"    : "" ,
-                                "limit"     : 2 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_START" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                }
-                        }
-                limitMaps["hemispheres"] = {
-                        "description" : "Hemispheres" ,
-                        "porder" : 16 ,
-                        "hemcontinentsize" : {
-                                "porder"    : 0 ,
-                                "parent"    : "" ,
-                                "limit"     : 4 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_HEM_CONTINENTS_SIZE" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                } ,
-                        "islandsize" : {
-                                "porder"    : 1 ,
-                                "parent"    : "" ,
-                                "limit"     : 2 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_ISLANDS_SIZE" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                } ,
-                        "hemnumbercontinents" : {
-                                "porder"    : 2 ,
-                                "parent"    : "" ,
-                                "limit"     : 5 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_HEM_NB_CONTINENTS" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                } ,
-                        "wrap" : {
-                                "porder"    : 3 ,
-                                "parent"    : "" ,
-                                "limit"     : 3 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_WRAP" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                } ,
-                        "start" : {
-                                "porder"    : 4 ,
-                                "parent"    : "" ,
-                                "limit"     : 2 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_START" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                }
-                        }
-                limitMaps["mediumandsmall"] = {
-                        "description" : "Medium and Small" ,
-                        "porder" : 17 ,
-                        "mascontinentsize" : {
-                                "porder"    : 0 ,
-                                "parent"    : "" ,
-                                "limit"     : 5 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_MAS_CONTINENTS_SIZE" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                } ,
-                        "islandsize" : {
-                                "porder"    : 1 ,
-                                "parent"    : "" ,
-                                "limit"     : 2 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_ISLANDS_SIZE" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                } ,
-                        "islandoverlap" : {
-                                "porder"    : 2 ,
-                                "parent"    : "" ,
-                                "limit"     : 2 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_ISLAND_OVERLAP" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                } ,
-                        "wrap" : {
-                                "porder"    : 3 ,
-                                "parent"    : "" ,
-                                "limit"     : 3 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_WRAP" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                } ,
-                        "start" : {
-                                "porder"    : 4 ,
-                                "parent"    : "" ,
-                                "limit"     : 2 ,
-                                "drawfunc"  : "Selection" ,
-                                "txttag"    : "TXT_MAPS_START" ,
-                                "cbfunc"    : "Sto_Selection_MultiCB" ,
-                                "tooltip"   : "" ,
-                                "listitem"  : None ,
-                                "listcomp"  : None ,
-                                "nbperline" : None
-                                }
-                        }
         valueLimits["maps"] = dict(limitMaps)
 
         # set the terrain settings
@@ -12476,7 +15329,7 @@ def initValueLimits():
                         "porder"    : 0 ,
                         "parent"    : "" ,
                         "limit"     : [0,15] ,
-                        "drawfunc"  : "ValueRandomFloat" ,
+                        "drawfunc"  : "StandardValueRandomFloat" ,
                         "txttag"    : "TXT_TERRAIN_PEAK_PERCENT" ,
                         "cbfunc"    : "Sto_Value_Random" ,
                         "tooltip"   : "" ,
@@ -12504,7 +15357,7 @@ def initValueLimits():
                         "porder"    : 0 ,
                         "parent"    : "" ,
                         "limit"     : [5,50] ,
-                        "drawfunc"  : "ValueRandom" ,
+                        "drawfunc"  : "StandardValueRandom" ,
                         "txttag"    : "TXT_TERRAIN_HILL_PERCENT" ,
                         "cbfunc"    : "Sto_Value_Random" ,
                         "tooltip"   : "" ,
@@ -12985,10 +15838,23 @@ def initValueLimits():
                         "listitem"  : None ,
                         "listcomp"  : None ,
                         "nbperline" : None
+                        } ,
+                "isolatehuman" : {
+                        "porder"    : 1 ,
+                        "parent"    : "" ,
+                        "limit"     : None ,
+                        "drawfunc"  : "SelectOne" ,
+                        "txttag"    : "TXT_STARTLOCS_ISOLATEHUMANS" ,
+                        "cbfunc"    : "Sto_Selection_OneCB" ,
+                        "tooltip"   : "" ,
+                        "listitem"  : None ,
+                        "listcomp"  : None ,
+                        "nbperline" : None
                         }
                 }
         valueLimits["startlocs"] = dict(limitStart)
 
+        # set the games settings
         limitGame = {}
         limitGame["porder"] = 4
         limitGame["log"] = {
@@ -13393,6 +16259,134 @@ def initValueLimits():
                 }
         valueLimits["game"] = dict(limitGame)
 
+        # set the FfH2 settings
+        if is_BtS_FFH2 or is_BtS_FF :
+                if (len(XMLEntriesList["lairs"]) > 0) or (len(XMLEntriesList["uniqueimprovements"]) > 0) :
+                        limitFFH2 = {}
+                        limitFFH2["porder"] = 5
+
+                        if (len(XMLEntriesList["lairs"]) > 0) :
+
+                                limitFFH2["lairs"] = {
+                                        "description" : getSMenuText("TXT_FFH2_LAIRS") ,
+                                        "porder" : 0 ,
+                                        "mindistlairstart" : {
+                                                "porder"    : 0 ,
+                                                "parent"    : "" ,
+                                                "limit"     : [1, 6] ,
+                                                "drawfunc"  : "Value" ,
+                                                "txttag"    : "TXT_FFH2_MINSTARTDIST" ,
+                                                "cbfunc"    : "Sto_DummyCallback" ,
+                                                "tooltip"   : "" ,
+                                                "listitem"  : None ,
+                                                "listcomp"  : None ,
+                                                "nbperline" : None
+                                                }
+                                        }
+
+                                iOrder = 1
+                                for sType in XMLEntriesList["lairs"] :
+
+                                        sText = "Dummy"
+                                        if not bGeneratingMap :
+                                                sText = str(copy.copy(XMLDescriptions[sType]))
+
+                                                if (parsedXMLValuesEntries[sType]["SpawnUnitType"] != "") or (parsedXMLValuesEntries[sType]["BonusConvert"] != "") :
+                                                        sText += " "
+                                                if parsedXMLValuesEntries[sType]["SpawnUnitType"] != "" :
+                                                        sDescr = XMLDescriptions[parsedXMLValuesEntries[sType]["SpawnUnitType"]]
+                                                        if "(" in sDescr : sDescr = sDescr[0:sDescr.index("(")]
+                                                        if sDescr[-1] == "" : sDescr = sDescr[0:-1]
+                                                        sText += "(%s)" %sDescr
+                                                if parsedXMLValuesEntries[sType]["BonusConvert"] != "" :
+                                                        sText += "(%s)" %(XMLDescriptions[parsedXMLValuesEntries[sType]["BonusConvert"]], )
+                                                sText += " :"
+
+                                        limitFFH2["lairs"][getTypeForm(sType)] = {
+                                                "porder"    : int(iOrder) ,
+                                                "parent"    : "" ,
+                                                "limit"     : [0, 20] ,
+                                                "drawfunc"  : "StandardValueRandomFloat" ,
+                                                "txttag"    : str(sText) ,
+                                                "cbfunc"    : "Sto_Value_Random" ,
+                                                "tooltip"   : "" ,
+                                                "listitem"  : None ,
+                                                "listcomp"  : None ,
+                                                "nbperline" : None
+                                                }
+
+                                        iOrder += 1
+
+                        if (len(XMLEntriesList["uniqueimprovements"]) > 0) :
+
+                                limitFFH2["uniqueimprovements"] = {
+                                        "description" : getSMenuText("TXT_FFH2_UNIQUEIMPROVEMENTS") ,
+                                        "porder" : 1 ,
+                                        "mindistuniquestart" : {
+                                                "porder"    : 0 ,
+                                                "parent"    : "" ,
+                                                "limit"     : [1, 10] ,
+                                                "drawfunc"  : "Value" ,
+                                                "txttag"    : "TXT_FFH2_MINSTARTDIST" ,
+                                                "cbfunc"    : "Sto_DummyCallback" ,
+                                                "tooltip"   : "" ,
+                                                "listitem"  : None ,
+                                                "listcomp"  : None ,
+                                                "nbperline" : None
+                                                }
+                                        }
+
+                                iOrder = 1
+                                for sType in XMLEntriesList["uniqueimprovements"] :
+
+                                        sText = "Dummy"
+                                        if not bGeneratingMap :
+                                                sText = str(copy.copy(XMLDescriptions[sType]))
+
+                                                if (parsedXMLValuesEntries[sType]["SpawnUnitType"] != "") or (parsedXMLValuesEntries[sType]["BonusConvert"] != "") :
+                                                        sText += " "
+                                                if parsedXMLValuesEntries[sType]["SpawnUnitType"] != "" :
+                                                        sDescr = XMLDescriptions[parsedXMLValuesEntries[sType]["SpawnUnitType"]]
+                                                        if "(" in sDescr : sDescr = sDescr[0:sDescr.index("(")]
+                                                        if sDescr[-1] == "" : sDescr = sDescr[0:-1]
+                                                        sText += "(%s)" %sDescr
+                                                if parsedXMLValuesEntries[sType]["BonusConvert"] != "" :
+                                                        sText += "(%s)" %(XMLDescriptions[parsedXMLValuesEntries[sType]["BonusConvert"]], )
+                                                sText += " :"
+
+                                        limitFFH2["uniqueimprovements"][getTypeForm(sType)] = {
+                                                "porder"    : int(iOrder) ,
+                                                "parent"    : "" ,
+                                                "limit"     : [0, 100] ,
+                                                "drawfunc"  : "StandardValueRandom" ,
+                                                "txttag"    : str(sText) ,
+                                                "cbfunc"    : "Sto_Value_Random" ,
+                                                "tooltip"   : "" ,
+                                                "listitem"  : None ,
+                                                "listcomp"  : None ,
+                                                "nbperline" : None
+                                                }
+
+                                        iOrder += 1
+
+                                        if not sType in XMLEntriesList["uniqueimprovementswater"] :
+                                                limitFFH2["uniqueimprovements"][getTypeForm(sType) + "placement"] = {
+                                                        "porder"    : int(iOrder) ,
+                                                        "parent"    : "" ,
+                                                        "limit"     : 3 ,
+                                                        "drawfunc"  : "SelectionRB" ,
+                                                        "txttag"    : "TXT_FFH2_PLACEMENT" ,
+                                                        "cbfunc"    : "Sto_Selection_MultiRB" ,
+                                                        "tooltip"   : "" ,
+                                                        "listitem"  : None ,
+                                                        "listcomp"  : None ,
+                                                        "nbperline" : None
+                                                        }
+
+                                                iOrder += 1
+
+                        valueLimits["ffh2"] = dict(limitFFH2)
+
 # check that all entries are used in the current version and add/remove settings if running a version with different options .
 def checkSettings(settingsEntry):
 
@@ -13510,6 +16504,26 @@ def checkSettings(settingsEntry):
                                                 else :
                                                         for item in val :
                                                                 if not type(item) is types.IntType :
+                                                                        bValid = False
+                                                if bValid :
+                                                        if len(val) == 2 :
+                                                                if val[0] >= val[1] :
+                                                                        bValid = False
+                                                        minVal, maxVal = valLim
+                                                        for item in val :
+                                                                if minVal > item :
+                                                                        bValid = False
+                                                                if maxVal < item :
+                                                                        bValid = False
+                                elif drawFunction == "StandardValueRandomFloat" :
+                                        if val != "standard" :
+                                                if not type(val) is types.ListType :
+                                                        bValid = False
+                                                elif (len(val) == 0) or (len(val) > 2) :
+                                                        bValid = False
+                                                else :
+                                                        for item in val :
+                                                                if not ((type(item) is types.IntType) or (type(item) is types.FloatType)):
                                                                         bValid = False
                                                 if bValid :
                                                         if len(val) == 2 :
@@ -13794,7 +16808,7 @@ def getCallBackList():
                 ["Sto_Defender", Sto_Defender_Script] ,
                 ["Sto_Select_Tech_Select", Sto_Select_Tech_Select_Script] ,
                 ["Sto_Select_Unit_Select", Sto_Select_Unit_Select_Script] ,
-                ["Sto_Open_Browser", Sto_Open_Browser_Script] ,
+##                ["Sto_Open_Browser", Sto_Open_Browser_Script] ,
                 ["Sto_Check_Update", Sto_Check_Update_Script]
                 ]
         return cbList
@@ -14091,13 +17105,14 @@ def Sto_Check_Update_Script(argsList):
 
         return 1
 
-def Sto_Open_Browser_Script(argsList):
-        try :
-                webbrowser.open("http://forums.civfanatics.com/showthread.php?t=151629", 1, 0)
-        except :
-                writeError()
-
-        return 1
+##def Sto_Open_Browser_Script(argsList):
+##        try :
+##                webbrowser.open("http://forums.civfanatics.com/showthread.php?t=151629", 1, 0)
+##                time.sleep(5)
+##        except :
+##                writeError()
+##
+##        return 1
 
 def Sto_Help_Option_Script(argsList):
         try :
@@ -14134,7 +17149,8 @@ def Sto_Help_Option_Script(argsList):
                 elif optionID == "normalize" :
                         txtList = [["TXT_HELP_NORM0", ""], ["TXT_HELP_NORM1", (getSMenuText("TXT_STARTLOCS_NORM_START_SEL0"),)], ["", ""],
                                    ["TXT_STARTLOCS_NORM_START", ""], ["TXT_HELP_NORM2", ""],
-                                   ["TXT_HELP_NORM2_1", (getSMenuText("TXT_STARTLOCS_SWAPHUMANS_SEL0"),)], ["", ""], 
+                                   ["TXT_HELP_NORM2_1", (getSMenuText("TXT_STARTLOCS_SWAPHUMANS_SEL0"),)], 
+                                   ["TXT_HELP_NORM2_1", (getSMenuText("TXT_STARTLOCS_ISOLATEHUMANS_SEL0"),)], ["", ""], 
                                    ["TXT_STARTLOCS_NORM_RIVER", ""], ["TXT_HELP_NORM3", ""], ["", ""],
                                    ["TXT_STARTLOCS_NORM_PEAK", ""], ["TXT_HELP_NORM4", ""], ["", ""],
                                    ["TXT_STARTLOCS_NORM_LAKE", ""], ["TXT_HELP_NORM5", ""], ["", ""],
@@ -14143,6 +17159,23 @@ def Sto_Help_Option_Script(argsList):
                                    ["TXT_STARTLOCS_NORM_FOODBONUS", ""], ["TXT_HELP_NORM8", ""], ["", ""],
                                    ["TXT_STARTLOCS_NORM_GOODTER", ""], ["TXT_HELP_NORM9", ""], ["", ""],
                                    ["TXT_STARTLOCS_NORM_EXTRA", ""], ["TXT_HELP_NORM10", ""], ["", ""]]
+                        launchPopUP(txtList)
+                elif optionID == "lairs" :
+                        txtList = [["TXT_FFH2_LAIRS", ""], ["", ""]]
+                        for sType in XMLEntriesList["lairs"] :
+                                sDescr = str(copy.copy(XMLDescriptions[sType]))
+                                fPercent = normalizeFloat(parsedXMLValuesEntries[sType]["iAppearanceProbability"] * 100 / 10000.0)
+                                txtList.append(["TXT_FFH2_LAIR_PERCENT", (sDescr, fPercent)])
+                        if "IMPROVEMENT_TOWER" in XMLEntriesList["lairs"] : txtList += [["", ""], ["TXT_FFH2_TOWERS", (XMLDescriptions["IMPROVEMENT_TOWER"], )]]
+                        launchPopUP(txtList)
+                elif optionID == "uniqueimprovements" :
+                        txtList = [["TXT_FFH2_UIMPR_VAR", ""], ["", ""]]
+                        iBaseChance = gc.getDefineINT("IMPROVEMENT_UNIQUE_CHANCE")
+                        for sType in XMLEntriesList["worldinfos"] :
+                                sDescr = str(copy.copy(XMLDescriptions[sType]))
+                                iPercent = iBaseChance + parsedXMLValuesEntries[sType]["iUniqueFeatureChance"]
+                                txtList.append(["TXT_FFH2_UIMPR_SIZE", (sDescr, iPercent)])
+                        if "IMPROVEMENT_MAELSTROM" in XMLEntriesList["uniqueimprovements"] : txtList += [["", ""], ["TXT_FFH2_MAELSTROM", (XMLDescriptions["IMPROVEMENT_MAELSTROM"], )]]
                         launchPopUP(txtList)
         except :
                 writeError()
@@ -14157,11 +17190,24 @@ def Sto_Selection_OneCB_Script(argsList):
                 dum, baseTag, option1, option2 = szName.split("_")
                 selection[baseTag][option1][option2] = bool(bValue)
 
+                bRefresh = False
                 if option2 == "erasedefres" :
                         if bool(bValue) :
                                 if selection["resources"]["resourcesgen"]["waterpercent"] == "standard" : selection["resources"]["resourcesgen"]["waterpercent"] = [-1]
                                 if selection["resources"]["resourcesgen"]["landpercent"] == "standard" : selection["resources"]["resourcesgen"]["landpercent"] = [-1]
                         
+                        bRefresh = True
+
+                elif option2 in ["swaphuman", "isolatehuman"] :
+                        if (bool(bValue)) and (option2 == "swaphuman"):
+                                selection["startlocs"]["relocate"]["isolatehuman"] = False
+
+                        if (bool(bValue)) and (option2 == "isolatehuman"):
+                                selection["startlocs"]["relocate"]["swaphuman"] = False
+
+                        bRefresh = True
+
+                if bRefresh :
                         getScreen().checkEditBox()
                         getScreen().refreshScreen()
         except :
@@ -14541,6 +17587,7 @@ class CvStoFullOfResourcesScreen:
 		self.szResourcesOptionsTabName = getUMenuText("TXT_RESOURCES")
 		self.szStartOptionsTabName = getUMenuText("TXT_STARTLOC")
 		self.szGameOptionsTabName = getUMenuText("TXT_GAME_OPTIONS")
+		self.szFfH2OptionsTabName = getUText("Fall from Heaven 2 :")
 
 	def refreshScreen(self):
                 try : self.refreshMapOptionsTab()
@@ -14553,6 +17600,9 @@ class CvStoFullOfResourcesScreen:
                 except : writeError()
                 try : self.refreshGameOptionsTab()
                 except : writeError()
+                if bFfH2Tab :
+                        try : self.refreshFfH2OptionsTab()
+                        except : writeError()
 
 	def checkEditBox(self):
                 try : self.checkEditBoxMapOptionsTab()
@@ -14565,6 +17615,9 @@ class CvStoFullOfResourcesScreen:
                 except : writeError()
                 try : self.checkEditBoxGameOptionsTab()
                 except : writeError()
+                if bFfH2Tab :
+                        try : self.checkEditBoxFfH2OptionsTab()
+                        except : writeError()
 
 	def interfaceScreen (self):
 		self.initText()
@@ -14585,6 +17638,8 @@ class CvStoFullOfResourcesScreen:
 		self.pTabControl.attachTabItem("ResourcesForm", self.szResourcesOptionsTabName)
 		self.pTabControl.attachTabItem("StartForm", self.szStartOptionsTabName)
 		self.pTabControl.attachTabItem("GameForm", self.szGameOptionsTabName)
+                if bFfH2Tab :
+                        self.pTabControl.attachTabItem("FfH2Form", self.szFfH2OptionsTabName)
 
 		# no need to check errors , CTD occurs if there is an error		
 		self.drawInfosTab()
@@ -14593,6 +17648,8 @@ class CvStoFullOfResourcesScreen:
 		self.drawResourcesOptionsTab()
 		self.drawStartOptionsTab()
 		self.drawGameOptionsTab()
+                if bFfH2Tab :
+                        self.drawFfH2OptionsTab()
 
 	def selectDrawFunction(self, optionFunction, argList = []):
                 dictFunctions = {
@@ -14603,6 +17660,7 @@ class CvStoFullOfResourcesScreen:
                         "SelectionRB" : self.drawBoxOptionSelectionMultiRB ,
                         "Value" : self.drawBoxOptionValue ,
                         "StandardValueRandom" : self.drawBoxOptionStandardValueRandom ,
+                        "StandardValueRandomFloat" : self.drawBoxOptionStandardValueRandom ,
                         "MultiValues" : self.drawBoxOptionMultiValues ,
                         "standardgen" : self.drawBoxOptionSelectionSpecialDefaultResources ,
                         "SelectionSpecial" : self.drawBoxOptionSelectionSpecial ,
@@ -14626,6 +17684,7 @@ class CvStoFullOfResourcesScreen:
                         "SelectionRB" : self.refreshSelectionMultiRB ,
                         "Value" : self.refreshValue ,
                         "StandardValueRandom" : self.refreshStandardValueRandom ,
+                        "StandardValueRandomFloat" : self.refreshStandardValueRandom ,
                         "MultiValues" : self.refreshMultiValues ,
                         "standardgen" : self.refreshSelectionSpecialDefaultResources ,
                         "SelectionSpecial" : self.refreshSelectionSpecial ,
@@ -14646,6 +17705,7 @@ class CvStoFullOfResourcesScreen:
                         "ValueRandomFloat" : self.checkEditBoxValueRandomFloat ,
                         "Value" : self.checkEditBoxValue ,
                         "StandardValueRandom" : self.checkEditBoxStandardValueRandom ,
+                        "StandardValueRandomFloat" : self.checkEditBoxStandardValueRandomFloat ,
                         "MultiValues" : self.checkEditBoxMultiValues ,
                         "resmultiply" : self.checkEditBoxMultiplyResources
                         }
@@ -14678,11 +17738,15 @@ class CvStoFullOfResourcesScreen:
 
                 txtList = [
                     "newBox", ["TXT_INFOS_0", ""],
-                    "newBox", ["TXT_INFOS_1", ""], "newBox", "button1", "newBox", "button2",
+                    "newBox", ["TXT_INFOS_1", ""], "newBox", "button2", ##, "newBox", "button1", "newBox", "button2",
                     "sep", "newBox", ["TXT_INFOS_2", ""],
                     "newBox", ["TXT_INFOS_3", ""], ["TXT_INFOS_4", ""], "newBox", ["TXT_INFOS_5", (getSMenuText("TXT_REFRESH"),)], "newBox",
                     ["TXT_INFOS_6", ""], ["TXT_INFOS_7", (getSMenuText("TXT_EXIT"), getSMenuText("TXT_EXIT0"))], ["TXT_INFOS_8", ""], "newBox",
                     ["TXT_INFOS_9", ""], ["TXT_INFOS_9_0", ""], "newBox", ["TXT_INFOS_10", ""], "newBox", ["TXT_INFOS_11", ""],
+                    "newBox", ["TXT_INFOS_11_0", ""], ["TXT_INFOS_11_1", ""], "newBox", ["TXT_INFOS_11_2", ""],
+                    "newBox", ["TXT_INFOS_11_2_0", ""], ["TXT_INFOS_11_2_1", ""], ["TXT_INFOS_11_2_2", ""],
+                    "newBox", ["TXT_INFOS_11_3", ""],
+                    "newBox", ["TXT_INFOS_11_4", ""], ["TXT_INFOS_11_5", ""], ["TXT_INFOS_11_6", ""], ["TXT_INFOS_11_7", ""],
                     "sep", "newBox", ["TXT_INFOS_12", ""],
                     "newBox", ["TXT_INFOS_13", ""], "newBox", ["TXT_INFOS_14", ""], "endChapter",
                     ["TXT_INFOS_15", ""], ["TXT_INFOS_16", ""], "endChapter", ["TXT_INFOS_17", ""], ["TXT_INFOS_18", ""], ["TXT_INFOS_19", ""]
@@ -14739,13 +17803,13 @@ class CvStoFullOfResourcesScreen:
 
                                 iSepIndex += 1
 
-                        elif item == "button1" :
-                                tab.setLayoutFlag(newBox, "LAYOUT_LEFT")
-
-                                szOptionDesc = getUMenuText("TXT_OPEN_BROWSER")
-                                szCallbackFunction = "Sto_Open_Browser"
-                                szWidgetName = "open_browser_%d_%d" %(iTextIndex, iBoxIndex)
-                                tab.attachButton(newBox, szWidgetName, szOptionDesc, self.callbackIFace, szCallbackFunction, szWidgetName)
+##                        elif item == "button1" :
+##                                tab.setLayoutFlag(newBox, "LAYOUT_LEFT")
+##
+##                                szOptionDesc = getUMenuText("TXT_OPEN_BROWSER")
+##                                szCallbackFunction = "Sto_Open_Browser"
+##                                szWidgetName = "open_browser_%d_%d" %(iTextIndex, iBoxIndex)
+##                                tab.attachButton(newBox, szWidgetName, szOptionDesc, self.callbackIFace, szCallbackFunction, szWidgetName)
 
                         elif item == "button2" :
                                 tab.setLayoutFlag(newBox, "LAYOUT_LEFT")
@@ -14803,10 +17867,12 @@ class CvStoFullOfResourcesScreen:
                                 while len(getSMenuText(labelTag))>len(tittleBar2) : tittleBar2 += "^_^"
                 tittleBar2 = getUText(tittleBar2)
 
-                tittleBar3 = "^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^"
-                if language == 2 : tittleBar3 += "^_^^_^^_^^_^^_^^_^^_^^_^"
-                elif language == 3 : tittleBar3 += "^_^^_^^_^"
-                elif language == 4 : tittleBar3 += "^_^^_^^_^^_^^_^"
+                tittleBar3 = "^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^"
+                if language == 0 : tittleBar3 += "^_^^_^^_^^_^^_^^_^"
+                elif language == 1 : tittleBar3 += "^_^^_^^_^^_^^_^^_^^_^"
+                elif language == 2 : tittleBar3 += "^_^^_^^_^^_^^_^^_^"
+                elif language == 3 : tittleBar3 += "^_^^_^^_^^_^^_^^_^^_^^_^^_^"
+                elif language == 4 : tittleBar3 += "^_^^_^^_^^_^^_^^_^^_^^_^"
                 tittleBar3 = getUText(tittleBar3)
 
                 # draw each map box
@@ -15523,17 +18589,17 @@ class CvStoFullOfResourcesScreen:
                                 while len(getSMenuText(labelTag))>len(tittleBar2) : tittleBar2 += "^_^"
                 if language == 0 : tittleBar2 = tittleBar2[0:-6]
                 elif language == 1 : tittleBar2 = tittleBar2[0:-9]
-                elif language == 2 : tittleBar2 = tittleBar2[0:-9]
+                elif language == 2 : tittleBar2 = tittleBar2[0:-3]
                 elif language == 3 : tittleBar2 = tittleBar2[0:-9]
-                elif language == 4 : tittleBar2 = tittleBar2[0:-9]
+                elif language == 4 : tittleBar2 = tittleBar2[0:-12]
                 tittleBar2 = getUText(tittleBar2)
 
-                tittleBar3 = "^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^"
-                if language == 0 : tittleBar3 += "^_^^_^^_^^_^^_^^_^"
-                elif language == 1 : tittleBar3 += "^_^^_^^_^^_^^_^^_^^_^"
+                tittleBar3 = "^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^"
+                if language == 0 : tittleBar3 += ""
+                elif language == 1 : tittleBar3 += "^_^^_^^_^"
                 elif language == 2 : tittleBar3 += "^_^^_^^_^^_^^_^^_^"
-                elif language == 3 : tittleBar3 += "^_^^_^^_^^_^"
-                elif language == 4 : tittleBar3 += "^_^^_^^_^^_^"
+                elif language == 3 : tittleBar3 += "^_^"
+                elif language == 4 : tittleBar3 += "^_^^_^^_^"
                 tittleBar3 = getUText(tittleBar3)
 
                 # draw each Start box
@@ -16073,6 +19139,302 @@ class CvStoFullOfResourcesScreen:
                                         continue
                                 elif (optionTag2 == "technoreplace") and (XMLEntriesList["techsstartciv"] == []) :
                                         continue
+
+                                baseOptionTag2 = str(optionTag2)
+                                if "-" in optionTag2 :
+                                        baseOptionTag2, iIndex = splitTag(optionTag2)
+
+                                optionFunction = valueLimits[baseTag][optionTag1][baseOptionTag2]["drawfunc"]
+                                self.selectCheckEditBoxFunction(optionFunction, (baseTag, optionTag1, optionTag2))
+
+	def drawFfH2OptionsTab(self):
+
+                baseTag = "ffh2"
+
+                # draw the tab ,
+		tab = self.pTabControl
+
+		tab.attachVBox("FfH2Form", "FfH2VBoxParent")
+		
+		# Add Games Options
+		
+		tab.attachPanel("FfH2VBoxParent", "FfH2PanelCenter")
+		tab.setStyle("FfH2PanelCenter", "Panel_Tan15_Style")
+		tab.setLayoutFlag("FfH2PanelCenter", "LAYOUT_SIZE_HEXPANDING")
+		tab.setLayoutFlag("FfH2PanelCenter", "LAYOUT_SIZE_VEXPANDING")
+		
+		tab.attachScrollPanel("FfH2PanelCenter", "FfH2Panel")
+		tab.setLayoutFlag("FfH2Panel", "LAYOUT_SIZE_HEXPANDING")
+		tab.setLayoutFlag("FfH2Panel", "LAYOUT_SIZE_VEXPANDING")
+
+		tab.attachVBox("FfH2Panel", "FfH2VBox")
+		tab.setLayoutFlag("FfH2VBox", "LAYOUT_SIZE_HEXPANDING")
+		tab.setLayoutFlag("FfH2VBox", "LAYOUT_SIZE_VEXPANDING")
+
+		# add a texture to egalize column ( can't find another way for the moment ... will check that later )
+                tittleBar1 = "^_^"
+                for FfH2ID in selection[baseTag].keys() :
+                        while len(valueLimits[baseTag][FfH2ID]["description"])>len(tittleBar1) : tittleBar1 += "^_^"
+                tittleBar1 = getUText(tittleBar1)
+
+                tittleBar2 = ""
+
+                for FfH2ID in sortKeys(selection, baseTag) :
+                        for optionID in sortKeys(selection, baseTag, FfH2ID) :
+                                baseOptionID = str(optionID)
+                                if "-" in optionID :
+                                        baseOptionID, iIndex = splitTag(optionID)
+                                labelTag = valueLimits[baseTag][FfH2ID][baseOptionID]["txttag"]
+                                if labelTag[0:4] == "TXT_" :
+                                        szLabelText = getSMenuText(labelTag)
+                                else :
+                                        szLabelText = labelTag
+                                while len(szLabelText) > len(tittleBar2) : tittleBar2 += "^_^"
+                if language == 0 : tittleBar2 = tittleBar2[0:-6]
+                elif language == 1 : tittleBar2 = tittleBar2[0:-9]
+                elif language == 2 : tittleBar2 = tittleBar2[0:-6]
+                elif language == 3 : tittleBar2 = tittleBar2[0:-6]
+                elif language == 4 : tittleBar2 = tittleBar2[0:-9]
+                tittleBar2 = getUText(tittleBar2)
+
+                tittleBar3 = "^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^^_^"
+                if language == 0 : tittleBar3 += "^_^^_^^_^"
+                elif language == 1 : tittleBar3 += "^_^^_^^_^^_^^_^"
+                elif language == 2 : tittleBar3 += "^_^^_^^_^^_^^_^"
+                elif language == 3 : tittleBar3 += "^_^^_^"
+                elif language == 4 : tittleBar3 += "^_^^_^"
+                tittleBar3 = getUText(tittleBar3)
+
+                # draw each FfH2 box
+		listFfH2 = sortKeys(selection, baseTag)
+                nbFfH2 = len(listFfH2)
+                listParents = getParents().keys()
+
+                lUniqueIDsBegin = [getTypeForm(sType) for sType in XMLEntriesList["uniqueimprovements"]]
+                lUniqueIDsEnd = [getTypeForm(sType) + "placement" for sType in XMLEntriesList["uniqueimprovements"]]
+
+		for iFfH2 in range(nbFfH2):
+
+                        FfH2ID = listFfH2[iFfH2]
+
+                        if (FfH2ID == "lairs") and (XMLEntriesList["lairs"] == []) : continue
+                        if (FfH2ID == "uniqueimprovements") and (XMLEntriesList["uniqueimprovements"] == []) : continue
+                        
+                        tab.attachHSeparator("FfH2VBox", "%sHSeparator0" %FfH2ID)
+                        tab.attachHSeparator("FfH2VBox", "%sHSeparator01" %FfH2ID)
+
+                        #create Hbox with 3 Vbox in
+                        szBoxName = "%sHBox" %FfH2ID
+                        vBox1 = "%sVBox1" %FfH2ID
+                        vBox2 = "%sVBox2" %FfH2ID
+                        vBox3 = "%sVBox3" %FfH2ID
+
+                        tab.attachHBox("FfH2VBox", szBoxName)
+                        tab.setLayoutFlag(szBoxName, "LAYOUT_SIZE_HEXPANDING")
+
+                        tab.attachVSeparator(szBoxName, "%sVSeparator0" %FfH2ID)
+
+                        tab.attachVBox(szBoxName, vBox1)
+
+                        tab.attachFixedSpacer(szBoxName, 5)
+                        tab.attachVSeparator(szBoxName, "%sVSeparator1" %FfH2ID)
+                        tab.attachFixedSpacer(szBoxName, 5)
+
+                        tab.attachVBox(szBoxName, vBox2)
+                        tab.setLayoutFlag(vBox2, "LAYOUT_SIZE_VEXPANDING")
+
+                        tab.attachFixedSpacer(szBoxName, 5)
+                        tab.attachVSeparator(szBoxName, "%sVSeparator2" %FfH2ID)
+                        tab.attachFixedSpacer(szBoxName, 5)
+
+                        tab.attachVBox(szBoxName, vBox3)
+                        tab.setLayoutFlag(vBox3, "LAYOUT_SIZE_HEXPANDING")
+                        tab.setLayoutFlag(vBox3, "LAYOUT_SIZE_VEXPANDING")
+
+                        tab.attachVSeparator(szBoxName, "%sVSeparator3" %FfH2ID)
+                        tab.attachFixedSpacer(szBoxName, 5)
+
+                        ## create tittle , help button in box 1
+                        # Tittle
+                        szBoxName = "%sTittleHBox1" %FfH2ID
+                        tab.attachHBox(vBox1, szBoxName)
+
+                        tab.attachLabel(szBoxName, "%sTittleLabel1" %FfH2ID, tittleBar1)
+
+                        tab.attachHSeparator(vBox1, "%sHSeparatorTittle1" %FfH2ID)
+                        tab.attachHSeparator(vBox1, "%sHSeparatorTittle11" %FfH2ID)
+
+                        # FfH2 tittle
+                        szBoxName = "FfH2Label_%s" %FfH2ID
+                        tab.attachHBox(vBox1, szBoxName)
+                        tab.setLayoutFlag(szBoxName, "LAYOUT_HCENTER")
+
+                        szLabelDesc = getUText(valueLimits[baseTag][FfH2ID]["description"])
+                        szWidgetName = "FfH2LabelTitlle_%s" %FfH2ID
+                        tab.attachLabel(szBoxName, szWidgetName, szLabelDesc)
+
+                        # help Button
+                        if FfH2ID in ["lairs", "uniqueimprovements"] :
+                                szBoxName = "%sTitlleHBox" %FfH2ID
+                                tab.attachHBox(vBox1, szBoxName)
+                                tab.setLayoutFlag(szBoxName, "LAYOUT_HCENTER")
+
+                                szOptionDesc = getUMenuText("TXT_HELP")
+                                szCallbackFunction = "Sto_Help_Option"
+                                szWidgetName = "Help_%s_%s" %(baseTag, FfH2ID)
+                                tab.attachButton(szBoxName, szWidgetName, szOptionDesc, self.callbackIFace, szCallbackFunction, szWidgetName)
+
+                        ## create tittles , list of options ,selections in box 2 et 3
+                        # Tittles
+                        szBoxName = "%sTittleHBox2" %FfH2ID
+                        tab.attachHBox(vBox2, szBoxName)
+
+                        tab.attachLabel(szBoxName, "%sTittleLabel2" %FfH2ID, tittleBar2)
+
+                        tab.attachHSeparator(vBox2, "%sHSeparatorTittle2" %FfH2ID)
+                        tab.attachHSeparator(vBox2, "%sHSeparatorTittle22" %FfH2ID)
+
+                        szBoxName = "%sTittleHBox3" %FfH2ID
+                        tab.attachHBox(vBox3, szBoxName)
+                        tab.setLayoutFlag(szBoxName, "LAYOUT_LEFT")
+
+                        tab.attachLabel(szBoxName, "%sTittleLabel3" %FfH2ID, tittleBar3)
+
+                        tab.attachHSeparator(vBox3, "%sHSeparatorTittle3" %FfH2ID)
+                        tab.attachHSeparator(vBox3, "%sHSeparatorTittle33" %FfH2ID)
+
+                        listOptionsLoop = sortKeys(selection, baseTag, FfH2ID)
+                        nbOptionsLoop = len(listOptionsLoop)
+
+                        # double the separator when adding a multiline option
+                        bLastOptionMultiLine = False
+
+                        for iOption in range(nbOptionsLoop) :
+
+                                optionID = listOptionsLoop[iOption]
+
+                                # blank functions drawn with other optionID
+                                baseOptionID = str(optionID)
+                                if "-" in optionID :
+                                        baseOptionID, iIndex = splitTag(optionID)
+                                        if not baseOptionID in listParents : continue
+
+                                optionFunction = valueLimits[baseTag][FfH2ID][baseOptionID]["drawfunc"]
+                                
+                                bBoxOn = True
+
+                                if (optionFunction == "SelectionSpecial") :
+                                        nbElement = len(valueLimits[baseTag][FfH2ID][baseOptionID]["listitem"])
+                                        nbPerLine = valueLimits[baseTag][FfH2ID][baseOptionID]["nbperline"]
+                                        if nbElement > nbPerLine :
+                                                bThisOptionMultiLine = True
+                                        else :
+                                                bThisOptionMultiLine = False
+                                else :
+                                        bThisOptionMultiLine = False
+
+                                if (bThisOptionMultiLine) and (not bLastOptionMultiLine) and (iOption != 0) :
+                                        tab.attachHSeparator(vBox2, "%s%sHSeparator4" %(FfH2ID,optionID))
+                                        tab.attachHSeparator(vBox3, "%s%sHSeparator5" %(FfH2ID,optionID))
+
+                                if optionID in lUniqueIDsBegin :
+                                        tab.attachHSeparator(vBox2, "%s%sHSeparator4" %(FfH2ID,optionID))
+                                        tab.attachHSeparator(vBox3, "%s%sHSeparator5" %(FfH2ID,optionID))
+
+                                if optionFunction in listParents:
+                                        self.selectDrawFunction(optionFunction)
+
+                                elif optionFunction == "SelectionSpecial" :
+                                        self.selectDrawFunction(optionFunction, (vBox2, vBox3, baseTag, FfH2ID, optionID, bBoxOn))
+
+                                else :
+                                        #box1 : add option label
+                                        szNameHSupport = "%s%sDescSupport2" %(FfH2ID,optionID)
+                                        tab.attachHBox(vBox2, szNameHSupport)
+                                        tab.setLayoutFlag(szNameHSupport, "LAYOUT_SIZE_VEXPANDING")
+                                        tab.setLayoutFlag(szNameHSupport, "LAYOUT_RIGHT")
+
+                                        szLabelName = "%s%sOptionLabel" %(FfH2ID,optionID)
+                                        labelTag = valueLimits[baseTag][FfH2ID][baseOptionID]["txttag"]
+                                        if labelTag[0:4] == "TXT_" :
+                                                szLabelText = getUMenuText(labelTag)
+                                        else :
+                                                szLabelText = getUText(labelTag)
+                                        tab.attachLabel(szNameHSupport, szLabelName, szLabelText)
+                                        tab.setEnabled(szLabelName, bBoxOn)
+
+                                        #box2 : add option selection
+
+                                        szNameHSupport = "%s%sDescSupport3" %(FfH2ID,optionID)
+                                        tab.attachHBox(vBox3, szNameHSupport)
+                                        tab.setLayoutFlag(szNameHSupport, "LAYOUT_SIZE_VEXPANDING")
+                                        tab.setLayoutFlag(szNameHSupport, "LAYOUT_LEFT")
+
+                                        self.selectDrawFunction(optionFunction, (szNameHSupport, baseTag, FfH2ID, optionID, bBoxOn))
+
+                                if (iOption < (nbOptionsLoop-1)) and (not optionFunction in listParents):
+                                        tab.attachHSeparator(vBox2, "%s%sHSeparator2" %(FfH2ID,optionID))
+                                        tab.attachHSeparator(vBox3, "%s%sHSeparator3" %(FfH2ID,optionID))
+                                        if bThisOptionMultiLine :
+                                                tab.attachHSeparator(vBox2, "%s%sHSeparator6" %(FfH2ID,optionID))
+                                                tab.attachHSeparator(vBox3, "%s%sHSeparator7" %(FfH2ID,optionID))
+
+                                        if len(lUniqueIDsEnd) > 0 :
+                                                if optionID == lUniqueIDsEnd[-1] :
+                                                        tab.attachHSeparator(vBox2, "%s%sHSeparator6" %(FfH2ID,optionID))
+                                                        tab.attachHSeparator(vBox3, "%s%sHSeparator7" %(FfH2ID,optionID))
+
+                                bLastOptionMultiLine = bool(bThisOptionMultiLine)
+
+                        # end FfH2 separator
+                        tab.attachHSeparator("FfH2VBox", "%sHSeparator1" %FfH2ID)
+                        tab.attachHSeparator("FfH2VBox", "%sHSeparator11" %FfH2ID)
+                        tab.attachFixedSpacer("FfH2VBox", 10)
+                        if iFfH2 != (nbFfH2-1) : tab.attachFixedSpacer("FfH2VBox", 10)
+
+                # draw the language dropdown ,buttons resets , load save , exit buttons
+                self.drawLowerPanel("FfH2VBoxParent", baseTag)
+
+	def refreshFfH2OptionsTab(self):
+
+                baseTag = "ffh2"
+		tab = self.pTabControl
+
+		for optionTag1 in selection[baseTag].keys() :
+
+                        if (optionTag1 == "lairs") and (XMLEntriesList["lairs"] == []) : continue
+                        if (optionTag1 == "uniqueimprovements") and (XMLEntriesList["uniqueimprovements"] == []) : continue
+                        
+                        for optionTag2 in selection[baseTag][optionTag1].keys() :
+
+                                bBoxOn = True
+
+                                baseOptionTag2 = str(optionTag2)
+                                if "-" in optionTag2 :
+                                        baseOptionTag2, iIndex = splitTag(optionTag2)
+
+                                optionFunction = valueLimits[baseTag][optionTag1][baseOptionTag2]["drawfunc"]
+                                
+                                if ("-" in optionTag2) or (optionFunction == "SelectionSpecial") :
+                                        self.selectRefreshFunction(optionFunction, (baseTag, optionTag1, optionTag2, bBoxOn))
+
+                                else :
+                                        szLabelName = "%s%sOptionLabel" %(optionTag1, optionTag2)
+                                        tab.setEnabled(szLabelName, bBoxOn)
+
+                                        self.selectRefreshFunction(optionFunction, (baseTag, optionTag1, optionTag2, bBoxOn))
+
+	def checkEditBoxFfH2OptionsTab(self):
+
+                baseTag = "ffh2"
+		tab = self.pTabControl
+
+		for optionTag1 in selection[baseTag].keys() :
+
+                        if (optionTag1 == "lairs") and (XMLEntriesList["lairs"] == []) : continue
+                        if (optionTag1 == "uniqueimprovements") and (XMLEntriesList["uniqueimprovements"] == []) : continue
+                        
+                        for optionTag2 in selection[baseTag][optionTag1].keys() :
 
                                 baseOptionTag2 = str(optionTag2)
                                 if "-" in optionTag2 :
@@ -17674,6 +21036,51 @@ class CvStoFullOfResourcesScreen:
                 elif len(selection[baseTag][optionTag1][optionTag2]) == 2 :
                         selection[baseTag][optionTag1][optionTag2] = [int(iEDRandom1), int(iEDRandom2)]
 
+        def checkEditBoxStandardValueRandomFloat(self, argsList):
+                global selection
+
+                baseTag, optionTag1, optionTag2 = argsList
+
+		tab = self.pTabControl
+                baseOptionTag2 = str(optionTag2)
+                if "-" in optionTag2 :
+                        baseOptionTag2, iIndex = splitTag(optionTag2)
+
+                valTp = copy.deepcopy(valueLimits[baseTag][optionTag1][baseOptionTag2]["limit"])
+                valTpMin, valTpMax = valTp
+                midValue = valTpMin + (valTpMax - valTpMin)/2
+
+                txtEDValue = getSText( tab.getText( "EDValue_%s_%s_%s" %(baseTag, optionTag1, optionTag2) ) )
+                txtEDRandom1 = getSText( tab.getText( "EDRandom1_%s_%s_%s" %(baseTag, optionTag1, optionTag2) ) )
+                txtEDRandom2 = getSText( tab.getText( "EDRandom2_%s_%s_%s" %(baseTag, optionTag1, optionTag2) ) )
+
+                try :
+                        iEDValue = float(txtEDValue)
+                except :
+                        iEDValue = -1
+                try :
+                        iEDRandom1 = float(txtEDRandom1)
+                except :
+                        iEDRandom1 = -1
+                try :
+                        iEDRandom2 = float(txtEDRandom2)
+                except :
+                        iEDRandom2 = -1
+
+                if ( iEDValue<valTpMin ) or ( iEDValue>valTpMax ):
+                        iEDValue = float(midValue)
+
+                if ( iEDRandom1<valTpMin ) or ( iEDRandom1>=valTpMax ) or ( iEDRandom1>iEDRandom2 ):
+                        iEDRandom1 = float(valTpMin)
+
+                if ( iEDRandom2<=valTpMin ) or ( iEDRandom2>valTpMax ) or ( iEDRandom2<=iEDRandom1 ):
+                        iEDRandom2 = float(valTpMax)
+
+                if len(selection[baseTag][optionTag1][optionTag2]) == 1 :
+                        selection[baseTag][optionTag1][optionTag2] = [normalizeFloat(iEDValue)]
+                elif len(selection[baseTag][optionTag1][optionTag2]) == 2 :
+                        selection[baseTag][optionTag1][optionTag2] = [normalizeFloat(iEDRandom1), normalizeFloat(iEDRandom2)]
+
         def checkEditBoxValueRandom(self, argsList):
                 global selection
 
@@ -18073,6 +21480,10 @@ def isRandomCustomMapOption(argsList):
 	return False
 
 ##!_!## Text functions
+def getTypeForm(sT) :
+        st = sT.replace("_", "")
+        return st
+
 def normalizeFloat(fl): # don't understand why round doesn't return a number with n digits
         sfl = str(fl)
         if "." in sfl :
@@ -18098,6 +21509,12 @@ def getSMenuText(sTag, rList=""):
         return getSText(textDic[sTag][language])
 
 textDic = {
+        "TXT_DUMMY" : [
+                "%s" ,
+                "%s" ,
+                "%s" ,
+                "%s" ,
+                "%s" ] ,
         "TXT_BUTTON_NAME" : [
                 "Options :" ,
                 "Options :" ,
@@ -18381,11 +21798,11 @@ textDic = {
                 "Casuale" ,
                 "Al azar" ] ,
         "TXT_MAPS_CC_NB_CONTINENTS_SEL1" : [
-                "One Per Team" ,
-                "1 par équipe" ,
-                "1 pro Team" ,
-                "Una per squadra" ,
-                "Una por equipo" ] ,
+                "One Per Team(Max 6)" ,
+                "1 par équipe(Max 6)" ,
+                "1 pro Team(Max 6)" ,
+                "Una per squadra(Mas 6)" ,
+                "Una por equipo(Máx 6)" ] ,
         "TXT_MAPS_CC_NB_CONTINENTS_SEL2" : [
                 "2" ,
                 "2" ,
@@ -18896,6 +22313,90 @@ textDic = {
                 "Zufällig" ,
                 "Casuale" ,
                 "Al azar" ] ,
+        "TXT_MAPS_TECTONICS_LANDMASS" : [
+                "Landmass Type :" ,
+                "Type continents :" ,
+                "Landmassentyp :" ,
+                "Tipo massa terra :" ,
+                "Tipo de masa de tierra :" ] ,
+        "TXT_MAPS_TECTONICS_LANDMASS_SEL0" : [
+		"Earthlike (70% water)" ,
+		"Semblable à la Terre (70% d'eau)" ,
+		"Erdähnlich (70% Wasser)" ,
+		"Simile alla Terra (70% acqua)" ,
+		"Similar a la Tierra (70% agua)" ] ,
+        "TXT_MAPS_TECTONICS_LANDMASS_SEL1" : [
+		"60% water" ,
+		"60% d'eau" ,
+		"60% Wasser" ,
+		"60% acqua" ,
+		"60% agua" ] ,
+        "TXT_MAPS_TECTONICS_LANDMASS_SEL2" : [
+		"Pangaea" ,
+		"Pangée" ,
+		"Pangäa" ,
+		"Pangea" ,
+		"Pangea" ] ,
+        "TXT_MAPS_TECTONICS_LANDMASS_SEL3" : [
+		"Lakes (30% water)" ,
+		"Lacs (30% d'eau)" ,
+		"Seen (30% Wasser)" ,
+		"Laghi (30% acqua)" ,
+		"Lagos (30% agua)" ] ,
+        "TXT_MAPS_TECTONICS_LANDMASS_SEL4" : [
+		"Islands" ,
+		"Iles" ,
+		"Inseln" ,
+		"Isole" ,
+		"Islas" ] ,
+        "TXT_MAPS_TECTONICS_LANDMASS_SEL5" : [
+		"Mediterranean" ,
+		"Méditerranéen" ,
+		"Mediterran" ,
+		"Mediterraneo" ,
+		"Mediterráneo" ] ,
+        "TXT_MAPS_TECTONICS_LANDMASS_SEL6" : [
+		"Terra" ,
+		"Terra" ,
+		"Terra" ,
+		"Terra" ,
+		"Terra" ] ,
+        "TXT_MAPS_TECTONICS_LANDMASS_SEL7" : [
+		"Terra(Old World Start)" ,
+		"Terra(départ : Antiquité)" ,
+		"Terra(Start Alte Welt)" ,
+		"Terra(partenza Vecchio Mondo)" ,
+		"Terra(inicio en Viejo Mundo)" ] ,
+        "TXT_MAPS_TECTONICS_ARIDITY" : [
+                "Aridity Level :" ,
+                "Taux d'aridité :" ,
+                "Dürrestufe :" ,
+                "Livello aridità :" ,
+                "Nivel de aridez :" ] ,
+        "TXT_MAPS_TECTONICS_ARIDITY_SEL0" : [
+		"Arid" ,
+		"Aride" ,
+		"Trocken" ,
+		"Arido" ,
+		"Árido" ] ,
+        "TXT_MAPS_TECTONICS_ARIDITY_SEL1" : [
+		"Normal" ,
+                "Normale" ,
+                "Normal" ,
+                "Normale" ,
+                "Normal" ] ,
+        "TXT_MAPS_TECTONICS_ARIDITY_SEL2" : [
+		"Wet" ,
+		"Humide" ,
+		"Feucht" ,
+		"Umido" ,
+		"Húmedo" ] ,
+        "TXT_MAPS_TECTONICS_ARIDITY_SEL3" : [
+		"No ice" ,
+		"Pas de glace" ,
+		"Kein Eis" ,
+		"No ghiaccio" ,
+		"Sin hielo" ] ,
         "TXT_TERRAIN_DES" : [
                 "Grounds :" ,
                 "Terrains :" ,
@@ -20420,7 +23921,19 @@ textDic = {
                 "Die menschlichen Spieler entfernen" ,
                 "Allontanare i giocatori umani" ,
                 "Alejar los jugadores humanos" ] ,
-        "TXT_INFOS_0" : [
+        "TXT_STARTLOCS_ISOLATEHUMANS" : [
+                "For scripts of Continents type :" ,
+                "Pour les scripts de type continents :" ,
+                "Für Indexe der Kontinentart :" ,
+                "Per gli scritti del tipo dei continenti :" ,
+                "Para las escrituras del tipo de los continentes :" ] ,
+        "TXT_STARTLOCS_ISOLATEHUMANS_SEL0" : [
+                "Place the human players so they are on the least populated continents" ,
+                "Placer les joueurs humains pour qu'ils soient sur les continents les moins peuplés" ,
+                "Setzen Sie die menschlichen Spieler, also sind sie auf den wenigen bevölkerten Kontinenten" ,
+                "ADisponga i giocatori umani in modo da sono sui meno continenti popolati" ,
+                "Coloque a los jugadores humanos así que están en los menos continentes poblados" ] ,
+       "TXT_INFOS_0" : [
                 "Welcome :" ,
                 "Bienvenue :" ,
                 "Willkommen :" ,
@@ -20498,6 +24011,78 @@ textDic = {
                 "Verwenden Sie <Karte neu laden> nicht in den Welterbauer." ,
                 "Non usi l'<Rigenera mappa> nel editor." ,
                 "No utilice <Regenerar mapa> en el Creador de mundos." ] ,
+        "TXT_INFOS_11_0" : [
+                "There is a special implementation for the MOD <Fall from Heaven 2>." ,
+                "Il y a une implémentation spéciale pour le MOD <Fall from Heaven 2>." ,
+                "Es gibt eine spezielle Implementierung für den Umb. <Fall from Heaven 2>." ,
+                "Ci è un'esecuzione speciale per il MOD <Fall from Heaven 2>." ,
+                "Hay una puesta en práctica especial para la MOD <Fall from Heaven 2>." ] ,
+        "TXT_INFOS_11_1" : [
+                "So that the script recognizes the MOD, there must be the text <Fall from Heaven 2> in the name of the MOD." ,
+                "Pour que le script reconnaisse le MOD, il doit y avoir le text <Fall from Heaven 2> dans le nom du MOD." ,
+                "Damit der Index den Umb. erkennt, muss es den Text <Fall from Heaven 2> im Namen des Umb. geben." ,
+                "In modo che lo scritto riconosca il MOD, ci deve essere il testo <Fall from Heaven 2> in nome del MOD." ,
+                "De modo que la escritura reconozca la MOD, debe haber el texto <Fall from Heaven 2> en nombre de la MOD." ] ,
+        "TXT_INFOS_11_2" : [
+                "Scripts Custom Continents, Hub, Inland Sea, Ring, Wheel and Islands are limited to 18 players." ,
+                "Les scripts Custom Continents, Hub, Inland Sea, Ring, Wheel et Islands sont limités à 18 joueurs." ,
+                "Die Skripte Custom Continents, Hub, Inland Sea, Ring, Wheel und Islands sind auf 18 Spieler begrenzt." ,
+                "I manoscritti Custom Continents, Hub, Inland Sea, Ring, Wheel e Islands sono limitati a 18 giocatori." ,
+                "Las escrituras Custom Continents, Hub, Inland Sea, Ring, Wheel y Islands se limitan a 18 jugadores." ] ,
+        "TXT_INFOS_11_2_0" : [
+                "<Tectonics> has its own generator of grounds." ,
+                "<Tectonics> a son propre générateur de terrains." ,
+                "<Tectonics> hat seinen eigenen Geländegenerator." ,
+                "<Tectonics> ha il suo generatore di terreni." ,
+                "<Tectonics> tiene su propio generador de terrenos." ] ,
+        "TXT_INFOS_11_2_1" : [
+                "Only the option <Without> is taken in count for the 5 grounds." ,
+                "Seule l'option <Sans> est prise en compte pour les 5 terrains." ,
+                "Nur die Wahl <Ohne> ist eingelassener Zählimpuls für die 5 Wahlen der Gelände." ,
+                "Soltanto l'opzione <Senza> è conteggio contenuto per le 5 opzioni dei terreni." ,
+                "Solamente la opción <Sin> es cuenta admitida para las 5 opciones de terrenos." ] ,
+        "TXT_INFOS_11_2_2" : [
+                "If you do not want that rivers are added, enter the minimal value for this option." ,
+                "Si vous ne voulez pas que des rivières soient ajoutées, entrez la valeur minimale pour cette option." ,
+                "Wenn Sie nicht wollen, dass Flüsse hinzugefügt werden, gehen Sie hinein der minimale Wert für diese Option." ,
+                "Se non volete che fiumi siano aggiunti, entrate il valore minimo per quest'opzione." ,
+                "Si no quiere que algunos ríos estén añadidos, entre el valor mínimo para esta opción." ] ,
+        "TXT_INFOS_11_3" : [
+                "There is an implementation to support the sizes added by the MODS. Tell me if you encounter a problem with a script in particular." ,
+                "Il y a une implémentation pour supporter les tailles ajoutées par les MODS. Dîtes moi si vous rencontrez un problème avec un script en particulier." ,
+                "Es gibt eine Implementierung, zum der Größen zu stützen, die durch das MODS hinzugefügt werden. Besagt ich, wenn Sie auf ein Problem mit einem Index insbesondere stoßen." ,
+                "Ci è un'esecuzione per sostenere i formati aggiunti dal MODS. Detto me se incontrate un problema con uno scritto in particolare." ,
+                "Hay una puesta en práctica para apoyar los tamaños agregados por el MODS. Dicho yo si usted encuentra un problema con una escritura particularmente." ] ,
+        "TXT_INFOS_11_4" : [
+                "In certain cases, the script do not manage to place all the players." ,
+                "Dans certains cas, le script n'arrive pas à placer tous les joueurs." ,
+                "In bestimmten Fällen erreichen der Index nicht, alle Spieler zu setzen." ,
+                "In determinati casi, lo scritto non riesce a disporre tutti i giocatori." ,
+                "En ciertos casos, la escritura no maneja colocar a todos los jugadores." ] ,
+        "TXT_INFOS_11_5" : [
+                "That can happen if there are many players on a small map." ,
+                "Cela peut arriver si il y a beaucoup de joueurs sur une petite carte." ,
+                "Das kann geschehen, wenn es viele Spieler auf einem kleinen Diagramm gibt." ,
+                "Quello può accadere se ci sono molti giocatori su un piccolo programma." ,
+                "Eso puede suceder si hay muchos jugadores en un pequeño mapa." ] ,
+        "TXT_INFOS_11_6" : [
+                "Or if you request a start inland on a map where there are only small islands, for an example." ,
+                "Ou bien si vous demandez un départ à l'intérieur des terres sur une carte où il n'y a que des petites îles, par exemple." ,
+                "Oder wenn Sie ein Anfangsbinnenland auf einem Diagramm fordern, in dem es nur kleine Inseln gibt, als ein Beispiel." ,
+                "O se chiedete un interno di inizio su un programma in cui ci sono soltanto piccole isole, per un esempio." ,
+                "O si usted pide un interior del comienzo en un mapa donde hay solamente pequeñas islas, por un ejemplo." ] ,
+        "TXT_INFOS_11_7" : [
+                "In this case, the script launches an implementation by default and warns you with a message at the beginning of the game." ,
+                "Dans ce cas, le script lance une implémentation par defaut et vous previent avec un message au debut de la partie." ,
+                "In diesem Fall startet der Index eine Implementierung durch Rückstellung und warnt Sie mit einer Mitteilung zu Beginn des Spiels." ,
+                "In questo caso, lo scritto lancia un'esecuzione per difetto e lo avverte con un messaggio all'inizio del gioco." ,
+                "En este caso, la escritura pone en marcha una puesta en práctica por abandono y le advierte con un mensaje al principio del juego." ] ,
+        "TXT_INFOS_11_8" : [
+                "This do not happen often, but that may cause problems on maps like <Hub>." ,
+                "Cela n'arrive pas souvent, mais cela peut poser des problèmes sur des cartes comme <Hub>." ,
+                "Dieses geschehen nicht häufig, aber das kann Probleme auf Diagrammen verursachen mögen <Hub>." ,
+                "Ciò non accade spesso, ma quella può causare i problemi sui programmi gradice <Hub>." ,
+                "Esto no sucede a menudo, pero ése puede causar problemas en mapas tiene gusto de <Hub>." ] ,
         "TXT_INFOS_12" : [
                 "For network multiplayer games :" ,
                 "Pour les parties multijoueurs de réseau :" ,
@@ -20575,7 +24160,79 @@ textDic = {
                 "Une mise à jour est disponible. Vous pouvez aller sur le forum pour la télécharger." ,
                 "Ein Update ist vorhanden. Sie können das Forum fortfahren, es herunterzuladen." ,
                 "Un aggiornamento è disponibile. Potete andare sulla tribuna caricarla programmi oggetto." ,
-                "Una actualización está disponible. Usted puede ir en el foro a transferirlo." ]
+                "Una actualización está disponible. Usted puede ir en el foro a transferirlo." ] ,
+        "TXT_FFH2_LAIRS" : [
+                "Lairs :" ,
+                "Tanières :" ,
+                "Lager :" ,
+                "Tane :" ,
+                "Guaridas :" ] ,
+        "TXT_FFH2_MINSTARTDIST" : [
+                "Minimal distance with a starting point :" ,
+                "Distance minimale avec un point de départ :" ,
+                "Minimaler Abstand mit einem Ausgangspunkt :" ,
+                "Distanza minima con un punto di partenza :" ,
+                "Distancia mínima con un punto de partida :" ] ,
+        "TXT_FFH2_UNIQUEIMPROVEMENTS" : [
+                "Unique improvements :" ,
+                "Améliorations uniques :" ,
+                "Einzigartige Verbesserungen :" ,
+                "Miglioramenti unici :" ,
+                "Mejoras únicas :" ] ,
+        "TXT_FFH2_PLACEMENT" : [
+                "Placement :" ,
+                "Placement :" ,
+                "Anlage :" ,
+                "Sistemazione :" ,
+                "Colocación :" ] ,
+        "TXT_FFH2_PLACEMENT_SEL0" : [
+                "Anywhere" ,
+                "N'importe où" ,
+                "Überall" ,
+                "Dovunque" ,
+                "Dondequiera" ] ,
+        "TXT_FFH2_PLACEMENT_SEL1" : [
+                "Far" ,
+                "Loin" ,
+                "Weit" ,
+                "Lontano" ,
+                "Lejos" ] ,
+        "TXT_FFH2_PLACEMENT_SEL2" : [
+                "Only on a deserted island" ,
+                "Seulement sur une île déserte" ,
+                "Nur auf einer verlassenen Insel" ,
+                "Soltanto su un'isola deserta" ,
+                "Solamente sobre una isla desértica" ] ,
+        "TXT_FFH2_LAIR_PERCENT" : [
+                "The percentage of placement per default of %s is %r." ,
+                "Le pourcentage de placement par défaut des %s est de %r." ,
+                "Der Prozentsatz der Platzierung pro Rückstellung von %s ist %r." ,
+                "La percentuale della disposizione per difetto di %s è %r." ,
+                "El porcentaje de la colocación por el defecto de %s es %r." ] ,
+        "TXT_FFH2_UIMPR_VAR" : [
+                "The chance of an unique improvement to be placed depends on the size of the map :" ,
+                "La chance qu'une amélioration unique soit placée depend de la taille de la carte :" ,
+                "Die Wahrscheinlichkeit einer einzigartigen Verbesserung gesetzt zu werden hängt von der Größe des Diagramms ab :" ,
+                "La probabilità di un miglioramento unico essere disposto dipende dal formato del programma :" ,
+                "La ocasión de una mejora única de ser colocado depende del tamaño del mapa :" ] ,
+        "TXT_FFH2_UIMPR_SIZE" : [
+                "For the size %s, the chance is %r percents." ,
+                "Pour la taille %s, la chance est de %r pour cent." ,
+                "Für die Größe %s, ist die Wahrscheinlichkeit %r Prozent." ,
+                "Per il formato %s, la probabilità è %r per cento." ,
+                "Para el tamaño %s, la ocasión es el %r por ciento." ] ,
+        "TXT_FFH2_TOWERS" : [
+                "%s are placed on choke points." ,
+                "Les %s sont placées sur des points de concentration." ,
+                "%s werden auf Drosselklappenpunkte gesetzt." ,
+                "%s è disposto sui punti di bobina d'arresto." ,
+                "%s se coloca en puntos de estrangulación." ] ,
+        "TXT_FFH2_MAELSTROM" : [
+                "%s is placed in an inland sea, if possible." ,
+                "Le %s est placé dans une mer intérieure, si possible." ,
+                "%s wird in ein inneres Meer gesetzt, wenn möglich." ,
+                "%s è messo in un mare interno, possibilmente." ,
+                "El %s se coloca en un mar interior, si es posible." ]
         }
 
 ##        "" : [
