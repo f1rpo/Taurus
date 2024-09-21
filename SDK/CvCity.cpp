@@ -8015,7 +8015,10 @@ void CvCity::setWeLoveTheKingDay(bool bNewValue)
 		m_bWeLoveTheKingDay = bNewValue;
 
 		updateMaintenance();
-
+	// <trs.fix> Don't announce end. Do announce continuation.
+	}
+	if (isWeLoveTheKingDay())
+	{	// </trs.fix>
 		eCivic = NO_CIVIC;
 
 		for (iI = 0; iI < GC.getNumCivicInfos(); iI++)
