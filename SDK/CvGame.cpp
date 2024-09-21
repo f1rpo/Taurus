@@ -2339,7 +2339,6 @@ void CvGame::autoSave(bool bInitial)
 	CvEventReporter& kEventReporter = CvEventReporter::getInstance();
 	kEventReporter.setAutoSaving();
 	gDLL->getEngineIFace()->AutoSave(bInitial);
-	// <trs.fix>
 	if (bInitial)
 	{
 		// Treat automatic Start Save as an autosave
