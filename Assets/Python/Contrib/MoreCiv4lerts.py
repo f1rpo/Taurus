@@ -211,7 +211,11 @@ class MoreCiv4lertsEvent( AbstractMoreCiv4lertsEvent):
 			teamPlayerList = []
 			teamPlayerList = PyGame.getCivTeamList(PyGame.getActiveTeam())
 			teamPlayerList.append(PyPlayer(iActivePlayer))
-			for loopPlayer in range(len(teamPlayerList)):
+			#for loopPlayer in range(len(teamPlayerList)):
+			# <trs.fix> Addressing the issue that EF points out in the body
+			for teamPlayer in teamPlayerList:
+				# Should be iLoopPlayer or something, but let's keep the changes minimal.
+				loopPlayer = teamPlayer.getID() # </trs.fix>
 				lCity = []
 				# EF: This looks very wrong. Above the list of players will not be 0, 1, ...
 				#     but here it uses loopPlayer which is 0, 1, ...
