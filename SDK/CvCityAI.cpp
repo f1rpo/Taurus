@@ -6981,7 +6981,8 @@ int CvCityAI::AI_yieldValue(short* piYields, short* piCommerceYields, bool bAvoi
 	{
 		// tiny food factor, to ensure that even when we don't want to grow, 
 		// we still prefer more food if everything else is equal
-		iValue += (aiYields[YIELD_FOOD] * 1);
+		if (!isHuman() || !bFoodIsProduction) // trs.fix (from K-Mod - but here only for human)
+			iValue += (aiYields[YIELD_FOOD] * 1);
 
 		int iFoodPerTurn = (foodDifference(false) - ((bRemove) ? aiYields[YIELD_FOOD] : 0));
 		int iFoodLevel = getFood();
