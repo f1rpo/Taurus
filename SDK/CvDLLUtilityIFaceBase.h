@@ -208,10 +208,23 @@ public:
 
 	virtual WorldSizeTypes getWorldSize() = 0;
 	virtual uint getFrameCounter() const = 0;
-
-	virtual bool altKey() = 0;
-	virtual bool shiftKey() = 0;
-	virtual bool ctrlKey() = 0;
+	/*	<trs.fix> Renamed the virtual functions, replaced below with
+		reliable implementations from K-Mod. */
+	virtual bool altKeyExternal() = 0;
+	virtual bool shiftKeyExternal() = 0;
+	virtual bool ctrlKeyExternal() = 0;
+	bool altKey() const
+	{
+		return (GetKeyState(VK_MENU) & 0x8000);
+	}
+	bool shiftKey() const
+	{
+		return (GetKeyState(VK_SHIFT) & 0x8000);
+	}
+	bool ctrlKey() const
+	{
+		return (GetKeyState(VK_CONTROL) & 0x8000);
+	} // </trs.fix>
 	virtual bool scrollLock() = 0;
 	virtual bool capsLock() = 0;
 	virtual bool numLock() = 0;
