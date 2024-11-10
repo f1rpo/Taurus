@@ -89,20 +89,24 @@ class SevoPediaLeader:
 		panelName = self.top.getNextWidgetName()
 		screen.addPanel(panelName, localText.getText("TXT_KEY_PEDIA_TRAITS", ()), "", True, False, self.X_TRAITS, self.Y_TRAITS, self.W_TRAITS, self.H_TRAITS, PanelStyles.PANEL_STYLE_BLUE50)
 		listName = self.top.getNextWidgetName()
-		iNumCivs = 0
-		iLeaderCiv = -1
-		for iCiv in range(gc.getNumCivilizationInfos()):
-			civ = gc.getCivilizationInfo(iCiv)
-			if civ.isLeaders(self.iLeader):
-				iNumCivs += 1
-				iLeaderCiv = iCiv
-		if iNumCivs == 1:
-			szSpecialText = CyGameTextMgr().parseLeaderTraits(self.iLeader, iLeaderCiv, False, True)
-		else:		
-			szSpecialText = CyGameTextMgr().parseLeaderTraits(self.iLeader, -1, False, True)
+		# trs.fix: Search for the civ ID moved into a static method
+		szSpecialText = CyGameTextMgr().parseLeaderTraits(self.iLeader, getCiv(self.iLeader), False, True)
 		szSpecialText = szSpecialText[1:]
 		screen.addMultilineText(listName, szSpecialText, self.X_TRAITS+5, self.Y_TRAITS+30, self.W_TRAITS-10, self.H_TRAITS-35, WidgetTypes.WIDGET_GENERAL, -1, -1, CvUtil.FONT_LEFT_JUSTIFY)
 
+	# trs.fix: Static for use by SevoPediaMain; body cut from placeTraits.
+	@staticmethod
+	def getCiv(iLeader):
+		iNumCivs = 0
+		for iCiv in range(gc.getNumCivilizationInfos()):
+			civ = gc.getCivilizationInfo(iCiv)
+			if civ.isLeaders(iLeader):
+				iNumCivs += 1
+				iLeaderCiv = iCiv
+		# <trs.fix> (No functional change here)
+		if iNumCivs != 1:
+			return -1
+		return iLeaderCiv # </trs.fix>
 
 
 	def placeCivic(self):		

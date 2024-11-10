@@ -712,6 +712,7 @@ class SevoPediaMain(CvPediaScreen.CvPediaScreen):
 
 		i = 0
 		for item in self.list:
+			data1 = item[1] # trs.fix: Moved up
 			if (info == gc.getConceptInfo):
 				data1 = CivilopediaPageTypes.CIVILOPEDIA_PAGE_CONCEPT
 				data2 = item[1]
@@ -727,8 +728,10 @@ class SevoPediaMain(CvPediaScreen.CvPediaScreen):
 			elif (info == self.getTraitInfo):
 				data1 = CivilopediaPageTypes.CIVILOPEDIA_PAGE_CONCEPT_NEW
 				data2 = item[1]
+			# <trs.fix>
+			elif (info == gc.getLeaderHeadInfo):
+				data2 = SevoPediaLeader.SevoPediaLeader.getCiv(item[1]) # </trs.fix>
 			else:
-				data1 = item[1]
 				data2 = 1
 			screen.appendTableRow(self.ITEM_LIST_ID)
 			screen.setTableText(self.ITEM_LIST_ID, 0, i, u"<font=3>" + item[0] + u"</font>", info(item[1]).getButton(), widget, data1, data2, CvUtil.FONT_LEFT_JUSTIFY)
