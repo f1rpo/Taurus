@@ -2103,8 +2103,9 @@ void CvGame::update()
 		}
 		// <trs.start-with-resources>
 		/*	Slice 0 appears to be too early for some players, no balloons
-			get shown (race condition?). 1 didn't help; will 4 be late enough? */
-		if (getTurnSlice() == 4)
+			get shown (race condition?). 1 didn't help; 4 maybe somewhat,
+			toward 8, the delay gets noticeable. Try 7. */
+		if (getTurnSlice() == 7)
 		{
 			gDLL->getEngineIFace()->setResourceLayer(getBugOptionBOOL(
 					"Taurus__StartWithResourceDisplay"));
