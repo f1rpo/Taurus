@@ -1111,6 +1111,9 @@ def assignStartingPlots():
 	CyPythonMgr().allowDefaultImpl()
 
 def minStartingDistanceModifier():
+	# <trs.fix> Work around bug in the DLL that may call this function midgame
+	if not "bSuccessFlag" in globals():
+		return 0 # </trs.fix>
 	global bSuccessFlag
 	if bSuccessFlag == True:
 		return -95

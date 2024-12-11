@@ -1044,7 +1044,7 @@ int CvPlayer::startingPlotRange() const
 	/*	<trs.fix> Work around two bugs, neither of which Taurus can easily fix:
 	  - CvUnitAI::AI_foundRange causes found-city values to be calculated with the
 		bStartingLoc flag.
-	  - The Hub map script can't handle the minStartingDistanceModifier queries
+	  - A few map scripts can't handle the minStartingDistanceModifier queries
 		caused by bStartingLoc unless a Hub map has been generated in the current
 		session. */
 	bool bSkipMinStartingDistanceModifier = false;
@@ -1063,8 +1063,16 @@ int CvPlayer::startingPlotRange() const
 				(and after having exited, which we can't check). */
 			break;
 		default:
-			if (GC.getInitCore().getMapScriptName().compare(L"Hub") == 0)
-				bSkipMinStartingDistanceModifier = true;
+			wchar* aszAffectedMapScripts[] = { L"Hub", L"Ring", L"Wheel" };
+			for (int i = 0; i < ARRAYSIZE(aszAffectedMapScripts)
+				&& !bSkipMinStartingDistanceModifier; i++)
+			{
+				if (GC.getInitCore().getMapScriptName().compare(
+					aszAffectedMapScripts[i]) == 0)
+				{
+					bSkipMinStartingDistanceModifier = true;
+				}
+			}
 		}
 	}
 	if (!bSkipMinStartingDistanceModifier)
