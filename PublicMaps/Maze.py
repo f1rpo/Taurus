@@ -6,6 +6,8 @@
 #	Copyright (c) 2005 Firaxis Games, Inc. All rights reserved.
 #-----------------------------------------------------------------------------
 #
+# trs (note): This version by Ruff_Hi adds the Extra Land Strip option;
+# has been bundled with BUG since 2008.
 
 from CvPythonExtensions import *
 import CvUtil
