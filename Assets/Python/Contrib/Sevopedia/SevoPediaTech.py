@@ -109,6 +109,7 @@ class SevoPediaTech(CvPediaScreen.CvPediaScreen):
 		screen.attachLabel(panelName, "", "  ")
 		for iCiv in range(gc.getNumCivilizationInfos()):
 			civ = gc.getCivilizationInfo(iCiv)
+			if not civ.isPlayable() and not civ.isAIPlayable(): continue # trs: Exclude Minor civ
 			if civ.isCivilizationFreeTechs(self.iTech):
 				screen.attachImageButton(panelName, "", civ.getButton(), GenericButtonSizes.BUTTON_SIZE_CUSTOM, WidgetTypes.WIDGET_PEDIA_JUMP_TO_CIV, iCiv, 1, False)
 
