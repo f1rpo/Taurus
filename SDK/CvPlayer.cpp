@@ -10012,7 +10012,9 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			if ((GC.getGameINLINE().isHotSeat() || GC.getGameINLINE().isPbem()) && isHuman() && bDoTurn)
 			{
 				gDLL->getInterfaceIFace()->clearEventMessages();
-				gDLL->getEngineIFace()->setResourceLayer(false);
+				// trs.start-with-resources:
+				if (!getBugOptionBOOL("Taurus__StartWithResourceDisplay"))
+					gDLL->getEngineIFace()->setResourceLayer(false);
 
 				GC.getGameINLINE().setActivePlayer(getID());
 			}
