@@ -127,7 +127,8 @@ def getCustomMapOptionDescAt(argsList):
 	                   "TXT_KEY_MAP_SCRIPT_EARTH_60",
 	                   "TXT_KEY_MAP_SCRIPT_PANGAEA",
 	                   "TXT_KEY_MAP_SCRIPT_LAKES",
-	                   "TXT_KEY_MAP_SCRIPT_ISLANDS",
+	                   #"TXT_KEY_MAP_SCRIPT_ISLANDS",
+					   "TXT_KEY_MAP_SCRIPT_ISLANDS_90", # trs.tectonx
 	                   "TXT_KEY_MAP_SCRIPT_MEDITERRANEAN", 
 	                   "TXT_KEY_MAP_SCRIPT_TERRA",
 	                   "TXT_KEY_MAP_SCRIPT_TERRA_OLD_WORLD_START"]

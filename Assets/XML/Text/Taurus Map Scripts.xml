@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!-- trs: Game text for map scripts -->
+<Civ4GameText xmlns="http://www.firaxis.com">
+
+	<!-- Redefines - start -->
+
+	<!-- trs.tectonx: start
+		 (from AdvCiv) Replacing the water percentages because they're way off. -->
+	<TEXT>
+		<Tag>TXT_KEY_MAP_SCRIPT_EARTH_70</Tag>
+		<English>Earthlike (80%% water)</English>
+		<French>Semblable à la Terre (80%% d'eau)</French>
+		<German>Erdähnlich (80%% Wasser)</German>
+		<Italian>Simile alla Terra (80%% acqua)</Italian>
+		<Spanish>Similar a la Tierra (80%% agua)</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_MAP_SCRIPT_EARTH_60</Tag>
+		<English>Earthlike (70%% water)</English>
+		<French>Semblable à la Terre (70%% d'eau)</French>
+		<German>Erdähnlich (70%% Wasser)</German>
+		<Italian>Simile alla Terra (70%% acqua)</Italian>
+		<Spanish>Similar a la Tierra (70%% agua)</Spanish>
+	</TEXT>
+	<!-- No water percentage had been stated for these three -->
+	<TEXT>
+		<Tag>TXT_KEY_MAP_SCRIPT_MEDITERRANEAN</Tag>
+		<English>Mediterranean (45%% water)</English>
+		<French>Méditerranéen (45% d'eau)</French>
+		<German>Mediterran (45%% Wasser)</German>
+		<Italian>Mediterraneo (45%% acqua)</Italian>
+		<Spanish>Mediterráneo (45%% agua)</Spanish>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_MAP_SCRIPT_PANGAEA</Tag>
+		<English>Pangaea (70%% water)</English>
+		<French>Pangée (70%% d'eau)</French>
+		<German>Pangäa (70%% Wasser)</German>
+		<Italian>Pangea (70%% acqua)</Italian>
+		<Spanish>Pangea (70%% agua)</Spanish>
+	</TEXT>
+	<!-- Also shortened this (removing the word "actual") -->
+	<TEXT>
+		<Tag>TXT_KEY_MAP_SCRIPT_TERRA</Tag>
+		<English>Randomized Earth (67%% water)</English>
+		<French>Randomisation de la Terre (67%% d'eau)</French>
+		<German>Zufällige Erde (67%% Wasser)</German>
+		<Italian>Terra casuale (67%% acqua)</Italian>
+		<Spanish>Tierra al azar (67%% agua)</Spanish>
+	</TEXT>
+	<!-- To be consistent with the above -->
+	<TEXT>
+		<Tag>TXT_KEY_MAP_SCRIPT_TERRA_OLD_WORLD_START</Tag>
+		<English>Randomized Earth (Old World Start)</English>
+		<French>Randomisation de la Terre (départ : Antiquité)</French>
+		<German>Zufällige Erde (Start Alte Welt)</German>
+		<Italian>Terra casuale (partenza Vecchio Mondo)</Italian>
+		<Spanish>Tierra al azar (inicio en Viejo Mundo)</Spanish>
+	</TEXT>
+	<!-- trs.tectonx: end -->
+
+	<!-- Redefines - end -->
+
+	<!-- trs.tectonx: Based on TXT_KEY_MAP_SCRIPT_ISLANDS,
+		 which is used for various map scripts. Want one just for Tectonics.
+		 (So this will only affect the version bundled with Taurus.) -->
+	<TEXT>
+		<Tag>TXT_KEY_MAP_SCRIPT_ISLANDS_90</Tag>
+		<English>Islands (90%% water)</English>
+		<French>Iles (90%% d'eau)</French>
+		<German>Inseln (90%% Wasser)</German>
+		<Italian>Isole (90%% acqua)</Italian>
+		<Spanish>Islas (90%% agua)</Spanish>
+	</TEXT>
+
+</Civ4GameText>
