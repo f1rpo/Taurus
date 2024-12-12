@@ -110,6 +110,19 @@ class MnSMultilayeredFractal(CvMapGeneratorUtil.MultilayeredFractal):
 		iIslandsGrain = 4 + self.map.getCustomMapOption(1)
 		userInputOverlap = self.map.getCustomMapOption(2)
 
+		# <trs.sealvl> (Based on similar code added to Big_and_Small)
+		iSeaLevelChange = CyGlobalContext().getSeaLevelInfo(self.map.getSeaLevel()).getSeaLevelChange()
+		# iWater logic moved up
+		iWater = 74
+		if userInputOverlap:
+			iWater = 80
+
+			if iSeaLevelChange < 0:
+				iSeaLevelChange = (iSeaLevelChange * 3) // 4
+		iWater += iSeaLevelChange
+		iWater = min(iWater, 90)
+		# </trs.sealvl>
+
 		# Add a few random patches of Tiny Islands first.
 		numTinies = 1 + self.dice.get(4, "Tiny Islands - Medium and Small PYTHON")
 		print("Patches of Tiny Islands: ", numTinies)
@@ -121,8 +134,12 @@ class MnSMultilayeredFractal(CvMapGeneratorUtil.MultilayeredFractal):
 				tinySouthY = int(self.iH * tinyWestLon)
 				tinyWidth = int(self.iW * 0.15)
 				tinyHeight = int(self.iH * 0.15)
-
-				self.generatePlotsInRegion(80,
+				# <trs.sealvl> Only adjust a little here
+				iTinyWater = 80 # as before
+				iTinyWater += iSeaLevelChange // 2
+				iTinyWater = min(90, iTinyWater) # </trs.sealvl>
+				self.generatePlotsInRegion(#80,
+										   iTinyWater, # trs.sealvl
 				                           tinyWidth, tinyHeight,
 				                           tinyWestX, tinySouthY,
 				                           4, 3,
@@ -150,9 +167,9 @@ class MnSMultilayeredFractal(CvMapGeneratorUtil.MultilayeredFractal):
 			# Set Y exponent:
 			yExp = 5
 			# Also need to reduce amount of land plots, since there will be two layers in all areas.
-			iWater = 80
+			#iWater = 80 # trs.sealvl (moved up)
 		else: # The regions are separate, with continents only in one part, islands only in the other.
-			iWater = 74
+			#iWater = 74 # trs.sealvl (moved up)
 			# Set X exponent to square setting:
 			yExp = 6
 			# Handle horizontal shift for the Continents layer.
@@ -194,9 +211,9 @@ class MnSMultilayeredFractal(CvMapGeneratorUtil.MultilayeredFractal):
 			# Set Y exponent:
 			yExp = 5
 			# Also need to reduce amount of land plots, since there will be two layers in all areas.
-			iWater = 80
+			#iWater = 80 # trs.sealvl (moved up)
 		else: # The regions are separate, with continents only in one part, islands only in the other.
-			iWater = 74
+			#iWater = 74 # trs.sealvl (moved up)
 			# Set X exponent to square setting:
 			yExp = 6
 			# Handle horizontal shift for the Continents layer.
@@ -240,9 +257,9 @@ class MnSMultilayeredFractal(CvMapGeneratorUtil.MultilayeredFractal):
 			# Set Y exponent:
 			yExp = 5
 			# Also need to reduce amount of land plots, since there will be two layers in all areas.
-			iWater = 80
+			#iWater = 80 # trs.sealvl (moved up)
 		else: # The regions are separate, with continents only in one part, islands only in the other.
-			iWater = 74
+			#iWater = 74 # trs.sealvl (moved up)
 			# Set X exponent to square setting:
 			yExp = 6
 			# Handle horizontal shift for the Continents layer.
@@ -284,9 +301,9 @@ class MnSMultilayeredFractal(CvMapGeneratorUtil.MultilayeredFractal):
 			# Set Y exponent:
 			yExp = 5
 			# Also need to reduce amount of land plots, since there will be two layers in all areas.
-			iWater = 80
+			#iWater = 80 # trs.sealvl (moved up)
 		else: # The regions are separate, with continents only in one part, islands only in the other.
-			iWater = 74
+			#iWater = 74 # trs.sealvl (moved up)
 			# Set X exponent to square setting:
 			yExp = 6
 			# Handle horizontal shift for the Continents layer.
