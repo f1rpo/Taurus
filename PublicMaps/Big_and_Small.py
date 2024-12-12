@@ -17,6 +17,10 @@ from CvMapGeneratorUtil import FeatureGenerator
 def getDescription():
 	return "TXT_KEY_MAP_SCRIPT_BIG_AND_SMALL_DESCR"
 
+# trs.fix:
+def isSeaLevelMap():
+	return 0
+
 def isAdvancedMap():
 	"This map should not show up in simple mode"
 	return 0
@@ -95,26 +99,11 @@ class BnSMultilayeredFractal(CvMapGeneratorUtil.MultilayeredFractal):
 
 		# Water variables need to differ if Overlap is set. Defining default here.
 		iWater = 74
-		# <trs.sealvl>
-		iSeaLevelChange = CyGlobalContext().getSeaLevelInfo(self.map.getSeaLevel()).getSeaLevelChange()
-		# Moved up:
-		if userInputOverlap: # Need to reduce amount of land plots since there will be two layers in all areas
-			iWater = 82
-			# Seems that the effect of a low sea needs to be toned down somewhat
-			if iSeaLevelChange < 0:
-				iSeaLevelChange = (iSeaLevelChange * 2) // 3
-		iWater += iSeaLevelChange # Sea level had no effect previously
-		iWater = min(iWater, 90)
-		# </trs.sealvl>
-	
+
 		# Add a few random patches of Tiny Islands first.
 		numTinies = 1 + self.dice.get(4, "Tiny Islands - Custom Continents PYTHON")
 		print("Patches of Tiny Islands: ", numTinies)
 		if numTinies:
-			# <trs.sealvl> Only adjust a little here
-			iTinyWater = 80 # as before
-			iTinyWater += iSeaLevelChange // 2
-			iTinyWater = min(90, iTinyWater) # </trs.sealvl>
 			for tiny_loop in range(numTinies):
 				tinyWestLon = 0.01 * self.dice.get(85, "Tiny Longitude - Custom Continents PYTHON")
 				tinyWestX = int(self.iW * tinyWestLon)
@@ -123,8 +112,7 @@ class BnSMultilayeredFractal(CvMapGeneratorUtil.MultilayeredFractal):
 				tinyWidth = int(self.iW * 0.15)
 				tinyHeight = int(self.iH * 0.15)
 
-				self.generatePlotsInRegion(#80,
-										   iTinyWater, # trs.sealvl
+				self.generatePlotsInRegion(80,
 				                           tinyWidth, tinyHeight,
 				                           tinyWestX, tinySouthY,
 				                           4, 3,
@@ -150,7 +138,8 @@ class BnSMultilayeredFractal(CvMapGeneratorUtil.MultilayeredFractal):
 			# The west and east boundaries are already set (to max values).
 			# Set X exponent to normal setting:
 			xExp = 7
-			# iWater = 82 # trs.sealv (moved up)
+			# Also need to reduce amount of land plots, since there will be two layers in all areas.
+			iWater = 82
 		else: # The regions are separate, with continents only in one part, islands only in the other.
 			# Set X exponent to square setting:
 			xExp = 6
@@ -189,7 +178,8 @@ class BnSMultilayeredFractal(CvMapGeneratorUtil.MultilayeredFractal):
 			# The west and east boundaries are already set (to max values).
 			# Set X exponent to normal setting:
 			xExp = 7
-			#iWater = 82 # trs.sealvl (moved up)
+			# Also need to reduce amount of land plots, since there will be two layers in all areas.
+			iWater = 82
 		else: # The regions are separate, with continents only in one part, islands only in the other.
 			# Set X exponent to square setting:
 			xExp = 6
