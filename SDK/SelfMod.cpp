@@ -124,10 +124,6 @@ private:
 			m_iAddressOffset = 0;
 			return;
 		}
-		/*	Would be safer to be aware of the few different builds that (may) exist
-			and to hardcode offsets for them. So this is a problem worth reporting,
-			even if we can recover. */
-		FAssertMsg(pQuickTestBytes == NULL, "Trying to compensate through address offset");
 		int iAddressOffset = 0;
 		// Base address of the EXE. Reading below that results in a crash.
 		int const iLowAddressBound = 0x00400000;
@@ -167,15 +163,17 @@ private:
 			m_iAddressOffset = MIN_INT;
 			return;
 		}
-		// Run our initial test again to be on the safe side
-		if (pQuickTestBytes != NULL &&
+		/*	Run our initial test again to be on the safe side?
+			not likely to work. These offsets can only be used in close proximity,
+			if at all. */
+		/*if (pQuickTestBytes != NULL &&
 			!testCodeLayout(pQuickTestBytes, iQuickTestBytes,
 			uiQuickTestStart + iAddressOffset))
 		{
 			FErrorMsg("Address offset discarded; likely incorrect.");
 			m_iAddressOffset = MIN_INT;
 			return;
-		}
+		}*/
 		m_iAddressOffset = iAddressOffset;
 		return;
 	}
@@ -194,7 +192,8 @@ bool SelfMod::testCodeLayout(byte* pBytes, int iBytes, uint uiStart) const
 						until SelfMod is finished */
 					"Debugger breakpoint?");
 		#endif
-			FErrorMsg("Unexpected memory layout of EXE");
+			// Could be the Steam version, and we might be able to handle that.
+			//FErrorMsg("Unexpected memory layout of EXE");
 			return false;
 		}
 	}
@@ -302,24 +301,41 @@ protected:
 			 004649A9	call dword ptr ds:[0BC1E64h] */
 		byte aQuickTestBytes[] = { 0xFF, 0x15, 0x64, 0x1E, 0xBC, 0x00 };
 		/*	Longer sequence to search for if we have to find an address offset.
-			The first 27 instructions at the start of the function that calls
+			25 instructions near the start of the function that calls
 			CvPlayer::getGlobeLayerColors. This is a fairly long sequence w/o any
 			absolute addresses in operands. After this sequence, there are a bunch
-			of DLL calls, the last one being CvPlayer::getGlobeLayerColors. */
+			of DLL calls, the last one being CvPlayer::getGlobeLayerColors.
+			I've verified that this sequence exists in the Steamless (unpacked)
+			version of the Steam BtS EXE on disk, namely at 0x00464F88, i.e. at
+			an offset of 1616. */
 		byte aNeedleBytes[] = {
-			0x6A, 0xFF, 0x68, 0x15, 0xB9, 0xA3, 0x00, 0x64, 0xA1, 0x00, 0x00, 0x00,
-			0x00, 0x50, 0x64, 0x89, 0x25, 0x00, 0x00, 0x00, 0x00, 0x83, 0xEC, 0x68,
-			0x53, 0x55, 0x56, 0x57, 0x33, 0xFF, 0x89, 0x7C, 0x24, 0x54, 0x89, 0x7C,
-			0x24, 0x58, 0x89, 0x7C, 0x24, 0x5C, 0x89, 0xBC, 0x24, 0x80, 0x00, 0x00,
-			0x00, 0x89, 0x7C, 0x24, 0x44, 0x89, 0x7C, 0x24, 0x48, 0x89, 0x7C, 0x24,
-			0x4C, 0x8D, 0x54, 0x24, 0x40, 0x52, 0xC6, 0x84, 0x24, 0x84, 0x00, 0x00,
-			0x00, 0x01, 0x8B, 0x41, 0x04, 0x8D, 0x54, 0x24, 0x54, 0x52, 0x50, 0x8B,
-			0x41, 0x08, 0x50 
+			0xA1, 0x00, 0x00, 0x00, 0x00, 0x50, 0x64, 0x89, 0x25, 0x00, 0x00,
+			0x00, 0x00, 0x83, 0xEC, 0x68, 0x53, 0x55, 0x56, 0x57, 0x33, 0xFF,
+			0x89, 0x7C, 0x24, 0x54, 0x89, 0x7C, 0x24, 0x58, 0x89, 0x7C, 0x24,
+			0x5C, 0x89, 0xBC, 0x24, 0x80, 0x00, 0x00, 0x00, 0x89, 0x7C, 0x24,
+			0x44, 0x89, 0x7C, 0x24, 0x48, 0x89, 0x7C, 0x24, 0x4C, 0x8D, 0x54,
+			0x24, 0x40, 0x52, 0xC6, 0x84, 0x24, 0x84, 0x00, 0x00, 0x00, 0x01,
+			0x8B, 0x41, 0x04, 0x8D, 0x54, 0x24, 0x54, 0x52, 0x50, 0x8B, 0x41,
+			0x08, 0x50
 		};
-		int iAddressOffset = findAddressOffset(
-				aNeedleBytes, ARRAYSIZE(aNeedleBytes), 0x00464930,
+		int iNeedleOffset = findAddressOffset(
+				aNeedleBytes, ARRAYSIZE(aNeedleBytes), 0x00464938,
 				aQuickTestBytes, ARRAYSIZE(aQuickTestBytes), 0x004649A9);
-		if (iAddressOffset == MIN_INT)
+		/*	This offset is too far away from most of the code locations. Would
+			need two more search patterns. I'll just hardcode the offsets
+			instead and use the calculated offset only as confirmation that
+			we're dealing with Steam. */
+		/*if (iNeedleOffset == MIN_INT)
+			return false;*/
+		int aAdressOffsets[4] = {};
+		if (iNeedleOffset == 1616)
+		{
+			aAdressOffsets[0] = 1616;
+			aAdressOffsets[1] = 704;
+			aAdressOffsets[2] = 544;
+			aAdressOffsets[3] = 544;
+		}
+		else if (iNeedleOffset != 0)
 			return false;
 
 		// Finally apply the actual patch
@@ -327,8 +343,8 @@ protected:
 		{
 			float fSize = (i >= 3 ? ffBaseSize.offScreen : ffBaseSize.onScreen);
 			uint uiCodeAddress = aCodeAdresses[i] + aOperandOffsets[i];
-			FAssert(((int)uiCodeAddress) > -iAddressOffset);
-			uiCodeAddress += iAddressOffset;
+			FAssert(((int)uiCodeAddress) > -aAdressOffsets[i]);
+			uiCodeAddress += aAdressOffsets[i];
 			if (!unprotectPage(reinterpret_cast<LPVOID>(uiCodeAddress), sizeof(float)))
 				return false;
 			*reinterpret_cast<float*>(uiCodeAddress) = fSize;
@@ -757,7 +773,8 @@ void Civ4BeyondSwordPatches::patchPlotIndicatorSize()
 		showErrorMsgToPlayer(
 				"Failed to change balloon icon size. To avoid seeing "
 				"this error message, set the size to \"BtS\" on the Map tab "
-				"of the Mod Options screen");
+				"of the Mod Options screen. If using Steam, consider installing "
+				"the \"unsupported beta\" version of BtS.");
 	}
 }
 
