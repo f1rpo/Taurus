@@ -16,6 +16,8 @@
 # http://lists.sourceforge.net/lists/listinfo/configobj-develop
 # Comments, suggestions and bug reports welcome.
 
+# trs. One bugfix. Unsure if the BUG devs had modified this module at all.
+
 from __future__ import generators
 
 """

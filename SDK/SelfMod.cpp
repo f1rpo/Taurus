@@ -8,7 +8,7 @@
 
 Civ4BeyondSwordPatches smc::BtS_EXE;
 
-typedef int ModNameCheckHookFun(uint, uint); // trs.modname
+typedef int __cdecl ModNameCheckHookFun(uint, uint); // trs.modname
 
 namespace
 {
