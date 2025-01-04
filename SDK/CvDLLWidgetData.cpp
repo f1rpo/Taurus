@@ -1340,8 +1340,17 @@ void CvDLLWidgetData::doResearch(CvWidgetDataStruct &widgetDataStruct)
 			bShift = true;
 		}
 	}
-	// trs.fix: (moved up)
+	// <trs.fix> (moved up)
 	CvPlayer& kPlayer = GET_PLAYER(GC.getGameINLINE().getActivePlayer());
+	TechTypes eNewActiveResearch = (TechTypes)widgetDataStruct.m_iData1;
+
+	// For Sevopedia jump on research bar; from AdvCiv.
+	if (widgetDataStruct.m_eWidgetType == WIDGET_RESEARCH &&
+		eNewActiveResearch == kPlayer.getCurrentResearch() &&
+		!kPlayer.isChoosingFreeTech())
+	{
+		eNewActiveResearch = NO_TECH;
+	} // </trs.fix>
 /************************************************************************************************/
 /* UNOFFICIAL_PATCH                       12/07/09                            Emperor Fool      */
 /*                                                                                              */
@@ -1363,13 +1372,6 @@ void CvDLLWidgetData::doResearch(CvWidgetDataStruct &widgetDataStruct)
 /************************************************************************************************/
 /* UNOFFICIAL_PATCH                        END                                                  */
 /************************************************************************************************/
-	TechTypes eNewActiveResearch = (TechTypes)widgetDataStruct.m_iData1;
-	// <trs.fix> For Sevopedia jump on research bar; from AdvCiv.
-	if (widgetDataStruct.m_eWidgetType == WIDGET_RESEARCH &&
-		eNewActiveResearch == kPlayer.getCurrentResearch())
-	{
-		eNewActiveResearch = NO_TECH;
-	} // </trs.fix>
 	CvMessageControl::getInstance().sendResearch(eNewActiveResearch,
 			widgetDataStruct.m_iData2, bShift);
 }
