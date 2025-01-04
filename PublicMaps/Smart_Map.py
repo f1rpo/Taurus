@@ -3650,7 +3650,8 @@ def getCustomMapOptionDefault(argsList):
 	index = argsList[0]
 	#this chooses the last option in every case, which i've picked out to be a good option
 	result = len(selection_names_and_values[index]) - 1
-	fileName = civFilePath() + "smartmap90.cfg"
+	#fileName = civFilePath() + "smartmap90.cfg"
+	fileName = os.path.join(civFilePath(), "smartmap90.cfg") # trs.fix
 	try:
 		settings = open(fileName, 'r')
 		optionsWithDefault = pickle.load(settings)
@@ -3756,7 +3757,11 @@ def civFilePath():
 	try:
 		userFolder = regRead(_winreg.HKEY_CURRENT_USER,"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders","Personal")
 		#print "    userFolder",userFolder
-		civFolder = os.path.basename(regRead(_winreg.HKEY_LOCAL_MACHINE,"Software\\Firaxis Games\\Sid Meier's Civilization 4","INSTALLDIR"))
+		# trs.fix: Updated to look for the BtS installdir instead of the base game.
+		# (Still doubtful that this will work reliably on all systems.)
+		# NB: When exploring the registry, the key will probably be under
+		# Software\Wow6432Node. If it's there, regRead should still find it.
+		civFolder = os.path.basename(regRead(_winreg.HKEY_LOCAL_MACHINE,"Software\\Firaxis Games\\Sid Meier's Civilization 4 - Beyond the Sword","INSTALLDIR"))
 		#print "    civFolder",civFolder
 		finalFolder =  os.path.join(os.path.join(userFolder, "My Games"), civFolder)
 		#print "    finalFolder",finalFolder
@@ -3775,7 +3780,8 @@ def beforeStepOne():
 	
 	#save users settings
 	cymap = CyMap()
-	fileName = civFilePath() + "smartmap90.cfg"
+	#fileName = civFilePath() + "smartmap90.cfg"
+	fileName = os.path.join(civFilePath(), "smartmap90.cfg") # trs.fix
 	try:
 		settings = open(fileName, 'w')
 		smoptions = []
