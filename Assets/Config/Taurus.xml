@@ -73,7 +73,7 @@
 					type="boolean" default="True" />
 			<!-- trs.wcitybars -->
 			<option id="WideCityBars" key="Wide City Bars"
-					type="boolean" default="True">
+					type="boolean" default="False">
 				<change module="Taurus" function="updateCityBarWidth"/>
 			</option>
 			<!-- trs.found-yield -->

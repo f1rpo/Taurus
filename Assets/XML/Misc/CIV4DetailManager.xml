@@ -74,9 +74,10 @@
 	<Fader>
 		<Name>CITYBILLBOARD_SCALE</Name>
 		<!-- changes the size of the billboards based on the camera distance -->
-		<Key>700,	 1.5</Key>
-		<Key>2500,   1.0</Key>
-		<Key>6000,   0.67</Key>
+		<!-- trs.wcitybars: Was 1.5, 1.0, 0.67 -->
+		<Key>700,	 1.85</Key>
+		<Key>2500,   1.3</Key>
+		<Key>6000,   0.78</Key>
 	</Fader>
 	<Fader>
 		<Name>CITYBILLBOARD_HEIGHT</Name>
