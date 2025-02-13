@@ -116,7 +116,7 @@ import sys
 import gc
 import pickle
 
-VERSION = "0_60"
+VERSION = "0_68" # trs.fix (was stuck at 0_60)
 
 #------------------------------------------------------
 """Dropdown options"""

@@ -3651,7 +3651,7 @@ def getCustomMapOptionDefault(argsList):
 	#this chooses the last option in every case, which i've picked out to be a good option
 	result = len(selection_names_and_values[index]) - 1
 	#fileName = civFilePath() + "smartmap90.cfg"
-	fileName = os.path.join(civFilePath(), "smartmap90.cfg") # trs.fix
+	fileName = os.path.join(civFilePath(), "smartmap91.cfg") # trs.fix
 	try:
 		settings = open(fileName, 'r')
 		optionsWithDefault = pickle.load(settings)
@@ -3781,7 +3781,7 @@ def beforeStepOne():
 	#save users settings
 	cymap = CyMap()
 	#fileName = civFilePath() + "smartmap90.cfg"
-	fileName = os.path.join(civFilePath(), "smartmap90.cfg") # trs.fix
+	fileName = os.path.join(civFilePath(), "smartmap91.cfg") # trs.fix
 	try:
 		settings = open(fileName, 'w')
 		smoptions = []
