@@ -3681,7 +3681,9 @@ else:
 		try:
 			userFolder = regRead(_winreg.HKEY_CURRENT_USER,"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders","Personal")
 			#print "    userFolder",userFolder
-			civFolder = os.path.basename(regRead(_winreg.HKEY_LOCAL_MACHINE,"Software\\Firaxis Games\\Sid Meier's Civilization 4","INSTALLDIR"))
+			# trs.fix: Look for the BtS installdir instead of the base game
+			# (same bugfix as in SmartMap)
+			civFolder = os.path.basename(regRead(_winreg.HKEY_LOCAL_MACHINE,"Software\\Firaxis Games\\Sid Meier's Civilization 4 - Beyond the Sword","INSTALLDIR"))
 			#print "    civFolder",civFolder
 			finalFolder = os.path.join(os.path.join(userFolder, "My Games"), civFolder)
 			#print "    finalFolder",finalFolder
@@ -3762,7 +3764,7 @@ def saveMapOptionDefaults():
 			valueName = selection_names_and_values[index][selectionIndex][0]
 			smoptions.append((smoption,valueName))
 
-		#print "    try to store settings to",fileName
+		print "    try to store settings to",fileName
 		print smoptions
 		try:
 			pickle.dump(smoptions, settings)
@@ -3793,7 +3795,7 @@ def loadMapOptionDefaults():
 						selectionName, selectionValue, allowedRandomPick = selection_names_and_values[selOptionIndex][selectionIndex]
 						if selectionName == valueName:
 							selection_defaults[selOptionIndex] = selectionIndex
-		#print "    loaded option from cfg:",option,value
+		#print "    loaded option from cfg:",option,valueName
 		settings.close()
 	except IOError:
 		print "    Couldn't find ",fileName
