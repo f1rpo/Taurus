@@ -2687,7 +2687,8 @@ def addFeatures():
 	terrainTundra = cgc.getInfoTypeForString("TERRAIN_TUNDRA")
 	terrainSnow = cgc.getInfoTypeForString("TERRAIN_SNOW")
 
-	featNone = cgc.getInfoTypeForString("NO_FEATURE")
+	#featNone = cgc.getInfoTypeForString("NO_FEATURE")
+	featNone = FeatureTypes.NO_FEATURE # trs.fix
 	featIce = cgc.getInfoTypeForString("FEATURE_ICE")
 	featJungle = cgc.getInfoTypeForString("FEATURE_JUNGLE")
 	featOasis = cgc.getInfoTypeForString("FEATURE_OASIS")
@@ -3109,14 +3110,15 @@ def addFeatures():
 def isRiverCrossing(plot1,plot2):
 	cgc = CyGlobalContext()
 
-	dirNorth = cgc.getInfoTypeForString("DIRECTION_NORTH")
-	dirNorthEast = cgc.getInfoTypeForString("DIRECTION_NORTHEAST")
-	dirEast = cgc.getInfoTypeForString("DIRECTION_EAST")
-	dirSouthEast = cgc.getInfoTypeForString("DIRECTION_SOUTHEAST")
-	dirSouth = cgc.getInfoTypeForString("DIRECTION_SOUTH")
-	dirSouthWest = cgc.getInfoTypeForString("DIRECTION_SOUTHWEST")
-	dirWest = cgc.getInfoTypeForString("DIRECTION_WEST")
-	dirNorthWest = cgc.getInfoTypeForString("DIRECTION_NORTHWEST")
+	# trs.fix: These had used getInfoTypeForString
+	dirNorth = DirectionTypes.DIRECTION_NORTH
+	dirNorthEast = DirectionTypes.DIRECTION_NORTHEAST
+	dirEast = DirectionTypes.DIRECTION_EAST
+	dirSouthEast = DirectionTypes.DIRECTION_SOUTHEAST
+	dirSouth = DirectionTypes.DIRECTION_SOUTH
+	dirSouthWest = DirectionTypes.DIRECTION_SOUTHWEST
+	dirWest = DirectionTypes.DIRECTION_WEST
+	dirNorthWest = DirectionTypes.DIRECTION_NORTHWEST
 
 	map = cgc.getMap()
 	iW = map.getGridWidth()
