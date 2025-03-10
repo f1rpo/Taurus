@@ -2771,10 +2771,11 @@ enum GlobeLayerTypes
 };
 
 enum GlobeLayerUnitOptionTypes
-{
-	SHOW_ALL_MILITARY,
-	SHOW_TEAM_MILITARY,
+{	/*	trs.unitlayer: Swapped positions 0 and 2. The EXE apparently uses 2
+		as the default choice. */
 	SHOW_ENEMIES_IN_TERRITORY,
+	SHOW_TEAM_MILITARY,
+	SHOW_ALL_MILITARY,
 	SHOW_ENEMIES,
 	SHOW_PLAYER_DOMESTICS,
 
