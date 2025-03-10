@@ -6742,7 +6742,9 @@ void CvPlot::changeVisibilityCount(TeamTypes eTeam, int iChange, InvisibleTypes 
 					FirstContactData fcData(this, pUnit == NULL ? NULL : pUnit->plot(), pUnit);
 					GET_TEAM(getTeam()).meet(eTeam, true, &fcData);
 				}
-				if (!isBULL12Rules()) // To be on the safe side
+				// <trs.1stcontact>
+				if (!isBULL12Rules() // To be on the safe side
+					&& pUnit != NULL) // Not when border spread grants visibility
 				{
 					// from K-Mod: Meet the owner of any units you can see
 					for (CLLNode<IDInfo>* pNode = headUnitNode(); pNode != NULL;
@@ -6761,7 +6763,7 @@ void CvPlot::changeVisibilityCount(TeamTypes eTeam, int iChange, InvisibleTypes 
 								GET_PLAYER(pLoopUnit->getVisualOwner(eTeam)).getTeam(),
 								true, &fcData);
 					}
-				} // <trs.1stcontact
+				} // </trs.1stcontact>
 			}
 
 			pCity = getPlotCity();

@@ -3446,17 +3446,20 @@ void CvTeam::makeHasMet(TeamTypes eIndex, bool bNewDiplo,
 		gDLL->getInterfaceIFace()->setDirty(Score_DIRTY_BIT, true);
 	}
 	// <trs.1stcontact> (from AdvCiv)
-	bool bShowMessage = (isHuman() && pData != NULL);
-	if (bShowMessage || bNewDiplo)
+	bool bShowMessage = false;
+	if (bNewDiplo &&
+		(isHuman() || GET_TEAM(eIndex).isHuman())) // save time
 	{
 		enum FirstContactChoices { MESSAGE, DIPLO, BOTH };
 		FirstContactChoices const eOnFirstContact = (isBug() ?
 				(FirstContactChoices)getBugOptionINT("Taurus__OnFirstContact") :
 				DIPLO); // Met during the placement of free starting units
-		if (bNewDiplo && eOnFirstContact == MESSAGE)
-			bNewDiplo = false;
-		if (bShowMessage && eOnFirstContact == DIPLO)
-			bShowMessage = false;
+		if (eOnFirstContact != DIPLO)
+		{
+			bShowMessage = (pData != NULL && isHuman());
+			if (eOnFirstContact == MESSAGE)
+				bNewDiplo = false;
+		}
 	} // </trs.1stcontact>
 	if (GC.getGameINLINE().isOption(GAMEOPTION_ALWAYS_WAR))
 	{
@@ -4815,6 +4818,18 @@ void CvTeam::addFirstContactMessage(FirstContactData const& fcData, TeamTypes eO
 			//pUnitMet = pUnit2;
 			pAt = pUnit2->plot();
 		}
+	}
+	// Don't indicate a plot if we can't tell how it was spotted
+	if ((pAt1 == NULL || pAt2 == NULL) && pUnit1 == NULL && pUnit2 == NULL)
+		pAt = NULL;
+	// Can't tell where exactly a unit is met that continues to move afterwards
+	if ((pUnitMet != NULL && pUnitMet->getTeam() == eOther &&
+		pUnitMet->hasMoved() && pUnitMet->canMove()) ||
+		// Can't generally tell where meetings occur with simultaneous turns
+		(GC.getGameINLINE().isMPOption(MPOPTION_SIMULTANEOUS_TURNS)))	
+	{
+		pUnitMet = NULL;
+		pAt = NULL;
 	}
 	CvWString szMsg = gDLL->getText("TXT_KEY_MISC_TEAM_MET",
 			GET_PLAYER(ePlayerMet).getCivilizationAdjectiveKey());
