@@ -4743,9 +4743,28 @@ bool CvTeam::isHasTech(TechTypes eIndex) const
 	return m_pabHasTech[eIndex];
 }
 
+// trs.
+bool CvTeam::isTechSplash() const
+{
+	// Cut from announceTechToPlayers
+	if (GC.getGameINLINE().isNetworkMultiPlayer() ||
+		gDLL->getInterfaceIFace()->noTechSplash())
+	{
+		return false;
+	}
+	// Never makes sense to show popups to AI teams
+	if (!isHuman())
+		return false;
+	CvGame const& kGame = GC.getGameINLINE();
+	// Queuing them for a (currently) nonactive team in Hot Seat can make sense
+	if (getID() != kGame.getActiveTeam() && !kGame.isHotSeat())
+		return false;
+	return true;
+}
+
 void CvTeam::announceTechToPlayers(TechTypes eIndex, bool bPartial)
 {
-	bool bSound = ((GC.getGameINLINE().isNetworkMultiPlayer() || gDLL->getInterfaceIFace()->noTechSplash()) && !bPartial);
+	bool bSound = (!isTechSplash() && !bPartial); // trs. Moved into helper function
 
 	for (int iI = 0; iI < MAX_PLAYERS; iI++)
 	{
@@ -5295,12 +5314,50 @@ void CvTeam::setHasTech(TechTypes eIndex, bool bNewValue, PlayerTypes ePlayer, b
 
 		if (bNewValue)
 		{
-			if (bAnnounce)
+			if (bAnnounce
+				&& isHuman()) // trs.fix (cleaner this way)
 			{
 				if (GC.getGameINLINE().isFinalInitialized() && !(gDLL->GetWorldBuilderMode()))
 				{
 					FAssert(ePlayer != NO_PLAYER);
-					if (GET_PLAYER(ePlayer).isResearch() && (GET_PLAYER(ePlayer).getCurrentResearch() == NO_TECH))
+					// <trs.fix> Humans always do the choosing in human-AI teams
+					if (!GET_PLAYER(ePlayer).isHuman())
+					{
+						for (int i = 0; i < MAX_CIV_PLAYERS; i++)
+						{
+							CvPlayer& kLoopPlayer = GET_PLAYER((PlayerTypes)i);
+							if (kLoopPlayer.isAlive() && kLoopPlayer.isHuman() &&
+								kLoopPlayer.getTeam() == getID())
+							{
+								// Avoid multiple popups
+								if (kLoopPlayer.getID() != GC.getGameINLINE().getActivePlayer() &&
+									!GC.getGameINLINE().isHotSeat())
+								{
+									ePlayer = NO_PLAYER;
+									break;
+								}
+								ePlayer = kLoopPlayer.getID();
+								/*	CvEventManager.py handles the tech splash popup,
+									but BUG avoids modifying that file. So I'll
+									handle the missing popup (for tech finished by
+									a teammate of the active player) here. */
+								if (isTechSplash())
+								{
+									CvPopupInfo* pTechSplash = new CvPopupInfo();
+									if (pTechSplash != NULL) // (pointless convention?)
+									{
+										pTechSplash->setButtonPopupType(BUTTONPOPUP_PYTHON_SCREEN);
+										pTechSplash->setData1(eIndex);
+										pTechSplash->setText(L"showTechSplash");
+										kLoopPlayer.addPopup(pTechSplash);
+									}
+								}
+								break;
+							}
+						}
+					}
+					if (ePlayer != NO_PLAYER && // </trs.fix>
+						GET_PLAYER(ePlayer).isResearch() && (GET_PLAYER(ePlayer).getCurrentResearch() == NO_TECH))
 					{
 						szBuffer = gDLL->getText("TXT_KEY_MISC_WHAT_TO_RESEARCH_NEXT");
 						GET_PLAYER(ePlayer).chooseTech(0, szBuffer);

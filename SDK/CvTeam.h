@@ -448,6 +448,7 @@ protected:
 	void processTech(TechTypes eTech, int iChange);
 
 	void cancelDefensivePacts();
+	bool isTechSplash() const; // trs.
 	void announceTechToPlayers(TechTypes eIndex, bool bPartial = false);
 	void addFirstContactMessage(FirstContactData const& fcData, TeamTypes eOther); // trs.1stcontact
 
