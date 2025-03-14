@@ -1125,7 +1125,11 @@ void CvSelectionGroup::startMission()
 			return;
 		}
 	}
-
+	/*	<trs.fix> Check canStart before setting activity (because ACTIVITY_HOLD
+		will block waiting missions like Fortify) */
+	MissionData& kHeadMissionData = headMissionQueueNode()->m_data;
+	bool const bCanStart = canStartMission(kHeadMissionData.eMissionType,
+			kHeadMissionData.iData1, kHeadMissionData.iData2, plot()); // </trs.fix>
 	if (canAllMove())
 	{
 		setActivityType(ACTIVITY_MISSION);
@@ -1140,8 +1144,10 @@ void CvSelectionGroup::startMission()
 	bAction = false;
 	bNuke = false;
 	bNotify = false;
-
-	if (!canStartMission(headMissionQueueNode()->m_data.eMissionType, headMissionQueueNode()->m_data.iData1, headMissionQueueNode()->m_data.iData2, plot()))
+	// <trs.fix>
+	if (isBULL12Rules() ? !canStartMission(kHeadMissionData.eMissionType,
+		kHeadMissionData.iData1, kHeadMissionData.iData2, plot()) :
+		!bCanStart) // </trs.fix>
 	{
 		bDelete = true;
 	}
