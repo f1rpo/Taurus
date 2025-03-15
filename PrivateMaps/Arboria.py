@@ -1,3 +1,6 @@
+# trs.fix: This version fixes issues with a climate or sea level setting
+# carried over from a previously selected map affecting Arboria despite those
+# options being locked.
 #
 #	FILE:	 Arboria.py
 #	AUTHOR:  Bob Thomas (Sirian)
@@ -7,11 +10,12 @@
 #-----------------------------------------------------------------------------
 #
 
+# trs. Remove unused imports for clarity
 from CvPythonExtensions import *
-import CvUtil
-import random
+#import CvUtil
+#import random
 import CvMapGeneratorUtil
-import sys
+#import sys
 from CvMapGeneratorUtil import HintedWorld
 from CvMapGeneratorUtil import TerrainGenerator
 from CvMapGeneratorUtil import FeatureGenerator
@@ -101,9 +105,24 @@ def beforeGeneration():
 		
 def generatePlotTypes():
 	NiTextOut("Setting Plot Types (Python Arboria) ...")
-	global hinted_world
+	#global hinted_world # trs. Not needed
 	hinted_world = HintedWorld(16,8)
-
+	# <trs.fix> Overwrite initial values set by the FractalWorld (base class)
+	# constructor that depend on climate and sea level
+	gc = CyGlobalContext()
+	climate = gc.getClimateInfo(0)
+	hinted_world.hillGroupOneRange = climate.getHillRange()
+	hinted_world.hillGroupTwoRange = climate.getHillRange()
+	hinted_world.peakPercent = climate.getPeakPercent()
+	iMediumSeaLevel = min(1, gc.getNumSeaLevelInfos() - 1)
+	# While Temperate climate will probably remain at index 0 even in a mod,
+	# it's harder to say if Medium sea level will always remain at index 1.
+	for iSeaLevel in range(gc.getNumSeaLevelInfos()):
+		if gc.getSeaLevelInfo(iSeaLevel).getSeaLevelChange() == 0:
+			iMediumSeaLevel = iSeaLevel
+			break
+	hinted_world.seaLevelChange = gc.getSeaLevelInfo(iMediumSeaLevel).getSeaLevelChange()
+	# </trs.fix>
 	mapRand = CyGlobalContext().getGame().getMapRand()
 
 	numBlocks = hinted_world.w * hinted_world.h

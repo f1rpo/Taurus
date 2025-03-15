@@ -1,3 +1,6 @@
+# trs.fix: This version disables the sea level setting more properly -
+# to stop a setting carried over from another map to have an impact.
+# (Same issue as Boreal.)
 #
 #	FILE:	 Rainforest.py
 #	AUTHOR:  Bob Thomas (Sirian)
@@ -7,11 +10,12 @@
 #-----------------------------------------------------------------------------
 #
 
+# trs. Unused imports removed for clarity
 from CvPythonExtensions import *
-import CvUtil
+#import CvUtil
 import CvMapGeneratorUtil
-import random
-import sys
+#import random
+#import sys
 from math import sqrt
 from CvMapGeneratorUtil import FractalWorld
 from CvMapGeneratorUtil import TerrainGenerator
@@ -108,8 +112,8 @@ class RainforestFractalWorld(CvMapGeneratorUtil.FractalWorld):
 		
 		self.hillsFrac.fracInit(self.iNumPlotsX, self.iNumPlotsY, 2, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
 		self.peaksFrac.fracInit(self.iNumPlotsX, self.iNumPlotsY, 5, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
-
-		water_percent += self.seaLevelChange
+		# trs.fix: Commented out b/c the sea level is locked
+		#water_percent += self.seaLevelChange
 		water_percent = min(water_percent, self.seaLevelMax)
 		water_percent = max(water_percent, self.seaLevelMin)
 

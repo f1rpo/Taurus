@@ -1,3 +1,5 @@
+# trs.fix: This version fixes issues with a climate setting carried over from a
+# previously selected map affecting Ice Age despite the locked climate menu.
 #
 #	FILE:	 Ice_Age.py
 #	AUTHOR:  Bob Thomas (Sirian)
@@ -91,6 +93,16 @@ class IceAgeFractalWorld(CvMapGeneratorUtil.FractalWorld):
 		self.seaLevelMax = 72
 		self.seaLevelMin = 60
 		return
+	# trs.fix: Overwrite the climate-based attributes
+	def __init__(self):
+		FractalWorld.__init__(self)
+		# That's the temperate climate. (Cold might be more appropriate,
+		# but I don't want to change the behavior in the usual case, i.e.
+		# when temperate climate carries over from the last game played.)
+		climate = self.gc.getClimateInfo(0)
+		self.hillGroupOneRange = climate.getHillRange()
+		self.hillGroupTwoRange = climate.getHillRange()
+		self.peakPercent = climate.getPeakPercent()
 
 def generatePlotTypes():
 	NiTextOut("Setting Plot Types (Python Ice Age) ...")
@@ -295,6 +307,16 @@ class IceAgeFeatureGenerator(CvMapGeneratorUtil.FeatureGenerator):
 				rand = self.mapRand.get(100, "Add Encroaching Ice - Sirian's Ice Age - PYTHON")/100.0
 				if rand < 0.02:
 					pPlot.setFeatureType(self.featureIce, -1)
+	# trs.fix: Monkey-patch temperate climate
+	def addJunglesAtPlot(self, pPlot, iX, iY, lat):
+		getClimate = self.map.getClimate
+		def getTemperateClimate(self):
+			return 0
+		self.map.getClimate = getTemperateClimate.__get__(self.map, type(self.map))
+		try:
+			FeatureGenerator.addJunglesAtPlot(self, pPlot, iX, iY, lat)
+		finally:
+			self.map.getClimate = getClimate
 
 def addFeatures():
 	NiTextOut("Adding Features (Python Ice Age) ...")

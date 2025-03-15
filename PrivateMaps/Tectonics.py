@@ -68,11 +68,12 @@
 #      The number of plates could be more tunable.
 #      I could also rewrite the whole rivers thing...
 
+# trs. Remove unused imports for clarity
 from CvPythonExtensions import *
-import CvUtil
+#import CvUtil
 import CvMapGeneratorUtil
-import Popup as PyPopup
-from CvMapGeneratorUtil import TerrainGenerator
+#import Popup as PyPopup
+#from CvMapGeneratorUtil import TerrainGenerator
 from CvMapGeneratorUtil import FeatureGenerator
 
 def getDescription():
@@ -128,7 +129,7 @@ def getCustomMapOptionDescAt(argsList):
 	                   "TXT_KEY_MAP_SCRIPT_PANGAEA",
 	                   "TXT_KEY_MAP_SCRIPT_LAKES",
 	                   #"TXT_KEY_MAP_SCRIPT_ISLANDS",
-					   "TXT_KEY_MAP_SCRIPT_ISLANDS_90", # trs.tectonx
+					   "TXT_KEY_MAP_SCRIPT_ISLANDS_90", # trs.
 	                   "TXT_KEY_MAP_SCRIPT_MEDITERRANEAN", 
 	                   "TXT_KEY_MAP_SCRIPT_TERRA",
 	                   "TXT_KEY_MAP_SCRIPT_TERRA_OLD_WORLD_START"]
@@ -159,6 +160,8 @@ def generateTerrainTypes():
 	terrainTypes = terraingen.generateTerrain()
 	return terrainTypes
 
+# trs. Seems that this has been obsolete since v3.7. Commented out for clarity.
+'''
 def addFeatures():
 	NiTextOut("Adding Features (from Python Continents) ...")
 	if (CyMap().getCustomMapOption(0) == 5):         #  "Mediterranean"
@@ -171,6 +174,7 @@ def addFeatures():
 class NoIceFeatureGenerator(FeatureGenerator):
 	def addIceAtPlot(self, pPlot, iX, iY, lat):
 		return
+'''
 
 class voronoiMap:
 	def __init__(self,landPlates,seaPlates,hotspotsF):
@@ -1774,20 +1778,37 @@ def findStartingPlot(argsList):
 
 	return None
 
-class MediterraneanFeatureGenerator(CvMapGeneratorUtil.FeatureGenerator):
+# <trs.fix> Monkey-patch climate-based functions so that the climate type
+# possibly carried over from another map has no impact
+class TectonicsFeatureGenerator(FeatureGenerator):
+	def patch_getClimate(self, func, *args, **kwargs):
+		getClimate = self.map.getClimate
+		def getTemperateClimate(self):
+			return 0
+		self.map.getClimate = getTemperateClimate.__get__(self.map, type(self.map))
+		try:
+			getattr(FeatureGenerator, func)(self, *args, **kwargs)
+		finally:
+			self.map.getClimate = getClimate
+	def addIceAtPlot(self, pPlot, iX, iY, lat):
+		self.patch_getClimate('addIceAtPlot', pPlot, iX, iY, lat)
+	def addJunglesAtPlot(self, pPlot, iX, iY, lat):
+		self.patch_getClimate('addJunglesAtPlot', pPlot, iX, iY, lat)
+
+class MediterraneanFeatureGenerator(TectonicsFeatureGenerator): # </trs.fix>
 	def getLatitudeAtPlot(self, iX, iY):
 		"returns 0.0 for tropical, up to 1.0 for polar"
 		# 25/90 to 65/90:
 		lat = 5/float(18) + 4*(self.iGridH - iY)/float(9*self.iGridH)
 		return lat
-	
+
 def addFeatures():
 	if (5 == CyMap().getCustomMapOption(0)):
 		featuregen = MediterraneanFeatureGenerator()
 		featuregen.addFeatures()
 		return 0
 	else:
-		featuregen = CvMapGeneratorUtil.FeatureGenerator()
+		featuregen = TectonicsFeatureGenerator() # trs.fix (was FeatureGenerator)
 		featuregen.addFeatures()
 		return 0
 

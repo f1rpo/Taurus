@@ -1,3 +1,5 @@
+# trs.fix: This version disables the sea level setting more properly -
+# to stop a setting carried over from another map to have an impact.
 #
 #	FILE:	 Team_Battleground.py
 #	AUTHOR:  Bob Thomas (Sirian)
@@ -17,11 +19,11 @@
 #    - round with starting locations uniformly spread around the circle
 #    - donut - same as round but with water at the center
 
-
+# trs. Unused imports commented out for clarity
 from CvPythonExtensions import *
-import CvUtil
+#import CvUtil
 import CvMapGeneratorUtil
-import sys
+#import sys
 from CvMapGeneratorUtil import FractalWorld
 from CvMapGeneratorUtil import HintedWorld
 from CvMapGeneratorUtil import TerrainGenerator
@@ -193,15 +195,28 @@ def getGridSize(argsList):
 def generatePlotTypes():
 #	BugUtil.debug("Team_Battleground: generatePlotTypes")
 	NiTextOut("Setting Plot Types (Python Team Battleground) ...")
-	global hinted_world, mapRand
-	global fractal_world
+	# trs. Commented out for clarity b/c not used globally
+	#global hinted_world, mapRand
+	#global fractal_world
 	gc = CyGlobalContext()
+	# <trs.fix> Should behave like Medium sea level. Normally that's index 1
+	iMediumSeaLevel = min(1, gc.getNumSeaLevelInfos() - 1)
+	# ... but let's not depend on that.
+	for iSeaLevel in range(gc.getNumSeaLevelInfos()):
+		if gc.getSeaLevelInfo(iSeaLevel).getSeaLevelChange() == 0:
+			iMediumSeaLevel = iSeaLevel
+			break
+	# Could've just set this to 0, but if a mod gives Medium sea level
+	# a nonzero change, then let's go with that.
+	iSeaLevelChange = gc.getSeaLevelInfo(iMediumSeaLevel).getSeaLevelChange()
+	# </trs.fix>
 	map = CyMap()
 	mapRand = gc.getGame().getMapRand()
 	userInputPlots = map.getCustomMapOption(0)
 	
 	if userInputPlots == 2: # Four Corners
 		hinted_world = HintedWorld()
+		hinted_world.seaLevelChange = iSeaLevelChange # trs.fix
 		iNumPlotsX = map.getGridWidth()
 		iNumPlotsY = map.getGridHeight()
 
@@ -313,6 +328,7 @@ def generatePlotTypes():
 	if (userInputPlots == 4   # round
 	or  userInputPlots == 5): # donut
 		hinted_world = HintedWorld()
+		hinted_world.seaLevelChange = iSeaLevelChange # trs.fix
 		iNumPlotsX = map.getGridWidth()
 		iNumPlotsY = map.getGridHeight()
 
@@ -370,6 +386,7 @@ def generatePlotTypes():
 
 	elif userInputPlots == 1: # Top vs Bottom
 		fractal_world = FractalWorld(fracXExp=6, fracYExp=6)
+		fractal_world.seaLevelChange = iSeaLevelChange # trs.fix
 		fractal_world.initFractal(continent_grain = 4, rift_grain = -1, has_center_rift = False, invert_heights = True)
 		plot_types = fractal_world.generatePlotTypes(water_percent = 8)
 		return plot_types
@@ -379,6 +396,7 @@ def generatePlotTypes():
 		iNumPlotsY = map.getGridHeight()
 	
 		hinted_world = HintedWorld(4,2)
+		hinted_world.seaLevelChange = iSeaLevelChange # trs.fix
 		centerx = (hinted_world.w - 1)//2	
 		centery = (hinted_world.h - 1)//2
 		bridgey = centery
