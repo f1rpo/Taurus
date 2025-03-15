@@ -25,8 +25,9 @@
 					help="When checked, messages are displayed to alert you to various pending and existing conditions using Dr. Elmer Jiggle's Civ4lerts mod."/>
 			
 			<!-- City -->
+			<!-- trs.bugdefaults: default was True -->
 			<option id="CityPendingGrowth" key="City Pending Growth" 
-					type="boolean" default="True" and="Enabled" 
+					type="boolean" default="False" and="Enabled" 
 					get="isShowCityPendingGrowthAlert" set="setShowCityPendingGrowthAlert" 
 					label="Pending" 
 					help="When checked, displays an alert when a city's population will grow or shrink next turn."/>
