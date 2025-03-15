@@ -1145,9 +1145,9 @@ void CvSelectionGroup::startMission()
 	bNuke = false;
 	bNotify = false;
 	// <trs.fix>
-	if (isBULL12Rules() ? !canStartMission(kHeadMissionData.eMissionType,
+	if (!(isBULL12Rules() ? canStartMission(kHeadMissionData.eMissionType,
 		kHeadMissionData.iData1, kHeadMissionData.iData2, plot()) :
-		!bCanStart) // </trs.fix>
+		bCanStart)) // </trs.fix>
 	{
 		bDelete = true;
 	}

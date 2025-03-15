@@ -4746,8 +4746,9 @@ bool CvTeam::isHasTech(TechTypes eIndex) const
 // trs.
 bool CvTeam::isTechSplash() const
 {
+	CvGame const& kGame = GC.getGameINLINE();
 	// Cut from announceTechToPlayers
-	if (GC.getGameINLINE().isNetworkMultiPlayer() ||
+	if (kGame.isNetworkMultiPlayer() ||
 		gDLL->getInterfaceIFace()->noTechSplash())
 	{
 		return false;
@@ -4755,8 +4756,7 @@ bool CvTeam::isTechSplash() const
 	// Never makes sense to show popups to AI teams
 	if (!isHuman())
 		return false;
-	CvGame const& kGame = GC.getGameINLINE();
-	// Queuing them for a (currently) nonactive team in Hot Seat can make sense
+	// Queueing them for a (currently) nonactive team in Hot Seat can make sense
 	if (getID() != kGame.getActiveTeam() && !kGame.isHotSeat())
 		return false;
 	return true;
