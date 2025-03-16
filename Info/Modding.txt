@@ -43,6 +43,9 @@ ________________________________________________________________________________
 2. OPTIONAL COMPONENTS
 
 The following are all of the compile-time options for BULL. Each one has a unique preprocessor flag that you must define to enable the component. You do this with the /D option in your makefile.
+trs.doc: Most of these will break network compatibility with BULL.
+(Which might not be a concern at all, especially when building a
+mod with many rule changes on top of Taurus.)
 
 [0] BUFFY
 (trs.doc: There aren't going to be multiple HOF-compatible mods, so this option
@@ -86,7 +89,8 @@ removed.)
 		Allows the player to have the AI take over for X turns at a time
 
 [5] Global Warming
-
+(trs.doc: The new game option will change the savegame format and thereby break
+the savegame import and export capabilities of Taurus.)
 	Flag: _MOD_GWARM
 	by Minor Annoyance
 	http://forums.civfanatics.com/showthread.php?t=302649
