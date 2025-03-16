@@ -1,3 +1,4 @@
+# trs.fix: This version merely locks the nonfunctional sea level option.
 #
 #	FILE:	 Big_and_Small.py
 #	AUTHOR:  Bob Thomas (Sirian)
