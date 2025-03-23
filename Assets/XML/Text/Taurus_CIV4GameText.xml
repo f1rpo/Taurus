@@ -9,7 +9,7 @@
 	<TEXT>
 		<Tag>TXT_KEY_GLOBELAYER_UNITS_DOMESTICS</Tag>
 		<English>Civilians</English>
-		<French>Unités non militaires</French>
+		<French>Unit&#233;s non militaires</French>
 		<German>Zivilisten</German>
 		<Italian>Eserciti non militari</Italian>
 		<Spanish>Ej&#233;rcitos no militares</Spanish>
@@ -92,7 +92,7 @@
 		<French>Montrer film</French>
 		<German>Wiederholung abspielen</German>
 		<Italian>Mostra replay</Italian>
-		<Spanish>Mostrar repetición</Spanish>
+		<Spanish>Mostrar repetici&#243;n</Spanish>
 	</TEXT>
 	<!-- trs.hofwarn: end -->
 
