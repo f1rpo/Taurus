@@ -93,6 +93,8 @@
 	<export module="BugOptionsScreen" function="handleBugFloatDropdownChange" to="CvOptionsScreenCallbackInterface"/>
 	<export module="BugOptionsScreen" function="handleBugColorDropdownChange" to="CvOptionsScreenCallbackInterface"/>
 	<export module="BugOptionsScreen" function="handleBugSliderChanged" to="CvOptionsScreenCallbackInterface"/>
+	<!-- trs.lod -->
+	<export module="Taurus" function="handleLODButtonInput" to="CvOptionsScreenCallbackInterface"/>
 	
 	<!-- Civ4 Options Screen UI control handlers -->
 	<extend how="after" module="BugOptionsScreen" function="handleLanguagesDropdownBoxInput" to="CvOptionsScreenCallbackInterface"/>

@@ -137,4 +137,27 @@
 		<Spanish>Hemos encontrado la civilizaci&#243;n %s1:2_CivAdj</Spanish>
 	</TEXT>
 
+	<!-- trs.lod (start) -->
+	<TEXT>
+		<Tag>TXT_KEY_LOD_OPENING</Tag>
+		<English>Opening %s1_FileName in the system's default editor ...</English>
+		<German>&#214;ffne %s1_FileName im externen Standard-Editor ...</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_LOD_MISSING_TITLE</Tag>
+		<English>LOD settings not found</English>
+		<German>LOD-Einstellungen nicht gefunden</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_LOD_BUTTON</Tag>
+		<English>Detail Controls (external)</English>
+		<German>Detail-Einstellungen (extern)</German>
+	</TEXT>
+	<TEXT>
+		<Tag>TXT_KEY_LOD_BUTTON_HOVER</Tag>
+		<English>Open the XML file for level-of-detail controls in the system's default editor. (Will interrupt fullscreen mode.)</English>
+		<German>&#214;ffne die Detaillierungs-Einstellungen in externem Editor (XML); Vollbildmodus wird ggf. unterbrochen.</German>
+	</TEXT>
+	<!-- trs.lod (end) -->
+
 </Civ4GameText>

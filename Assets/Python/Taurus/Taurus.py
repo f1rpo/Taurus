@@ -1,8 +1,9 @@
-# trs. So far, used only as glue between Config/Taurus.xml and the DLL.
+# trs. Glue between Config/Taurus.xml, the DLL and other other Python modules.
 
 from CvPythonExtensions import *
 import CvUtil
 import BugPath
+import LODEditing # trs.lod
 
 gc = CyGlobalContext()
 
@@ -32,3 +33,7 @@ def toggleDebugMode(argsList=None):
 	# Let the DLL decide whether ChtLvl should matter.
 	if getChtLvl() <= 0:
 		gc.getGame().toggleDebugMode()
+
+# trs.lod:
+def handleLODButtonInput(argsList):
+	LODEditing.editLODSettings()

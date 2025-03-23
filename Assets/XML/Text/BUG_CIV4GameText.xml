@@ -69,6 +69,7 @@
 		<Italian>Guida del BUG Mod non trovata</Italian>
 		<Spanish>Help File Not Found</Spanish>
 	</TEXT>
+	<!-- trs.lod (note): Now also used for the LOD settings file -->
 	<TEXT>
 		<Tag>TXT_KEY_BUG_HELP_MISSING_BODY</Tag>
 		<English>Could not find the file "%s1" in the search paths. See the System tab on the BUG Options screen [ALT + CTRL + O] for details.</English>

@@ -7,6 +7,7 @@
 ## Author: EmperorFool
 
 import BugOptionsTab
+import BugUtil # trs.lod
 
 class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 	"BUG Nap Options Screen Tab"
@@ -96,6 +97,11 @@ class BugMapOptionsTab(BugOptionsTab.BugOptionsTab):
 		self.addTextDropdown(screen, left, right, "Taurus__DefaultCamDistance")
 		# trs.camspeed:
 		self.addTextDropdown(screen, left, right, "Taurus__CamScrollSpeed")
+		# trs.lod (based on the help button in BugOptionsTab.py):
+		self.addButton(screen, panel,
+				"LODButton", "handleLODButtonInput",
+				BugUtil.getPlainText("TXT_KEY_LOD_BUTTON"),
+				BugUtil.getPlainText("TXT_KEY_LOD_BUTTON_HOVER"))
 		
 	def createMiscellaneousPanel(self, screen, panel):
 		self.addLabel(screen, panel, "Misc", "Misc:")
