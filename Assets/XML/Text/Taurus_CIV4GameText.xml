@@ -148,16 +148,6 @@
 		<English>LOD settings not found</English>
 		<German>LOD-Einstellungen nicht gefunden</German>
 	</TEXT>
-	<TEXT>
-		<Tag>TXT_KEY_LOD_BUTTON</Tag>
-		<English>Detail Controls (external)</English>
-		<German>Detail-Einstellungen (extern)</German>
-	</TEXT>
-	<TEXT>
-		<Tag>TXT_KEY_LOD_BUTTON_HOVER</Tag>
-		<English>Open the XML file for level-of-detail controls in the system's default editor. (Will interrupt fullscreen mode.)</English>
-		<German>&#214;ffne die Detaillierungs-Einstellungen in externem Editor (XML); Vollbildmodus wird ggf. unterbrochen.</German>
-	</TEXT>
 	<!-- trs.lod (end) -->
 
 </Civ4GameText>
